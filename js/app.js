@@ -133,8 +133,10 @@ function lookup(cep5){
     rc.className='show';return;
   }
   sR(cep5);
-  const{rota:r,mun:m,prev,next}=hit; const nb=bB(m.nome); const nx=nL(nb?nb.days:null);
-  const nS=String(r.num).padStart(2,'0'); const emb=gE(m.nome);
+  const{rota:r,mun:m,prev,next}=hit;
+  const nb=bB(m.nome);const nx=nL(nb?nb.days:null);
+  const nS=String(r.num).padStart(2,'0');
+  const emb=gE(m.nome);
   const boats = emb ? (emb.e || emb.estream || []) : [];
   
   const aP=prev
@@ -371,7 +373,8 @@ function renderMap(){
       bb.setAttribute('x',p.x-5);bb.setAttribute('y',p.y-4.5);
       bb.setAttribute('width','10');bb.setAttribute('height','9');
       bb.setAttribute('rx','3');bb.setAttribute('fill',r.cor);
-      bb.setAttribute('filter(#gw)');dot.appendChild(bb);
+      // CORREÇÃO: Injetado string completa de referência ao id do filter para evitar erro de execução setAttribute
+      bb.setAttribute('filter','url(#gw)');dot.appendChild(bb);
       const nt=document.createElementNS(NS,'text');
       nt.setAttribute('x',p.x);nt.setAttribute('y',p.y+2.6);
       nt.setAttribute('text-anchor','middle');nt.setAttribute('font-size','6');
@@ -424,7 +427,7 @@ function renderMap(){
   svg.appendChild(g);
 }
 
-// CORREÇÃO: m.rota alterado para r.num para unificar dados e matar o Rundefined
+// Geração dinâmica de conteúdo dentro do balão (Correção total do bug Rundefined)
 function sMT(e,c,rArg){
   const r=rArg||gR(c.rota);
   const color=r?r.cor:'#14b8a6';
@@ -484,7 +487,6 @@ function initMapInteractions(){
   msvg.addEventListener('touchmove',e=>{e.preventDefault();if(e.touches.length===1&&!lD){const t=e.touches[0];T.x=t.clientX-tS.x;T.y=t.clientY-tS.y;applyT();}else if(e.touches.length===2){const a=e.touches[0],b=e.touches[1];const d=Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY);if(lD){T.s=Math.min(5,Math.max(0.4,T.s*(d/lD)));applyT();}lD=d;}},{passive:false});
   msvg.addEventListener('touchend',e=>{if(e.touches.length===0)lD=null;});
   
-  // EVENTO DO MUNDO: O clique limpa as ferramentas fixadas na tela se disparadas fora
   msvg.addEventListener('click', (e) => {
     if(e.target === msvg) {
       if(mttTimer) clearTimeout(mttTimer);
@@ -495,7 +497,7 @@ function initMapInteractions(){
   });
 }
 
-// ── PROCESSADOR DO SELETOR MÚLTIPLO ──────────────────────
+// ── MULTI-SELECT ─────────────────────────────────────────
 let SEL={};
 function toggleSel(cepKey,mun,rota){
   if(SEL[cepKey]){delete SEL[cepKey];}
@@ -600,7 +602,7 @@ function setup(){
   document.getElementById('hbg').style.display=m?'none':'';
 }
 
-// ── EXECUÇÕES INICIAIS OPERACIONAIS ──────────────────────
+// ── INICIALIZAÇÃO ────────────────────────────────────────
 setup();
 window.addEventListener('resize',()=>{setup();if(cur==='m')renderMap();});
 initMapInteractions();
