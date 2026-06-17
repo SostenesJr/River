@@ -36,7 +36,6 @@ function gE(nome){
 function bB(nome){
   const e=gE(nome);
   if(!e)return null;
-  // Aceita tanto a chave .e quanto .estream do banco de dados
   const boats = e.e || e.estream;
   if(!boats || !boats.forEach) return null;
   let min=8,best=null;
@@ -99,10 +98,7 @@ function lookup(cep5){
   const nb=bB(m.nome);const nx=nL(nb?nb.days:null);
   const nS=String(r.num).padStart(2,'0');
   const emb=gE(m.nome);
-  
-  // Modificação anti-erro: unifica .e ou .estream na busca das embarcações individuais do card
   const boats = emb ? (emb.e || emb.estream || []) : [];
-  
   const aP=prev
     ?'<div class="adjc"><div class="adjd">anterior na calha</div><div class="adjn">'+prev.nome+'</div><div class="adjcep">CEP '+prev.cep+'-000</div><div class="adjkm">'+prev.km+'km de Manaus</div></div>'
     :'<div class="adjc"><div class="adjd">anterior</div><div class="adjn" style="color:var(--mu);font-style:italic">Inicio da rota</div><div class="adjkm">Proximo de Manaus</div></div>';
@@ -334,7 +330,7 @@ function renderMap(){
       if(mob){
         grp.addEventListener('touchend',e=>{e.preventDefault();e.stopPropagation();oMS(m,r);});
       } else {
-        grp.addEventListener('mouseenter',e=>{grp.parentNode.appendChild(grp);sMT(e,m,r);});
+        grp.addEventListener('mouseenter',e=>{if(focR&&focR!==r.num)return;grp.parentNode.appendChild(grp);sMT(e,m,r);});
         grp.addEventListener('mouseleave',()=>{document.getElementById('mtt').className='';});
         grp.addEventListener('click',()=>{focR=focR===r.num?null:r.num;renderMap();updL();});
       }
@@ -343,8 +339,13 @@ function renderMap(){
   });
   svg.appendChild(g);
 }
+
+// MODIFICAÇÃO DE SEGURANÇA: Bloqueia a renderização se o usuário passar o mouse em um item ocultado por filtro
 function sMT(e,c,rArg){
-  const r=rArg||gR(c.rota);const color=r?r.cor:'#14b8a6';
+  const r=rArg||gR(c.rota);
+  if(focR && focR !== r.num) return; 
+  
+  const color=r?r.cor:'#14b8a6';
   const ri=r?r.municipios.findIndex(m=>m.seq===c.seq):-1;
   const rm=ri>=0?r.municipios[ri]:null;
   const prev=ri>0?r.municipios[ri-1]:null;
@@ -357,6 +358,7 @@ function sMT(e,c,rArg){
   if(lx+230>mc.width)lx-=244;if(ty+120>mc.height)ty-=120;
   tt.style.left=lx+'px';tt.style.top=ty+'px';tt.className='on';
 }
+
 function oMS(c,rArg){
   const r=rArg||gR(c.rota);const color=r?r.cor:'#14b8a6';
   const ri=r?r.municipios.findIndex(m=>m.seq===c.seq):-1;
@@ -384,7 +386,6 @@ function zI(){T.s=Math.min(5,T.s*1.3);applyT();}function zO(){T.s=Math.max(0.4,T
 
 let cur='t';
 
-// ── PAN / ZOOM DO MAPA ───────────────────────────────────
 function initMapInteractions(){
   const msvg=document.getElementById('msvg');
   let drag=false,ds={};
@@ -398,7 +399,6 @@ function initMapInteractions(){
   msvg.addEventListener('touchend',e=>{if(e.touches.length===0)lD=null;});
 }
 
-// ── MULTI-SELECT ─────────────────────────────────────────
 let SEL={};
 function toggleSel(cepKey,mun,rota){
   if(SEL[cepKey]){delete SEL[cepKey];}
@@ -503,7 +503,6 @@ function setup(){
   document.getElementById('hbg').style.display=m?'none':'';
 }
 
-// ── INICIALIZAÇÃO ────────────────────────────────────────
 setup();
 window.addEventListener('resize',()=>{setup();if(cur==='m')renderMap();});
 initMapInteractions();
