@@ -7,9 +7,13 @@
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
 <div id="hdr">
   <div class="dot"></div>
-  <div><div class="lt">RIVER OPS</div><div class="ls">CEP &rarr; Rota &rarr; Posicao na Calha</div></div>
+  <div>
+    <div class="lt">RIVER OPS</div>
+    <div class="ls">CEP &rarr; Rota &rarr; Posicao na Calha</div>
+  </div>
   <div class="htabs">
     <button class="htab on" onclick="SS('t',this)">&#9889; Triagem</button>
     <button class="htab" onclick="SS('r',this)">&#128203; Rotas</button>
@@ -18,6 +22,7 @@
   </div>
   <div class="hbg" id="hbg">10 ROTAS &middot; 57 MUN.</div>
 </div>
+
 <div id="btabs">
   <div class="brow">
     <button class="btab on" id="bt-t" onclick="SS('t',null,'bt-t')"><span class="bti">&#9889;</span>Triagem</button>
@@ -26,9 +31,12 @@
     <button class="btab" id="bt-p" onclick="SS('p',null,'bt-p')"><span class="bti">&#128424;</span>Guia</button>
   </div>
 </div>
+
 <div id="app">
-  <div class="scr" id="sc-t" style="flex-direction:column;align-items:center;overflow-y:auto;padding:20px 16px;gap:14px">
+  
+  <div class="scr" id="sc-t">
     <div class="csec">
+      <div style="font-size:20px;font-weight:900;color:var(--ac);letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px;text-align:center">Facil Express LTDA</div>
       <label class="clbl">5 primeiros digitos do CEP da etiqueta</label>
       <input id="ci" type="tel" inputmode="numeric" maxlength="9" placeholder="CEP ou SLAM" autocomplete="off" spellcheck="false" oninput="onCI(this.value)" onkeydown="onK(event)">
       <div class="chint">Digite o CEP (5 digitos) OU a sigla SLAM (ex: RTE9)<br>Rota = papelao no chao &nbsp;|&nbsp; Posicao = sequencia na calha &nbsp;|&nbsp; erro: buscar cidade anterior/proxima</div>
@@ -36,15 +44,19 @@
     <div id="rcard"></div>
     <div class="recb" id="recb"><div class="rect">Buscas recentes</div><div class="chips" id="rchp"></div></div>
   </div>
+
   <div class="scr h" id="sc-r">
     <div class="rhdr"><div class="rsw"><span class="rsi">&#9901;</span><input type="text" placeholder="Buscar municipio, CEP ou numero de rota..." oninput="fR(this.value)"></div></div>
     <div class="rbdy" id="rbdy"></div>
   </div>
+
   <div class="scr h" id="sc-m">
-    <svg id="msvg" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;touch-action:none"></svg>
+    <svg id="msvg" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg"></svg>
     <div class="mc2"><button class="mcb" onclick="zI()">+</button><button class="mcb" onclick="zO()">-</button><button class="mcb" onclick="zR()">&#8635;</button></div>
-    <div id="mleg"></div><div id="mtt"></div>
+    <div id="mleg"></div>
+    <div id="mtt"></div>
   </div>
+
   <div class="scr h" id="sc-p">
     <div class="ph">
       <div class="ph-text">
