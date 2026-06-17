@@ -213,7 +213,7 @@ function renderMap(){
   const defs=document.createElementNS(NS,'defs');
   defs.innerHTML=
     '<pattern id="gr" width="30" height="30" patternUnits="userSpaceOnUse">'+
-    '<path d="M30 0L0 0 0 30" fill="none" stroke="#0d1520" stroke-width=".4"/></pattern>'+
+    '<path d="M30 0L0 0 0 30" fill="none" stroke="#0f172a" stroke-width=".4"/></pattern>'+
     '<filter id="gw"><feGaussianBlur stdDeviation="1.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'+
     '<filter id="gs"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'+
     '<style>.cm-dot{transition:transform .15s ease;transform-box:fill-box;transform-origin:center}'+
@@ -240,6 +240,15 @@ function renderMap(){
   border.setAttribute('fill','#0f1b2d'); 
   border.setAttribute('stroke','#1e3552'); 
   border.setAttribute('stroke-width','2');
+  
+  border.addEventListener('click', (e) => {
+    if(e.target === border) {
+      if(mttTimer) clearTimeout(mttTimer);
+      const tt = document.getElementById('mtt');
+      tt.className = '';
+      tt.removeAttribute('data-fixed');
+    }
+  });
   g.appendChild(border);
   
   const lbl=proj(-6.3,-67.2);
@@ -247,7 +256,7 @@ function renderMap(){
   wm.setAttribute('x',lbl.x);wm.setAttribute('y',lbl.y);
   wm.setAttribute('text-anchor','middle');wm.setAttribute('font-size','24');
   wm.setAttribute('font-weight','800');wm.setAttribute('letter-spacing','4');
-  wm.setAttribute('fill','#17293d');wm.setAttribute('font-family','-apple-system,sans-serif');
+  wm.setAttribute('fill','#1b2a47');wm.setAttribute('font-family','-apple-system,sans-serif');
   wm.setAttribute('pointer-events','none');wm.textContent='AMAZONAS';
   g.appendChild(wm);
   
