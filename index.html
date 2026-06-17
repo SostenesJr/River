@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RIVER OPS · Triagem - Manaus</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="dark">
+    <header>
+        <div class="header-logo">
+            <h1>RIVER OPS</h1>
+            <h2>Triagem</h2>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#" id="triagem-tab" class="active">Triagem</a></li>
+                <li><a href="#" id="guia-tab">Guia do Galpão</a></li>
+                <li><a href="#" id="mapa-tab">Mapa</a></li>
+                <li><a href="#" id="embarcacoes-tab">Embarcações</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="app">
+        <div class="triagem-dashboard active-view">
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="Digite CEP, SLAM ou Município...">
+                <div id="search-results-dropdown" class="dropdown"></div>
+            </div>
+
+            <div class="map-and-details-container">
+                <div class="map-section">
+                    <div class="svg-map-wrapper">
+                        <svg id="msvg" viewBox="0 0 900 600"></svg>
+                    </div>
+                </div>
+
+                <div class="route-details-section">
+                    <div class="recent-searches-panel">
+                        <h3>Buscas Recentes</h3>
+                        <ul id="recent-searches-list"></ul>
+                    </div>
+                    
+                    <div class="barcos-hoje-panel">
+                        <h3>Próximas Saídas</h3>
+                        <div id="next-departures"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="guia-container">
+            <h3>Guia de Triagem do Galpão</h3>
+            <div id="guide-content"></div>
+        </div>
+        
+        <div class="embarcacoes-container">
+            <h3>Embarcações Cadastradas</h3>
+            <div id="vessels-list"></div>
+        </div>
+    </main>
+
+    <div id="sh" class="mobile-sheet">
+        <div class="sh-handle"></div>
+        <div class="sh-content"></div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
