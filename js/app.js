@@ -196,7 +196,7 @@ function bPrint(){
   });
 }
 
-let T={s:1,x:0,y:0},focR=null;
+let T={s:1,x:0,y:0},focR=null,mttTimer=null;
 function gR(n){return ROTAS.find(r=>r.num===n);}
 function renderMap(){
   const svg=document.getElementById('msvg');
@@ -226,24 +226,23 @@ function renderMap(){
   g.setAttribute('transform','translate('+T.x+','+T.y+') scale('+T.s+')');
   const bg=document.createElementNS(NS,'rect');
   bg.setAttribute('width',W);bg.setAttribute('height',H);
-  bg.setAttribute('fill','#0e1a2b');g.appendChild(bg);
+  bg.setAttribute('fill','#0a0f1d');g.appendChild(bg); // Fundo do mapa mais escuro
   const gr=document.createElementNS(NS,'rect');
   gr.setAttribute('width',W);gr.setAttribute('height',H);
   gr.setAttribute('fill','url(#gr)');g.appendChild(gr);
   const bPts=AM_BORDER.map(([lat,lng])=>{const p=proj(lat,lng);return p.x+','+p.y;}).join(' ');
   const border=document.createElementNS(NS,'polygon');
   border.setAttribute('points',bPts);
-  border.setAttribute('fill','#142840');
-  border.setAttribute('stroke','#2a4a6e');
-  border.setAttribute('stroke-width','1.5');
-  border.setAttribute('opacity','0.95');
+  border.setAttribute('fill','#11223f'); // Nova cor interna do AM
+  border.setAttribute('stroke','#1d3b68'); // Borda mais definida
+  border.setAttribute('stroke-width','2');
   g.appendChild(border);
   const lbl=proj(-6.3,-67.2);
   const wm=document.createElementNS(NS,'text');
   wm.setAttribute('x',lbl.x);wm.setAttribute('y',lbl.y);
-  wm.setAttribute('text-anchor','middle');wm.setAttribute('font-size','22');
-  wm.setAttribute('font-weight','700');wm.setAttribute('letter-spacing','3');
-  wm.setAttribute('fill','#24405e');wm.setAttribute('font-family','-apple-system,sans-serif');
+  wm.setAttribute('text-anchor','middle');wm.setAttribute('font-size','24');
+  wm.setAttribute('font-weight','800');wm.setAttribute('letter-spacing','4');
+  wm.setAttribute('fill','#1e3456');wm.setAttribute('font-family','-apple-system,sans-serif');
   wm.setAttribute('pointer-events','none');wm.textContent='AMAZONAS';
   g.appendChild(wm);
   RIOS.forEach(rv=>{
@@ -251,9 +250,9 @@ function renderMap(){
     const path=document.createElementNS(NS,'polyline');
     path.setAttribute('points',pts.join(', '));
     path.setAttribute('fill','none');
-    path.setAttribute('stroke','#1e4a7a');
+    path.setAttribute('stroke','#38bdf8'); // Linha dos rios em azul vivo brilhante
     path.setAttribute('stroke-width',rv.w);
-    path.setAttribute('opacity',rv.op);
+    path.setAttribute('opacity','0.65'); // Maior visibilidade
     path.setAttribute('stroke-linecap','round');
     path.setAttribute('stroke-linejoin','round');
     g.appendChild(path);
@@ -271,7 +270,7 @@ function renderMap(){
   hc.setAttribute('cx',hub.x);hc.setAttribute('cy',hub.y);hc.setAttribute('r','6');
   hc.setAttribute('fill','#14b8a6');hc.setAttribute('filter','url(#gw)');
   const hg=document.createElementNS(NS,'g');hg.style.cursor='pointer';hg.appendChild(hc);
-  hg.addEventListener('click',()=>{focR=null;renderMap();updL();});
+  hg.addEventListener('click',()=>{focR=null;if(mttTimer)clearTimeout(mttTimer);document.getElementById('mtt').className='';renderMap();updL();});
   const hl=document.createElementNS(NS,'text');
   hl.setAttribute('x',hub.x+10);hl.setAttribute('y',hub.y+4);
   hl.setAttribute('font-size','11');hl.setAttribute('fill','#14b8a6');
@@ -289,7 +288,7 @@ function renderMap(){
       line.setAttribute('fill','none');
       line.setAttribute('stroke',r.cor);
       line.setAttribute('stroke-width',focR&&focR!==r.num?'1':'2');
-      line.setAttribute('opacity',focR&&focR!==r.num?'0.05':'0.5');
+      line.setAttribute('opacity',focR&&focR!==r.num?'0.05':'0.6');
       line.setAttribute('stroke-linecap','round');
       if(isRoad)line.setAttribute('stroke-dasharray','6,4');
       g.appendChild(line);
@@ -303,7 +302,8 @@ function renderMap(){
       const grp=document.createElementNS(NS,'g');
       grp.setAttribute('class','cm-marker');
       grp.style.cursor='pointer';
-      grp.setAttribute('opacity',dim?'0.06':'1');
+      grp.setAttribute('opacity',dim?'0.00':'1'); // Totalmente invisível se filtrado
+      if(dim) grp.style.pointerEvents='none'; // Desativa cliques/mouse nas ocultas
       const dot=document.createElementNS(NS,'g');
       dot.setAttribute('class','cm-dot');
       const bb=document.createElementNS(NS,'rect');
@@ -330,9 +330,17 @@ function renderMap(){
       if(mob){
         grp.addEventListener('touchend',e=>{e.preventDefault();e.stopPropagation();oMS(m,r);});
       } else {
-        grp.addEventListener('mouseenter',e=>{if(focR&&focR!==r.num)return;grp.parentNode.appendChild(grp);sMT(e,m,r);});
-        grp.addEventListener('mouseleave',()=>{document.getElementById('mtt').className='';});
-        grp.addEventListener('click',()=>{focR=focR===r.num?null:r.num;renderMap();updL();});
+        grp.addEventListener('mouseenter',e=>{if(focR&&focR!==r.num)return;grp.parentNode.appendChild(grp);sMT(e,m,r,true);}); // Passou o mouse: abre temporário
+        grp.addEventListener('mouseleave',()=>{if(document.getElementById('mtt').dataset.fixed!=="true")document.getElementById('mtt').className='';}); // Tirou o mouse: some se não foi clicado
+        grp.addEventListener('click',e=>{
+          if(mttTimer)clearTimeout(mttTimer);
+          sMT(e,m,r,false); // Clicou: abre em modo FIXO
+          document.getElementById('mtt').dataset.fixed="true";
+          mttTimer=setTimeout(()=>{
+            document.getElementById('mtt').className='';
+            document.getElementById('mtt').dataset.fixed="false";
+          },10000); // Trava de 10 segundos na tela
+        });
       }
       g.appendChild(grp);
     });
@@ -340,11 +348,8 @@ function renderMap(){
   svg.appendChild(g);
 }
 
-// MODIFICAÇÃO DE SEGURANÇA: Bloqueia a renderização se o usuário passar o mouse em um item ocultado por filtro
-function sMT(e,c,rArg){
-  const r=rArg||gR(c.rota);
-  if(focR && focR !== r.num) return; 
-  
+function sMT(e,c,rArg,isTemp){
+  const r=rArg||gR(c.rota);if(focR&&focR!==r.num)return;
   const color=r?r.cor:'#14b8a6';
   const ri=r?r.municipios.findIndex(m=>m.seq===c.seq):-1;
   const rm=ri>=0?r.municipios[ri]:null;
@@ -352,11 +357,13 @@ function sMT(e,c,rArg){
   const next=(ri>=0&&ri<r.municipios.length-1)?r.municipios[ri+1]:null;
   const nb=rm?bB(rm.nome):null;const nx=nL(nb?nb.days:null);
   const tt=document.getElementById('mtt');
+  if(isTemp && tt.dataset.fixed==="true") return; // Não substitui se já estiver fixado por clique
   tt.innerHTML='<div style="padding:10px 12px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="min-width:38px;height:30px;border-radius:6px;background:'+color+';display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:700;color:#fff;padding:0 6px"><div style="font-size:7px;opacity:.7">R'+String(c.rota).padStart(2,'0')+'</div><div>'+String(c.seq).padStart(2,'0')+'</div></div><div><div style="font-size:13px;font-weight:700">'+c.nome+'</div><div style="font-size:10px;color:'+color+'">'+(r?r.nome:'')+'</div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:10px;margin-bottom:6px"><div><div style="color:var(--mu);font-size:8px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:1px">Anterior</div>'+(prev?prev.nome:'Inicio')+'</div><div><div style="color:var(--mu);font-size:8px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:1px">Proximo</div>'+(next?next.nome:'Fim da rota')+'</div></div>'+(nb?'<div style="font-size:10px;display:flex;align-items:center;gap:6px"><span class="'+nx.c+'" style="font-size:9px;font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;padding:1px 6px;border-radius:3px">'+nx.l+'</span><span style="font-weight:600">'+nb.boat.n+'</span></div>':'')+'</div>';
   const mc=document.getElementById('sc-m').getBoundingClientRect();
   let lx=e.clientX-mc.left+14,ty=e.clientY-mc.top-12;
   if(lx+230>mc.width)lx-=244;if(ty+120>mc.height)ty-=120;
   tt.style.left=lx+'px';tt.style.top=ty+'px';tt.className='on';
+  if(!isTemp) tt.dataset.fixed="true"; else tt.dataset.fixed="false";
 }
 
 function oMS(c,rArg){
@@ -378,11 +385,11 @@ function oMS(c,rArg){
 }
 function bL(){
   const l=document.getElementById('mleg');l.innerHTML='<div class="mlttl">Rotas</div>';
-  ROTAS.forEach(r=>{const row=document.createElement('div');row.className='mlr';row.dataset.rota=r.num;row.innerHTML='<div class="mlnum" style="background:'+r.cor+'">'+String(r.num).padStart(2,'0')+'</div><span class="mlnm">'+r.nome+'</span>';row.onclick=()=>{focR=focR===r.num?null:r.num;renderMap();updL();};l.appendChild(row);});
+  ROTAS.forEach(r=>{const row=document.createElement('div');row.className='mlr';row.dataset.rota=r.num;row.innerHTML='<div class="mlnum" style="background:'+r.cor+'">'+String(r.num).padStart(2,'0')+'</div><span class="mlnm">'+r.nome+'</span>';row.onclick=()=>{focR=focR===r.num?null:r.num;if(mttTimer)clearTimeout(mttTimer);document.getElementById('mtt').className='';renderMap();updL();};l.appendChild(row);});
 }
 function updL(){document.querySelectorAll('.mlr[data-rota]').forEach(el=>el.classList.toggle('dim',!!focR&&parseInt(el.dataset.rota)!==focR));}
 function applyT(){const g=document.getElementById("mg");if(g)g.setAttribute("transform","translate("+T.x+","+T.y+") scale("+T.s+")");}
-function zI(){T.s=Math.min(5,T.s*1.3);applyT();}function zO(){T.s=Math.max(0.4,T.s/1.3);applyT();}function zR(){T={s:1,x:0,y:0};focR=null;renderMap();updL();}
+function zI(){T.s=Math.min(5,T.s*1.3);applyT();}function zO(){T.s=Math.max(0.4,T.s/1.3);applyT();}function zR(){T={s:1,x:0,y:0};focR=null;if(mttTimer)clearTimeout(mttTimer);document.getElementById('mtt').className='';renderMap();updL();}
 
 let cur='t';
 
@@ -492,7 +499,7 @@ function SS(name,btn,mid){
   if(btn){document.querySelectorAll('.htab').forEach(b=>b.classList.remove('on'));if(btn&&btn.classList)btn.classList.add('on');}
   if(mid){document.querySelectorAll('.btab').forEach(b=>b.classList.remove('on'));const el=document.getElementById(mid);if(el)el.classList.add('on');}
   cSh();
-  if(name==='m'){renderMap();bL();updL();}
+  if(name==='m'){if(mttTimer)clearTimeout(mttTimer);document.getElementById('mtt').className='';renderMap();bL();updL();}
 }
 function cSh(){document.getElementById('sh').classList.remove('on');}
 function setup(){
