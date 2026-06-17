@@ -213,50 +213,70 @@ function renderMap(){
   const defs=document.createElementNS(NS,'defs');
   defs.innerHTML=
     '<pattern id="gr" width="30" height="30" patternUnits="userSpaceOnUse">'+
-    '<path d="M30 0L0 0 0 30" fill="none" stroke="#0d1520" stroke-width=".4"/></pattern>'+
+    '<path d="M30 0L0 0 0 30" fill="none" stroke="#0f172a" stroke-width=".4"/></pattern>'+
     '<filter id="gw"><feGaussianBlur stdDeviation="1.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'+
     '<filter id="gs"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'+
     '<style>.cm-dot{transition:transform .15s ease;transform-box:fill-box;transform-origin:center}'+
-    '.cm-marker:hover .cm-dot{transform:scale(2.1)}'+
+    '.cm-marker:hover .cm-dot{transform:scale(1.8)}'+
     '.cm-label{transition:opacity .12s ease;opacity:0;pointer-events:none}'+
     '.cm-marker:hover .cm-label{opacity:1}</style>';
   svg.appendChild(defs);
+  
   const g=document.createElementNS(NS,'g');
   g.id='mg';
   g.setAttribute('transform','translate('+T.x+','+T.y+') scale('+T.s+')');
+  
+  // 🎨 CORES DO MAPA: Fundo Industrial Escuro
   const bg=document.createElementNS(NS,'rect');
   bg.setAttribute('width',W);bg.setAttribute('height',H);
-  bg.setAttribute('fill','#0a0f1d');g.appendChild(bg); // Fundo do mapa mais escuro
+  bg.setAttribute('fill','#070c14');g.appendChild(bg); 
+  
   const gr=document.createElementNS(NS,'rect');
   gr.setAttribute('width',W);gr.setAttribute('height',H);
   gr.setAttribute('fill','url(#gr)');g.appendChild(gr);
+  
+  // Contorno do Amazonas
   const bPts=AM_BORDER.map(([lat,lng])=>{const p=proj(lat,lng);return p.x+','+p.y;}).join(' ');
   const border=document.createElementNS(NS,'polygon');
   border.setAttribute('points',bPts);
-  border.setAttribute('fill','#11223f'); // Nova cor interna do AM
-  border.setAttribute('stroke','#1d3b68'); // Borda mais definida
+  border.setAttribute('fill','#0f1b2d'); // Corpo do estado destacado
+  border.setAttribute('stroke','#1e3552'); // Divisa viva
   border.setAttribute('stroke-width','2');
+  
+  // CLIQUE NO FUNDO DO MAPA: Limpa tudo instantaneamente se clicar fora
+  border.addEventListener('click', (e) => {
+    if(e.target === border) {
+      if(mttTimer) clearTimeout(mttTimer);
+      const tt = document.getElementById('mtt');
+      tt.className = '';
+      tt.removeAttribute('data-fixed');
+    }
+  });
   g.appendChild(border);
+  
   const lbl=proj(-6.3,-67.2);
   const wm=document.createElementNS(NS,'text');
   wm.setAttribute('x',lbl.x);wm.setAttribute('y',lbl.y);
   wm.setAttribute('text-anchor','middle');wm.setAttribute('font-size','24');
   wm.setAttribute('font-weight','800');wm.setAttribute('letter-spacing','4');
-  wm.setAttribute('fill','#1e3456');wm.setAttribute('font-family','-apple-system,sans-serif');
+  wm.setAttribute('fill','#17293d');wm.setAttribute('font-family','-apple-system,sans-serif');
   wm.setAttribute('pointer-events','none');wm.textContent='AMAZONAS';
   g.appendChild(wm);
+  
+  // Rios em Azul Elétrico Vivo
   RIOS.forEach(rv=>{
     const pts=rv.coords.map(([lat,lng])=>{const p=proj(lat,lng);return p.x+' '+p.y;});
     const path=document.createElementNS(NS,'polyline');
     path.setAttribute('points',pts.join(', '));
     path.setAttribute('fill','none');
-    path.setAttribute('stroke','#38bdf8'); // Linha dos rios em azul vivo brilhante
+    path.setAttribute('stroke','#0284c7'); 
     path.setAttribute('stroke-width',rv.w);
-    path.setAttribute('opacity','0.65'); // Maior visibilidade
+    path.setAttribute('opacity','0.75'); 
     path.setAttribute('stroke-linecap','round');
     path.setAttribute('stroke-linejoin','round');
     g.appendChild(path);
   });
+  
   const hub=proj(-3.119,-60.021);
   [20,13,7].forEach(r=>{
     const p=document.createElementNS(NS,'circle');
@@ -270,13 +290,14 @@ function renderMap(){
   hc.setAttribute('cx',hub.x);hc.setAttribute('cy',hub.y);hc.setAttribute('r','6');
   hc.setAttribute('fill','#14b8a6');hc.setAttribute('filter','url(#gw)');
   const hg=document.createElementNS(NS,'g');hg.style.cursor='pointer';hg.appendChild(hc);
-  hg.addEventListener('click',()=>{focR=null;if(mttTimer)clearTimeout(mttTimer);document.getElementById('mtt').className='';renderMap();updL();});
+  hg.addEventListener('click',()=>{focR=null;if(mttTimer)clearTimeout(mttTimer);const tt=document.getElementById('mtt');tt.className='';tt.removeAttribute('data-fixed');renderMap();updL();});
   const hl=document.createElementNS(NS,'text');
   hl.setAttribute('x',hub.x+10);hl.setAttribute('y',hub.y+4);
   hl.setAttribute('font-size','11');hl.setAttribute('fill','#14b8a6');
   hl.setAttribute('font-weight','700');hl.setAttribute('font-family','-apple-system,sans-serif');
   hl.setAttribute('pointer-events','none');hl.textContent='MANAUS';
   hg.appendChild(hl);g.appendChild(hg);
+  
   ROTAS.forEach(r=>{
     const isRoad=(r.num===9||r.num===10);
     const pts=r.municipios.map(m=>LATLNG[m.cep]?proj(LATLNG[m.cep].lat,LATLNG[m.cep].lng):null).filter(Boolean);
@@ -288,22 +309,24 @@ function renderMap(){
       line.setAttribute('fill','none');
       line.setAttribute('stroke',r.cor);
       line.setAttribute('stroke-width',focR&&focR!==r.num?'1':'2');
-      line.setAttribute('opacity',focR&&focR!==r.num?'0.05':'0.6');
+      line.setAttribute('opacity',focR&&focR!==r.num?'0.00':'0.55');
       line.setAttribute('stroke-linecap','round');
       if(isRoad)line.setAttribute('stroke-dasharray','6,4');
       g.appendChild(line);
     }
   });
+  
   ROTAS.forEach(r=>{
     r.municipios.forEach(m=>{
       const ll=LATLNG[m.cep];if(!ll)return;
       const p=proj(ll.lat,ll.lng);
       const dim=focR&&focR!==r.num;
+      
+      if(dim) return; // Se a rota estiver ocultada na legenda, o ponto desaparece 100%
+
       const grp=document.createElementNS(NS,'g');
       grp.setAttribute('class','cm-marker');
       grp.style.cursor='pointer';
-      grp.setAttribute('opacity',dim?'0.00':'1'); // Totalmente invisível se filtrado
-      if(dim) grp.style.pointerEvents='none'; // Desativa cliques/mouse nas ocultas
       const dot=document.createElementNS(NS,'g');
       dot.setAttribute('class','cm-dot');
       const bb=document.createElementNS(NS,'rect');
@@ -323,23 +346,38 @@ function renderMap(){
       lbl.setAttribute('class','cm-label');
       lbl.setAttribute('x',p.x+9);lbl.setAttribute('y',p.y+3.5);
       lbl.setAttribute('font-size','8');
-      lbl.setAttribute('fill',dim?'#0e1a2b':'#bcd4dd');
+      lbl.setAttribute('fill','#bcd4dd');
       lbl.setAttribute('font-family','-apple-system,sans-serif');
       lbl.textContent=m.nome.split(' ')[0];grp.appendChild(lbl);
+      
       const mob=window.innerWidth<768;
       if(mob){
         grp.addEventListener('touchend',e=>{e.preventDefault();e.stopPropagation();oMS(m,r);});
       } else {
-        grp.addEventListener('mouseenter',e=>{if(focR&&focR!==r.num)return;grp.parentNode.appendChild(grp);sMT(e,m,r,true);}); // Passou o mouse: abre temporário
-        grp.addEventListener('mouseleave',()=>{if(document.getElementById('mtt').dataset.fixed!=="true")document.getElementById('mtt').className='';}); // Tirou o mouse: some se não foi clicado
-        grp.addEventListener('click',e=>{
-          if(mttTimer)clearTimeout(mttTimer);
-          sMT(e,m,r,false); // Clicou: abre em modo FIXO
-          document.getElementById('mtt').dataset.fixed="true";
+        // MOUSE ENTER: Abre instantaneamente se não houver trava de clique fixa
+        grp.addEventListener('mouseenter',e=>{
+          const tt=document.getElementById('mtt');
+          if(tt.getAttribute('data-fixed')==="true") return;
+          sMT(e,m,r);
+        });
+        // MOUSE LEAVE: Desaparece no exato milissegundo em que o mouse sai do ponto
+        grp.addEventListener('mouseleave',()=>{
+          const tt=document.getElementById('mtt');
+          if(tt.getAttribute('data-fixed')==="true") return;
+          tt.className='';
+        });
+        // CLICK: Fixa o balão por 10 segundos exatos e limpa o resto
+        grp.addEventListener('click',e => {
+          e.stopPropagation(); // Impede o clique de propagar para o fundo do mapa
+          if(mttTimer) clearTimeout(mttTimer);
+          const tt=document.getElementById('mtt');
+          sMT(e,m,r);
+          tt.setAttribute('data-fixed', "true"); 
+          
           mttTimer=setTimeout(()=>{
-            document.getElementById('mtt').className='';
-            document.getElementById('mtt').dataset.fixed="false";
-          },10000); // Trava de 10 segundos na tela
+            tt.className='';
+            tt.removeAttribute('data-fixed'); 
+          },10000);
         });
       }
       g.appendChild(grp);
@@ -348,26 +386,29 @@ function renderMap(){
   svg.appendChild(g);
 }
 
-function sMT(e,c,rArg,isTemp){
-  const r=rArg||gR(c.rota);if(focR&&focR!==r.num)return;
+// CORREÇÃO: m.rota substituído por r.num para matar o bug do Rundefined
+function sMT(e,c,rArg){
+  const r=rArg||gR(c.rota);
   const color=r?r.cor:'#14b8a6';
+  const rotaNum = r ? String(r.num).padStart(2,'0') : String(c.rota).padStart(2,'0');
   const ri=r?r.municipios.findIndex(m=>m.seq===c.seq):-1;
   const rm=ri>=0?r.municipios[ri]:null;
   const prev=ri>0?r.municipios[ri-1]:null;
   const next=(ri>=0&&ri<r.municipios.length-1)?r.municipios[ri+1]:null;
   const nb=rm?bB(rm.nome):null;const nx=nL(nb?nb.days:null);
   const tt=document.getElementById('mtt');
-  if(isTemp && tt.dataset.fixed==="true") return; // Não substitui se já estiver fixado por clique
-  tt.innerHTML='<div style="padding:10px 12px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="min-width:38px;height:30px;border-radius:6px;background:'+color+';display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:700;color:#fff;padding:0 6px"><div style="font-size:7px;opacity:.7">R'+String(c.rota).padStart(2,'0')+'</div><div>'+String(c.seq).padStart(2,'0')+'</div></div><div><div style="font-size:13px;font-weight:700">'+c.nome+'</div><div style="font-size:10px;color:'+color+'">'+(r?r.nome:'')+'</div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:10px;margin-bottom:6px"><div><div style="color:var(--mu);font-size:8px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:1px">Anterior</div>'+(prev?prev.nome:'Inicio')+'</div><div><div style="color:var(--mu);font-size:8px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:1px">Proximo</div>'+(next?next.nome:'Fim da rota')+'</div></div>'+(nb?'<div style="font-size:10px;display:flex;align-items:center;gap:6px"><span class="'+nx.c+'" style="font-size:9px;font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;padding:1px 6px;border-radius:3px">'+nx.l+'</span><span style="font-weight:600">'+nb.boat.n+'</span></div>':'')+'</div>';
+  
+  tt.innerHTML='<div style="padding:10px 12px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="min-width:38px;height:30px;border-radius:6px;background:'+color+';display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:700;color:#fff;padding:0 6px"><div style="font-size:7px;opacity:.7">R'+rotaNum+'</div><div>'+String(c.seq).padStart(2,'0')+'</div></div><div><div style="font-size:13px;font-weight:700">'+c.nome+'</div><div style="font-size:10px;color:'+color+'">'+(r?r.nome:'')+'</div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:10px;margin-bottom:6px"><div><div style="color:var(--mu);font-size:8px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:1px">Anterior</div>'+(prev?prev.nome:'Inicio')+'</div><div><div style="color:var(--mu);font-size:8px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:1px">Proximo</div>'+(next?next.nome:'Fim da rota')+'</div></div>'+(nb?'<div style="font-size:10px;display:flex;align-items:center;gap:6px"><span class="'+nx.c+'" style="font-size:9px;font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;padding:1px 6px;border-radius:3px">'+nx.l+'</span><span style="font-weight:600">'+nb.boat.n+'</span></div>':'')+'</div>';
+  
   const mc=document.getElementById('sc-m').getBoundingClientRect();
   let lx=e.clientX-mc.left+14,ty=e.clientY-mc.top-12;
   if(lx+230>mc.width)lx-=244;if(ty+120>mc.height)ty-=120;
   tt.style.left=lx+'px';tt.style.top=ty+'px';tt.className='on';
-  if(!isTemp) tt.dataset.fixed="true"; else tt.dataset.fixed="false";
 }
 
 function oMS(c,rArg){
   const r=rArg||gR(c.rota);const color=r?r.cor:'#14b8a6';
+  const rotaNum = r ? String(r.num).padStart(2,'0') : String(c.rota).padStart(2,'0');
   const ri=r?r.municipios.findIndex(m=>m.seq===c.seq):-1;
   const rm=ri>=0?r.municipios[ri]:null;
   const prev=ri>0?r.municipios[ri-1]:null;
@@ -380,16 +421,16 @@ function oMS(c,rArg){
     bH='<div class="bttl" style="margin-top:12px">Embarcacoes</div>';
     boats.slice(0,3).forEach(b=>{const bx=nL(nD(b.d));bH+='<div class="brow2"><span class="bnx '+bx.c+'">'+bx.l+'</span><div style="flex:1"><div class="bnm">'+b.n+'</div><div class="binfo">'+b.d+(b.p?' - '+b.p:'')+'</div></div>'+(b.t?'<a href="tel:'+b.t.replace(/\D/g,'')+'" style="font-size:20px;text-decoration:none;margin-left:6px">&#128222;</a>':'')+'</div>';});
   }
-  document.getElementById('shc').innerHTML='<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px"><div style="min-width:60px;height:52px;border-radius:12px;background:'+color+';display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;flex-shrink:0"><div style="font-size:9px;opacity:.7;letter-spacing:.08em">ROTA '+String(c.rota).padStart(2,'0')+'</div><div style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:22px;font-weight:700;line-height:1">'+String(c.seq).padStart(2,'0')+'</div></div><div><div style="font-size:18px;font-weight:700">'+c.nome+'</div><div style="font-size:12px;color:'+color+';margin-top:2px">'+(r?r.nome:'')+' - '+c.seq+' de '+(r?r.municipios.length:'-')+'</div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px"><div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:10px 12px"><div style="font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">Anterior na calha</div><div style="font-size:13px;font-weight:600">'+(prev?prev.nome:'Inicio (Manaus)')+'</div></div><div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:10px 12px"><div style="font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">Proximo na calha</div><div style="font-size:13px;font-weight:600">'+(next?next.nome:'Fim da rota')+'</div></div></div>'+(nb?'<div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:10px 12px;margin-bottom:12px"><div style="font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Proxima embarcacao</div><div style="display:flex;align-items:center;gap:8px"><span class="'+nx.c+'" style="font-size:10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;padding:2px 7px;border-radius:4px">'+nx.l+'</span><span style="font-size:13px;font-weight:600">'+nb.boat.n+'</span>'+(nb.boat.t?'<a href="tel:'+nb.boat.t.replace(/\D/g,'')+'" style="font-size:20px;text-decoration:none;margin-left:auto">&#128222;</a>':'')+'</div></div>':'')+bH;
+  document.getElementById('shc').innerHTML='<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px"><div style="min-width:60px;height:52px;border-radius:12px;background:'+color+';display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;flex-shrink:0"><div style="font-size:9px;opacity:.7;letter-spacing:.08em">ROTA '+rotaNum+'</div><div style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:22px;font-weight:700;line-height:1">'+String(c.seq).padStart(2,'0')+'</div></div><div><div style="font-size:18px;font-weight:700">'+c.nome+'</div><div style="font-size:12px;color:'+color+';margin-top:2px">'+(r?r.nome:'')+' - '+c.seq+' de '+(r?r.municipios.length:'-')+'</div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px"><div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:10px 12px"><div style="font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">Anterior na calha</div><div style="font-size:13px;font-weight:600">'+(prev?prev.nome:'Inicio (Manaus)')+'</div></div><div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:10px 12px"><div style="font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">Proximo na calha</div><div style="font-size:13px;font-weight:600">'+(next?next.nome:'Fim da rota')+'</div></div></div>'+(nb?'<div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:10px 12px;margin-bottom:12px"><div style="font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Proxima embarcacao</div><div style="display:flex;align-items:center;gap:8px"><span class="'+nx.c+'" style="font-size:10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;padding:2px 7px;border-radius:4px">'+nx.l+'</span><span style="font-size:13px;font-weight:600">'+nb.boat.n+'</span>'+(nb.boat.t?'<a href="tel:'+nb.boat.t.replace(/\D/g,'')+'" style="font-size:20px;text-decoration:none;margin-left:auto">&#128222;</a>':'')+'</div></div>':'')+bH;
   document.getElementById('sh').classList.add('on');
 }
 function bL(){
   const l=document.getElementById('mleg');l.innerHTML='<div class="mlttl">Rotas</div>';
-  ROTAS.forEach(r=>{const row=document.createElement('div');row.className='mlr';row.dataset.rota=r.num;row.innerHTML='<div class="mlnum" style="background:'+r.cor+'">'+String(r.num).padStart(2,'0')+'</div><span class="mlnm">'+r.nome+'</span>';row.onclick=()=>{focR=focR===r.num?null:r.num;if(mttTimer)clearTimeout(mttTimer);document.getElementById('mtt').className='';renderMap();updL();};l.appendChild(row);});
+  ROTAS.forEach(r=>{const row=document.createElement('div');row.className='mlr';row.dataset.rota=r.num;row.innerHTML='<div class="mlnum" style="background:'+r.cor+'">'+String(r.num).padStart(2,'0')+'</div><span class="mlnm">'+r.nome+'</span>';row.onclick=()=>{focR=focR===r.num?null:r.num;if(mttTimer)clearTimeout(mttTimer);const tt=document.getElementById('mtt');tt.className='';tt.removeAttribute('data-fixed');renderMap();updL();};l.appendChild(row);});
 }
 function updL(){document.querySelectorAll('.mlr[data-rota]').forEach(el=>el.classList.toggle('dim',!!focR&&parseInt(el.dataset.rota)!==focR));}
 function applyT(){const g=document.getElementById("mg");if(g)g.setAttribute("transform","translate("+T.x+","+T.y+") scale("+T.s+")");}
-function zI(){T.s=Math.min(5,T.s*1.3);applyT();}function zO(){T.s=Math.max(0.4,T.s/1.3);applyT();}function zR(){T={s:1,x:0,y:0};focR=null;if(mttTimer)clearTimeout(mttTimer);document.getElementById('mtt').className='';renderMap();updL();}
+function zI(){T.s=Math.min(5,T.s*1.3);applyT();}function zO(){T.s=Math.max(0.4,T.s/1.3);applyT();}function zR(){T={s:1,x:0,y:0};focR=null;if(mttTimer)clearTimeout(mttTimer);const tt=document.getElementById('mtt');tt.className='';tt.removeAttribute('data-fixed');renderMap();updL();}
 
 let cur='t';
 
@@ -404,6 +445,16 @@ function initMapInteractions(){
   msvg.addEventListener('touchstart',e=>{e.preventDefault();if(e.touches.length===1){const t=e.touches[0];tS={x:t.clientX-T.x,y:t.clientY-T.y};}else if(e.touches.length===2){const a=e.touches[0],b=e.touches[1];lD=Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY);}},{passive:false});
   msvg.addEventListener('touchmove',e=>{e.preventDefault();if(e.touches.length===1&&!lD){const t=e.touches[0];T.x=t.clientX-tS.x;T.y=t.clientY-tS.y;applyT();}else if(e.touches.length===2){const a=e.touches[0],b=e.touches[1];const d=Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY);if(lD){T.s=Math.min(5,Math.max(0.4,T.s*(d/lD)));applyT();}lD=d;}},{passive:false});
   msvg.addEventListener('touchend',e=>{if(e.touches.length===0)lD=null;});
+  
+  // CLIQUE NO MUNDO: Se o operador clicar no vazio do SVG (fundo escuro), fecha o balão fixo na hora
+  msvg.addEventListener('click', (e) => {
+    if(e.target === msvg) {
+      if(mttTimer) clearTimeout(mttTimer);
+      const tt = document.getElementById('mtt');
+      tt.className = '';
+      tt.removeAttribute('data-fixed');
+    }
+  });
 }
 
 let SEL={};
@@ -454,8 +505,8 @@ function openSelPanel(){
       '<div style="font-size:11px;color:'+rota.cor+';font-weight:700">'+sorted.length+' mun.</div></div>';
     sorted.forEach(m=>{
       const ri=rota.municipios.findIndex(x=>x.seq===m.seq);
-      const prev=ri>0?rota.municipios[ri-1]:null;
-      const next=ri<rota.municipios.length-1?rota.municipios[ri+1]:null;
+      const prev=rota.municipios[ri-1];
+      const next=rota.municipios[ri+1];
       html+='<div class="sp-mun">'+
         '<span class="sp-mun-seq" style="color:'+rota.cor+'">'+String(m.seq).padStart(2,'0')+'</span>'+
         '<span class="sp-mun-slam">'+(m.slam||m.cep)+'</span>'+
@@ -499,7 +550,7 @@ function SS(name,btn,mid){
   if(btn){document.querySelectorAll('.htab').forEach(b=>b.classList.remove('on'));if(btn&&btn.classList)btn.classList.add('on');}
   if(mid){document.querySelectorAll('.btab').forEach(b=>b.classList.remove('on'));const el=document.getElementById(mid);if(el)el.classList.add('on');}
   cSh();
-  if(name==='m'){if(mttTimer)clearTimeout(mttTimer);document.getElementById('mtt').className='';renderMap();bL();updL();}
+  if(name==='m'){if(mttTimer)clearTimeout(mttTimer);const tt=document.getElementById('mtt');tt.className='';tt.removeAttribute('data-fixed');renderMap();bL();updL();}
 }
 function cSh(){document.getElementById('sh').classList.remove('on');}
 function setup(){
