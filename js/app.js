@@ -213,7 +213,7 @@ function renderMap(){
   const defs=document.createElementNS(NS,'defs');
   defs.innerHTML=
     '<pattern id="gr" width="30" height="30" patternUnits="userSpaceOnUse">'+
-    '<path d="M30 0L0 0 0 30" fill="none" stroke="#0f172a" stroke-width=".4"/></pattern>'+
+    '<path d="M30 0L0 0 0 30" fill="none" stroke="#0d1520" stroke-width=".4"/></pattern>'+
     '<filter id="gw"><feGaussianBlur stdDeviation="1.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'+
     '<filter id="gs"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'+
     '<style>.cm-dot{transition:transform .15s ease;transform-box:fill-box;transform-origin:center}'+
@@ -226,7 +226,6 @@ function renderMap(){
   g.id='mg';
   g.setAttribute('transform','translate('+T.x+','+T.y+') scale('+T.s+')');
   
-  // 🎨 CORES DO MAPA: Fundo Industrial Escuro
   const bg=document.createElementNS(NS,'rect');
   bg.setAttribute('width',W);bg.setAttribute('height',H);
   bg.setAttribute('fill','#070c14');g.appendChild(bg); 
@@ -235,23 +234,12 @@ function renderMap(){
   gr.setAttribute('width',W);gr.setAttribute('height',H);
   gr.setAttribute('fill','url(#gr)');g.appendChild(gr);
   
-  // Contorno do Amazonas
   const bPts=AM_BORDER.map(([lat,lng])=>{const p=proj(lat,lng);return p.x+','+p.y;}).join(' ');
   const border=document.createElementNS(NS,'polygon');
   border.setAttribute('points',bPts);
-  border.setAttribute('fill','#0f1b2d'); // Corpo do estado destacado
-  border.setAttribute('stroke','#1e3552'); // Divisa viva
+  border.setAttribute('fill','#0f1b2d'); 
+  border.setAttribute('stroke','#1e3552'); 
   border.setAttribute('stroke-width','2');
-  
-  // CLIQUE NO FUNDO DO MAPA: Limpa tudo instantaneamente se clicar fora
-  border.addEventListener('click', (e) => {
-    if(e.target === border) {
-      if(mttTimer) clearTimeout(mttTimer);
-      const tt = document.getElementById('mtt');
-      tt.className = '';
-      tt.removeAttribute('data-fixed');
-    }
-  });
   g.appendChild(border);
   
   const lbl=proj(-6.3,-67.2);
@@ -263,7 +251,6 @@ function renderMap(){
   wm.setAttribute('pointer-events','none');wm.textContent='AMAZONAS';
   g.appendChild(wm);
   
-  // Rios em Azul Elétrico Vivo
   RIOS.forEach(rv=>{
     const pts=rv.coords.map(([lat,lng])=>{const p=proj(lat,lng);return p.x+' '+p.y;});
     const path=document.createElementNS(NS,'polyline');
@@ -322,7 +309,7 @@ function renderMap(){
       const p=proj(ll.lat,ll.lng);
       const dim=focR&&focR!==r.num;
       
-      if(dim) return; // Se a rota estiver ocultada na legenda, o ponto desaparece 100%
+      if(dim) return;
 
       const grp=document.createElementNS(NS,'g');
       grp.setAttribute('class','cm-marker');
@@ -354,21 +341,18 @@ function renderMap(){
       if(mob){
         grp.addEventListener('touchend',e=>{e.preventDefault();e.stopPropagation();oMS(m,r);});
       } else {
-        // MOUSE ENTER: Abre instantaneamente se não houver trava de clique fixa
         grp.addEventListener('mouseenter',e=>{
           const tt=document.getElementById('mtt');
           if(tt.getAttribute('data-fixed')==="true") return;
           sMT(e,m,r);
         });
-        // MOUSE LEAVE: Desaparece no exato milissegundo em que o mouse sai do ponto
         grp.addEventListener('mouseleave',()=>{
           const tt=document.getElementById('mtt');
           if(tt.getAttribute('data-fixed')==="true") return;
           tt.className='';
         });
-        // CLICK: Fixa o balão por 10 segundos exatos e limpa o resto
         grp.addEventListener('click',e => {
-          e.stopPropagation(); // Impede o clique de propagar para o fundo do mapa
+          e.stopPropagation(); 
           if(mttTimer) clearTimeout(mttTimer);
           const tt=document.getElementById('mtt');
           sMT(e,m,r);
@@ -386,7 +370,6 @@ function renderMap(){
   svg.appendChild(g);
 }
 
-// CORREÇÃO: m.rota substituído por r.num para matar o bug do Rundefined
 function sMT(e,c,rArg){
   const r=rArg||gR(c.rota);
   const color=r?r.cor:'#14b8a6';
@@ -446,7 +429,6 @@ function initMapInteractions(){
   msvg.addEventListener('touchmove',e=>{e.preventDefault();if(e.touches.length===1&&!lD){const t=e.touches[0];T.x=t.clientX-tS.x;T.y=t.clientY-tS.y;applyT();}else if(e.touches.length===2){const a=e.touches[0],b=e.touches[1];const d=Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY);if(lD){T.s=Math.min(5,Math.max(0.4,T.s*(d/lD)));applyT();}lD=d;}},{passive:false});
   msvg.addEventListener('touchend',e=>{if(e.touches.length===0)lD=null;});
   
-  // CLIQUE NO MUNDO: Se o operador clicar no vazio do SVG (fundo escuro), fecha o balão fixo na hora
   msvg.addEventListener('click', (e) => {
     if(e.target === msvg) {
       if(mttTimer) clearTimeout(mttTimer);
