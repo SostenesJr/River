@@ -104,9 +104,11 @@ html,body{background:var(--bg);color:var(--tx);font-family:var(--font-sans);font
 .mlr.dim .mlnum,.mlr.dim .mlnm{opacity:.14}
 #mtt{position:absolute;background:rgba(18,21,27,0.96);backdrop-filter:blur(6px);border:1px solid var(--bd);border-radius:8px;padding:0;pointer-events:none;z-index:100;display:none;min-width:220px;box-shadow:0 4px 20px rgba(0,0,0,.5);overflow:hidden}
 #mtt.on{display:block}
+/* GUIA IMPRESSÃO */
 #sc-p{overflow-y:auto;padding:16px}
-.ph{max-width:820px;margin:0 auto 16px;display:flex;align-items:center;justify-content:space-between}
-.pbtn{padding:8px 16px;background:var(--ac);border:none;border-radius:7px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-sans)}
+.ph{max-width:820px;margin:0 auto 16px;display:flex;flex-direction:row;align-items:center;justify-content:between;gap:20px;border-bottom:1px solid var(--bd);padding-bottom:14px}
+.ph-text{flex:1;display:flex;flex-direction:column;gap:4px}
+.pbtn{padding:8px 16px;background:var(--ac);border:none;border-radius:7px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-sans);white-space:nowrap;align-self:center}
 .pgrid{max-width:820px;margin:0 auto;display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .pc{border-radius:10px;overflow:hidden;border:2px solid rgba(255,255,255,.08)}
 .pch{display:flex;align-items:center;gap:12px;padding:11px 14px}
