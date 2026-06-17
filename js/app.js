@@ -26,7 +26,15 @@ function gE(nome){
   }
   return h;
 }
-function bB(nome){const e=gE(nome);if(!e)return null;let min=8,best=null;e.e.forEach(b=>{const d=nD(b.d);if(d!==null&&d<min){min=d;best=b;}});return best?{boat:best,days:min}:null;}
+
+// CORREÇÃO AQUI: Verificação anti-erro caso o município não tenha barcos cadastrados
+function bB(nome){
+  const e=gE(nome);
+  if(!e || !e.e)return null; 
+  let min=8,best=null;
+  e.e.forEach(b=>{const d=nD(b.d);if(d!==null&&d<min){min=d;best=b;}});
+  return best?{boat:best,days:min}:null;
+}
 
 let recent=[];try{recent=JSON.parse(localStorage.getItem('rv4')||'[]');}catch(e){}
 function sR(c){if(!recent.includes(c)){recent.unshift(c);if(recent.length>8)recent=recent.slice(0,8);try{localStorage.setItem('rv4',JSON.stringify(recent));}catch(e){}}rR();}
@@ -238,7 +246,7 @@ function sMT(e,c,rArg){
 function oMS(c,rArg){
   const r=rArg||gR(c.rota);const color=r?r.cor:'#14b8a6';const ri=r?r.municipios.findIndex(m=>m.seq===c.seq):-1;const rm=ri>=0?r.municipios[ri]:null;
   const prev=ri>0?r.municipios[ri-1]:null;const next=(ri>=0&&ri<r.municipios.length-1)?r.municipios[ri+1]:null;
-  const nb=rm?bB(rm.nome):null;const nx=nL(nb?nb.days:null);const emb=rm?gE(rm.nome):null;const boats=emb?[...emb.e].sort((a,b)=>(nD(a.d)??99)-(nD(b.d)??99)):[];
+  const nb=rm?bB(rm.nome):null;const nx=nL(nb?nb.days:null);const emb=rm?gE(rm.nome):null;const boats=emb&&emb.e?[...emb.e].sort((a,b)=>(nD(a.d)??99)-(nD(b.d)??99)):[];
   let bH='';if(boats.length){bH='<div class="bttl" style="margin-top:12px">Embarcacoes</div>';boats.slice(0,3).forEach(b=>{const bx=nL(nD(b.d));bH+='<div class="brow2"><span class="bnx '+bx.c+'">'+bx.l+'</span><div style="flex:1"><div class="bnm">'+b.n+'</div><div class="binfo">'+b.d+(b.p?' - '+b.p:'')+'</div></div></div>';});}
   document.getElementById('shc').innerHTML='<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px"><div style="min-width:60px;height:52px;border-radius:12px;background:'+color+';display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;flex-shrink:0"><div style="font-size:9px;opacity:.7">ROTA '+String(c.rota).padStart(2,'0')+'</div><div style="font-size:22px;font-weight:700;">'+String(c.seq).padStart(2,'0')+'</div></div><div><div style="font-size:18px;font-weight:700">'+c.nome+'</div><div style="font-size:12px;color:'+color+'">'+(r?r.nome:'')+'</div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px"><div class="sp-mun" style="padding:10px 12px">Anterior: '+(prev?prev.nome:'Hub')+'</div><div class="sp-mun" style="padding:10px 12px">Proximo: '+(next?next.nome:'Fim')+'</div></div>'+(nb?'<div style="margin-bottom:12px"><span class="'+nx.c+'">'+nx.l+'</span> <b>'+nb.boat.n+'</b></div>':'')+bH;
   document.getElementById('sh').classList.add('on');
