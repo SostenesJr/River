@@ -133,10 +133,8 @@ function lookup(cep5){
     rc.className='show';return;
   }
   sR(cep5);
-  const{rota:r,mun:m,prev,next}=hit;
-  const nb=bB(m.nome);const nx=nL(nb?nb.days:null);
-  const nS=String(r.num).padStart(2,'0');
-  const emb=gE(m.nome);
+  const{rota:r,mun:m,prev,next}=hit; const nb=bB(m.nome); const nx=nL(nb?nb.days:null);
+  const nS=String(r.num).padStart(2,'0'); const emb=gE(m.nome);
   const boats = emb ? (emb.e || emb.estream || []) : [];
   
   const aP=prev
@@ -238,7 +236,6 @@ function bPrint(){
   });
 }
 
-// ── SISTEMA DE DESENHO VETORIAL DO MAPA (SVG GEOGRÁFICO) ──
 let T={s:1,x:0,y:0},focR=null,mttTimer=null;
 function gR(n){return ROTAS.find(r=>r.num===n);}
 function renderMap(){
@@ -284,7 +281,6 @@ function renderMap(){
   border.setAttribute('stroke','#1e3552'); 
   border.setAttribute('stroke-width','2');
   
-  // EVENTO DE CLIQUE FORA NO MAPA: Fecha os balões fixados e remove travas do DOM
   border.addEventListener('click', (e) => {
     if(e.target === border) {
       if(mttTimer) clearTimeout(mttTimer);
@@ -373,7 +369,7 @@ function renderMap(){
       bb.setAttribute('x',p.x-5);bb.setAttribute('y',p.y-4.5);
       bb.setAttribute('width','10');bb.setAttribute('height','9');
       bb.setAttribute('rx','3');bb.setAttribute('fill',r.cor);
-      // CORREÇÃO: Injetado string completa de referência ao id do filter para evitar erro de execução setAttribute
+      // CORREÇÃO EXATA DO ERRO DO SETATTRIBUTE DO GOOGLE CHROME
       bb.setAttribute('filter','url(#gw)');dot.appendChild(bb);
       const nt=document.createElementNS(NS,'text');
       nt.setAttribute('x',p.x);nt.setAttribute('y',p.y+2.6);
@@ -395,19 +391,16 @@ function renderMap(){
       if(mob){
         grp.addEventListener('touchend',e=>{e.preventDefault();e.stopPropagation();oMS(m,r);});
       } else {
-        // MOUSE ENTER: Abre de forma instantânea sem re-renderizar camadas SVG
         grp.addEventListener('mouseenter',e=>{
           const tt=document.getElementById('mtt');
           if(tt.getAttribute('data-fixed')==='true') return;
           sMT(e,m,r);
         });
-        // MOUSE LEAVE: Desaparece na mesma fração de segundo em que o ponteiro sai
         grp.addEventListener('mouseleave',()=>{
           const tt=document.getElementById('mtt');
           if(tt.getAttribute('data-fixed')==='true') return;
           tt.className='';
         });
-        // CLICK: Trava por 10 segundos exatos e bloqueia estouros de bolhas para o fundo
         grp.addEventListener('click',e => {
           e.stopPropagation(); 
           if(mttTimer) clearTimeout(mttTimer);
@@ -427,7 +420,6 @@ function renderMap(){
   svg.appendChild(g);
 }
 
-// Geração dinâmica de conteúdo dentro do balão (Correção total do bug Rundefined)
 function sMT(e,c,rArg){
   const r=rArg||gR(c.rota);
   const color=r?r.cor:'#14b8a6';
