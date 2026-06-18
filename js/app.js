@@ -1,9 +1,9 @@
 /* ============================================================
-   RIVER OPS — TRIAGEM — lógica da aplicação
+   RIVER OPS — TRIAGEM — lógica da aplicação com BIPES e AUTO-RESET
    Depende de js/data.js (deve ser carregado ANTES deste arquivo).
    ============================================================ */
 
-// Geração automática de estruturas de busca rápida com performance O(1) na inicialização
+// Inicialização dos índices de busca rápida com performance O(1) na inicialização
 const IDX={}; const SLAMIDX={};
 ROTAS.forEach(r=>r.municipios.forEach((m,i)=>{
   // Armazena e encadeia dados relacionais de adjacência direta das rotas
@@ -16,6 +16,32 @@ ROTAS.forEach(r=>r.municipios.forEach((m,i)=>{
     SLAMIDX[m.slam].push(rec); // Mapeia colisões de registros para siglas duplicadas
   }
 }));
+
+// 🎧 SUGESTÃO 1: SISTEMA DE AUDIO ATIVO (NATIVO DO NAVEGADOR)
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function emitirBipe(sucesso) {
+  try {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    if (sucesso) {
+      // Bipe Agudo e Curto: Sucesso (Bipou na calha certa)
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime); 
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.08);
+    } else {
+      // Bipe Grave e Longo: Alerta (Atenção, mudou de calha ou erro)
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(220, audioCtx.currentTime); 
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.35);
+    }
+  } catch(e) { console.log("Áudio bloqueado pelo navegador."); }
+}
 
 // Normaliza e isola o dia de saída textual em arrays de inteiros operacionais
 function pD(s){
@@ -83,6 +109,10 @@ function rR(){
   b.style.display='block'; ch.innerHTML=recent.map(c=>'<div class="chip" onclick="lookup(\''+c+'\')">'+c+'</div>').join('');
 }
 
+// Variáveis de controle para monitoramento de rotas e limpeza contínua
+let ultimaRotaAtiva = null;
+let timerAutoLimpeza = null;
+
 // Processador de Eventos de Digitação e Interceptação de Bipes de Leitores
 let lC='';
 function onCI(v){
@@ -100,6 +130,7 @@ function onCI(v){
 function lookupSlam(sig){
   const rc=document.getElementById('rcard'); const recs=SLAMIDX[sig];
   if(!recs||!recs.length){
+    emitirBipe(false); // Bip de erro técnico
     rc.innerHTML='<div class="nfd"><div class="nfi">&#128269;</div><div class="nft">Sigla '+sig+' nao encontrada</div><div class="nfs">Verifique a sigla SLAM ou digite o CEP.</div></div>';
     rc.className='show';return;
   }
@@ -129,6 +160,7 @@ function lookup(cep5){
       });
       h+='</div>'; rc.innerHTML=h; rc.className='show';return;
     }
+    emitirBipe(false); // Bipe de erro técnico
     rc.innerHTML='<div class="nfd"><div class="nfi">&#128269;</div><div class="nft">CEP '+cep5+' nao encontrado nas rotas RIVER</div><div class="nfs">CEPs 690xx-699xx dentro de Manaus = modal SPO9, nao RIVER.<br>Verifique os 5 digitos na etiqueta e tente novamente.</div></div>';
     rc.className='show';return;
   }
@@ -137,6 +169,22 @@ function lookup(cep5){
   const nS=String(r.num).padStart(2,'0'); const emb=gE(m.nome);
   const boats = emb ? (emb.e || emb.estream || []) : [];
   
+  // ── AUDITORIA DA SUGESTÃO 1 (BIPE DE CONFERÊNCIA) ──
+  if (ultimaRotaAtiva === null || ultimaRotaAtiva === r.num) {
+    emitirBipe(true); // Sucesso: Continua na mesma calha que estava operando
+  } else {
+    emitirBipe(false); // Alerta: A caixa atual pertence a uma rota DIFERENTE da anterior!
+  }
+  ultimaRotaAtiva = r.num; // Memoriza a última rota processada para o próximo bipe
+
+  // ── AUTO-RESET DA SUGESTÃO 2 (MÃOS LIVRES) ──
+  if (timerAutoLimpeza) clearTimeout(timerAutoLimpeza);
+  timerAutoLimpeza = setTimeout(() => {
+    document.getElementById('ci').value = ''; // Limpa a caixa de texto
+    lC = ''; // Destrava os validadores internos
+    document.getElementById('ci').focus(); // Mantém o foco ativo para receber o próximo bipe
+  }, 3000); // 3 segundos exatos para leitura tranquila e limpeza automática
+
   const aP=prev
     ?'<div class="adjc"><div class="adjd">anterior na calha</div><div class="adjn">'+prev.nome+'</div><div class="adjcep">CEP '+prev.cep+'-000</div><div class="adjkm">'+prev.km+'km de Manaus</div></div>'
     :'<div class="adjc"><div class="adjd">anterior</div><div class="adjn" style="color:var(--mu);font-style:italic">Inicio da rota</div><div class="adjkm">Proximo de Manaus</div></div>';
@@ -236,6 +284,7 @@ function bPrint(){
   });
 }
 
+// ── SISTEMA DE DESENHO VETORIAL DO MAPA (SVG GEOGRÁFICO) ──
 let T={s:1,x:0,y:0},focR=null,mttTimer=null;
 function gR(n){return ROTAS.find(r=>r.num===n);}
 function renderMap(){
@@ -281,6 +330,7 @@ function renderMap(){
   border.setAttribute('stroke','#1e3552'); 
   border.setAttribute('stroke-width','2');
   
+  // EVENTO DE CLIQUE FORA NO MAPA: Fecha os balões fixados e remove travas do DOM
   border.addEventListener('click', (e) => {
     if(e.target === border) {
       if(mttTimer) clearTimeout(mttTimer);
@@ -369,7 +419,6 @@ function renderMap(){
       bb.setAttribute('x',p.x-5);bb.setAttribute('y',p.y-4.5);
       bb.setAttribute('width','10');bb.setAttribute('height','9');
       bb.setAttribute('rx','3');bb.setAttribute('fill',r.cor);
-      // CORREÇÃO EXATA DO ERRO DO SETATTRIBUTE DO GOOGLE CHROME
       bb.setAttribute('filter','url(#gw)');dot.appendChild(bb);
       const nt=document.createElementNS(NS,'text');
       nt.setAttribute('x',p.x);nt.setAttribute('y',p.y+2.6);
@@ -420,6 +469,7 @@ function renderMap(){
   svg.appendChild(g);
 }
 
+// Geração dinâmica de conteúdo dentro do balão (Correção total do bug Rundefined)
 function sMT(e,c,rArg){
   const r=rArg||gR(c.rota);
   const color=r?r.cor:'#14b8a6';
@@ -567,7 +617,7 @@ function mrowClick(e,cepK,rNum,mSeq){
   if(selMode){
     toggleSel(cepK,mun,rota);
     const chk=document.getElementById('chk_'+cepK);
-    if(chk)chk.innerHTML=SEL[cepK]?'<span style="color:var(--re);font-weight:700">✓</span>':'';
+    if(chk)chk.innerHTML=SEL[cepKey]?'<span style="color:var(--re);font-weight:700">✓</span>':'';
   } else {
     lookup(mun.cep);SS('t',document.querySelector('.htab.on'));
   }
