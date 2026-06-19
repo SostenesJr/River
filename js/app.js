@@ -1,49 +1,39 @@
 /* ============================================================
-   RIVER OPS — TRIAGEM — lógica da aplicação com BIPES e AUTO-RESET
+   RIVER OPS — TRIAGEM — lógica da aplicação com Letras de A a J
    Depende de js/data.js (deve ser carregado ANTES deste arquivo).
    ============================================================ */
 
-// Inicialização dos índices de busca rápida com performance O(1) na inicialização
 const IDX={}; const SLAMIDX={};
 ROTAS.forEach(r=>r.municipios.forEach((m,i)=>{
-  // Armazena e encadeia dados relacionais de adjacência direta das rotas
   const rec={rota:r,mun:m,pos:i+1,total:r.municipios.length,
     prev:r.municipios[i-1]||null,
     next:r.municipios[i+1]||null};
-  IDX[m.cep]=rec; // Indexação prioritária por chave de CEP de 5 posições
+  IDX[m.cep]=rec; 
   if(m.slam){
     if(!SLAMIDX[m.slam]) SLAMIDX[m.slam]=[];
-    SLAMIDX[m.slam].push(rec); // Mapeia colisões de registros para siglas duplicadas
+    SLAMIDX[m.slam].push(rec); 
   }
 }));
 
-// 🎧 SUGESTÃO 1: SISTEMA DE AUDIO ATIVO (NATIVO DO NAVEGADOR)
+// Sistema de Audio Ativo (Bipes de Auditoria)
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function emitirBipe(sucesso) {
   try {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-
+    osc.connect(gain); gain.connect(audioCtx.destination);
     if (sucesso) {
-      // Bipe Agudo e Curto: Sucesso (Bipou na calha certa)
       osc.frequency.setValueAtTime(880, audioCtx.currentTime); 
       gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.08);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.08);
     } else {
-      // Bipe Grave e Longo: Alerta (Atenção, mudou de calha ou erro)
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(220, audioCtx.currentTime); 
+      osc.type = 'sawtooth'; osc.frequency.setValueAtTime(220, audioCtx.currentTime); 
       gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.35);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.35);
     }
-  } catch(e) { console.log("Áudio bloqueado pelo navegador."); }
+  } catch(e) {}
 }
 
-// Normaliza e isola o dia de saída textual em arrays de inteiros operacionais
 function pD(s){
   if(!s)return [];
   const t=s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/-feira/g,'');
@@ -52,7 +42,6 @@ function pD(s){
   return [...o].sort();
 }
 
-// Analisa a data interna do sistema e aponta o tempo restante para o próximo fechamento
 function nD(s){
   const d=pD(s); if(!d.length)return null;
   const td=new Date().getDay(); let m=7;
@@ -60,45 +49,40 @@ function nD(s){
   return m;
 }
 
-// Criação de rótulos humanos dinâmicos de prazos e estilos CSS correspondentes
 function nL(d){
   if(d===null)return{l:'?',c:'ns'};
-  if(d===0)return{l:'HOJE',c:'nt'}; // Alerta Vermelho de Fechamento Crítico
-  if(d===1)return{l:'AMANHA',c:'nw'}; // Alerta Laranja de Próxima Atenção
-  return{l:'em '+d+'d',c:'ns'}; // Normal
+  if(d===0)return{l:'HOJE',c:'nt'}; 
+  if(d===1)return{l:'AMANHA',c:'nw'}; 
+  return{l:'em '+d+'d',c:'ns'}; 
 }
 
-// Higienização completa de strings de texto para o Fuzzy Matching
 function nm(s){ return s.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Z0-9 ]/g,'').trim(); }
 const STOPWORDS=['DE','DA','DO','DOS','DAS'];
 function nmCore(s){ return nm(s).split(' ').filter(w=>!STOPWORDS.includes(w)).join(' '); }
 
-// Sistema Avançado de Casamento Triplo de Nomes de Cidades com Chaves EMBS
 function gE(nome){
   const k=nm(nome); let h=null;
-  Object.keys(EMBS).forEach(ek=>{if(!h&&nm(ek)===k)h=EMBS[ek];}); // Nível 1: Comparação Padrão Exata
+  Object.keys(EMBS).forEach(ek=>{if(!h&&nm(ek)===k)h=EMBS[ek];}); 
   if(!h){
     const kc=nmCore(nome);
-    Object.keys(EMBS).forEach(ek=>{if(!h&&nmCore(ek)===kc)h=EMBS[ek];}); // Nível 2: Limpeza Extrema de Conectivos
+    Object.keys(EMBS).forEach(ek=>{if(!h&&nmCore(ek)===kc)h=EMBS[ek];}); 
   }
   if(!h){
     const k2=k.split(' ').slice(0,2).join(' ');
-    Object.keys(EMBS).forEach(ek=>{if(!h&&nm(ek).split(' ').slice(0,2).join(' ')===k2)h=EMBS[ek];}); // Nível 3: Fallback pelas primeiras 2 palavras
+    Object.keys(EMBS).forEach(ek=>{if(!h&&nm(ek).split(' ').slice(0,2).join(' ')===k2)h=EMBS[ek];}); 
   }
   return h;
 }
 
-// Busca automatizada do barco ativo mais próximo de zarpar para a cidade consultada
 function bB(nome){
   const e=gE(nome); if(!e)return null;
-  const boats = e.e || e.estream; // Unificação de compatibilidade de chaves curtas ou longas
+  const boats = e.e || e.estream; 
   if(!boats || !boats.forEach) return null;
   let min=8,best=null;
   boats.forEach(b=>{const d=nD(b.d);if(d!==null&&d<min){min=d;best=b;}});
   return best?{boat:best,days:min}:null;
 }
 
-// Gestão Local persistente do histórico recente do dispositivo (LocalStorage)
 let recent=[]; try{recent=JSON.parse(localStorage.getItem('rv4')||'[]');}catch(e){}
 function sR(c){
   if(!recent.includes(c)){ recent.unshift(c); if(recent.length>8)recent=recent.slice(0,8); try{localStorage.setItem('rv4',JSON.stringify(recent));}catch(e){} }
@@ -109,81 +93,74 @@ function rR(){
   b.style.display='block'; ch.innerHTML=recent.map(c=>'<div class="chip" onclick="lookup(\''+c+'\')">'+c+'</div>').join('');
 }
 
-// Variáveis de controle para monitoramento de rotas e limpeza contínua
 let ultimaRotaAtiva = null;
 let timerAutoLimpeza = null;
 
-// Processador de Eventos de Digitação e Interceptação de Bipes de Leitores
 let lC='';
 function onCI(v){
   const hasLetter=/[A-Za-z]/.test(v);
-  if(hasLetter){ // Filtro Ativo para Fluxo Logístico de Siglas SLAM
+  if(hasLetter){ 
     const sig=v.toUpperCase().replace(/[^A-Z0-9]/g,'');
     if(sig.length>=3){lookupSlam(sig);} else {const rc=document.getElementById('rcard');rc.className='';rc.innerHTML='';lC='';}
     return;
   }
-  // Filtro Ativo para Fluxo Postal de Códigos de CEP (Tratamento para 5 dígitos)
   const c=v.replace(/\D/g,''); if(c.length>=5){ const c5=c.slice(0,5); if(c5!==lC){lC=c5; lookup(c5);}} else {const rc=document.getElementById('rcard');rc.className='';rc.innerHTML='';lC='';}
 }
 
-// Processa consultas por SLAM e renderiza telas de escolha manual se houver duplicidade
 function lookupSlam(sig){
   const rc=document.getElementById('rcard'); const recs=SLAMIDX[sig];
   if(!recs||!recs.length){
-    emitirBipe(false); // Bip de erro técnico
+    emitirBipe(false);
     rc.innerHTML='<div class="nfd"><div class="nfi">&#128269;</div><div class="nft">Sigla '+sig+' nao encontrada</div><div class="nfs">Verifique a sigla SLAM ou digite o CEP.</div></div>';
     rc.className='show';return;
   }
   if(recs.length===1){lookup(recs[0].mun.cep);return;}
   let h='<div class="nfd" style="text-align:left"><div style="font-size:13px;font-weight:700;margin-bottom:10px;text-align:center">Sigla '+sig+' atende '+recs.length+' municipios</div>';
   recs.forEach(rec=>{
-    h+='<div onclick="lookup(\''+rec.mun.cep+'\')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;margin-bottom:6px;cursor:pointer"><div style="width:34px;height:34px;border-radius:8px;background:'+rec.rota.cor+';display:flex;align-items:center;justify-content:center;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;font-weight:700;color:#fff;flex-shrink:0">'+String(rec.mun.seq).padStart(2,"0")+'</div><div style="flex:1"><div style="font-size:13px;font-weight:600">'+rec.mun.nome+'</div><div style="font-size:10px;color:var(--mu)">Rota '+String(rec.rota.num).padStart(2,"0")+' - '+rec.rota.nome+' - CEP '+rec.mun.cep+'</div></div></div>';
+    // 💻 AJUSTE: r.num agora exibe a letra direto (sem zeros forçados)
+    h+='<div onclick="lookup(\''+rec.mun.cep+'\')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;margin-bottom:6px;cursor:pointer"><div style="width:34px;height:34px;border-radius:8px;background:'+rec.rota.cor+';display:flex;align-items:center;justify-content:center;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;font-weight:700;color:#fff;flex-shrink:0">'+rec.rota.num+'</div><div style="flex:1"><div style="font-size:13px;font-weight:600">'+rec.mun.nome+'</div><div style="font-size:10px;color:var(--mu)">Rota '+rec.rota.num+' - '+rec.rota.nome+' - CEP '+rec.mun.cep+'</div></div></div>';
   });
   h+='</div>'; rc.innerHTML=h; rc.className='show';
 }
 
 function onK(e){if(e.key==='Enter'){const v=document.getElementById('ci').value.replace(/\D/g,'');if(v.length>=5)lookup(v.slice(0,5));}}
 
-// Renderizador Principal do Card de Triagem na Tela Inicial do Galpão
 function lookup(cep5){
   document.getElementById('ci').value=cep5; lC=cep5;
   const rc=document.getElementById('rcard'); const hit=IDX[cep5];
   if(!hit){
-    // Casamento aproximado por colisão inteligente de prefixos de CEP de 4 posições
     const matches=Object.keys(IDX).filter(k=>k.slice(0,4)===cep5.slice(0,4));
     if(matches.length===1){lookup(matches[0]);return;}
     if(matches.length>1){
       let h='<div class="nfd" style="text-align:left"><div style="font-size:13px;font-weight:700;margin-bottom:4px;text-align:center">CEP '+cep5+' nao encontrado exatamente</div><div style="font-size:11px;color:var(--mu);text-align:center;margin-bottom:10px">Encontrei '+matches.length+' municipios com CEP parecido — confirme qual e o correto:</div>';
       matches.forEach(k=>{
         const rec=IDX[k];
-        h+='<div onclick="lookup(\''+k+'\')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;margin-bottom:6px;cursor:pointer"><div style="width:34px;height:34px;border-radius:8px;background:'+rec.rota.cor+';display:flex;align-items:center;justify-content:center;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;font-weight:700;color:#fff;flex-shrink:0">'+String(rec.mun.seq).padStart(2,"0")+'</div><div style="flex:1"><div style="font-size:13px;font-weight:600">'+rec.mun.nome+'</div><div style="font-size:10px;color:var(--mu)">Rota '+String(rec.rota.num).padStart(2,"0")+' - '+rec.rota.nome+' - CEP '+k+'-000</div></div></div>';
+        h+='<div onclick="lookup(\''+k+'\')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;margin-bottom:6px;cursor:pointer"><div style="width:34px;height:34px;border-radius:8px;background:'+rec.rota.cor+';display:flex;align-items:center;justify-content:center;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;font-weight:700;color:#fff;flex-shrink:0">'+rec.rota.num+'</div><div style="flex:1"><div style="font-size:13px;font-weight:600">'+rec.mun.nome+'</div><div style="font-size:10px;color:var(--mu)">Rota '+rec.rota.num+' - '+rec.rota.nome+' - CEP '+k+'-000</div></div></div>';
       });
       h+='</div>'; rc.innerHTML=h; rc.className='show';return;
     }
-    emitirBipe(false); // Bipe de erro técnico
+    emitirBipe(false);
     rc.innerHTML='<div class="nfd"><div class="nfi">&#128269;</div><div class="nft">CEP '+cep5+' nao encontrado nas rotas RIVER</div><div class="nfs">CEPs 690xx-699xx dentro de Manaus = modal SPO9, nao RIVER.<br>Verifique os 5 digitos na etiqueta e tente novamente.</div></div>';
     rc.className='show';return;
   }
   sR(cep5);
   const{rota:r,mun:m,prev,next}=hit; const nb=bB(m.nome); const nx=nL(nb?nb.days:null);
-  const nS=String(r.num).padStart(2,'0'); const emb=gE(m.nome);
+  const nS=String(r.num); const emb=gE(m.nome); // 💻 AJUSTE: Remove padStart das letras
   const boats = emb ? (emb.e || emb.estream || []) : [];
   
-  // ── AUDITORIA DA SUGESTÃO 1 (BIPE DE CONFERÊNCIA) ──
   if (ultimaRotaAtiva === null || ultimaRotaAtiva === r.num) {
-    emitirBipe(true); // Sucesso: Continua na mesma calha que estava operando
+    emitirBipe(true);
   } else {
-    emitirBipe(false); // Alerta: A caixa atual pertence a uma rota DIFERENTE da anterior!
+    emitirBipe(false);
   }
-  ultimaRotaAtiva = r.num; // Memoriza a última rota processada para o próximo bipe
+  ultimaRotaAtiva = r.num;
 
-  // ── AUTO-RESET DA SUGESTÃO 2 (MÃOS LIVRES) ──
   if (timerAutoLimpeza) clearTimeout(timerAutoLimpeza);
   timerAutoLimpeza = setTimeout(() => {
-    document.getElementById('ci').value = ''; // Limpa a caixa de texto
-    lC = ''; // Destrava os validadores internos
-    document.getElementById('ci').focus(); // Mantém o foco ativo para receber o próximo bipe
-  }, 3000); // 3 segundos exatos para leitura tranquila e limpeza automática
+    document.getElementById('ci').value = ''; 
+    lC = ''; 
+    document.getElementById('ci').focus(); 
+  }, 3000);
 
   const aP=prev
     ?'<div class="adjc"><div class="adjd">anterior na calha</div><div class="adjn">'+prev.nome+'</div><div class="adjcep">CEP '+prev.cep+'-000</div><div class="adjkm">'+prev.km+'km de Manaus</div></div>'
@@ -204,14 +181,13 @@ function lookup(cep5){
   rc.className='show';
 }
 
-// Constrói a lista hierárquica e caixas colapsáveis na aba de Rotas
 function bRO(){
   const body=document.getElementById('rbdy');body.innerHTML='';
   ROTAS.forEach(r=>{
-    const nS=String(r.num).padStart(2,'0');
+    const nS=String(r.num); // 💻 AJUSTE: Exibe Letra direto
     const mH=r.municipios.map(m=>{
       const nb=bB(m.nome);const nx=nL(nb?nb.days:null);const cepK=m.cep+'_'+m.seq;
-      return '<div class="mrow" data-cep="'+cepK+'" onclick="mrowClick(event,\''+cepK+'\','+r.num+','+m.seq+')">'+
+      return '<div class="mrow" data-cep="'+cepK+'" onclick="mrowClick(event,\''+cepK+'\',\''+r.num+'\','+m.seq+')">'+
         '<div style="width:18px;height:18px;border-radius:4px;border:1.5px solid var(--bd);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-right:2px;font-size:10px" id="chk_'+cepK+'"></div>'+
         '<span class="mseq" style="color:'+r.cor+'">'+String(m.seq).padStart(2,'0')+'</span><span class="mcep">'+m.cep+'</span><span class="mname">'+m.nome+(m.slam?' <span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:9px;color:'+r.cor+';font-weight:700">'+m.slam+'</span>':'')+'</span><span class="mkm">'+m.km+'km</span><span class="mtt">'+m.tt+'</span><span class="mnx '+nx.c+'">'+nx.l+'</span></div>';
     }).join('');
@@ -222,7 +198,6 @@ function bRO(){
 }
 function fR(q){q=q.toLowerCase().trim();document.querySelectorAll('.rcard').forEach(c=>{const ok=!q||c.textContent.toLowerCase().includes(q);c.style.display=ok?'':'none';if(ok&&q)c.classList.add('open');});}
 
-// Estruturação do HTML base para alimentação do fluxo limpo de impressão
 function buildGuideHTML(){
   let css='*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;color:#000;background:#fff;padding:8px}h1{font-size:15px;margin-bottom:2px}'+
     '.sub{font-size:10px;color:#555;margin-bottom:10px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}'+
@@ -238,7 +213,7 @@ function buildGuideHTML(){
     '<div class="sub">Sigla SLAM / CEP -> Rota (papelao no chao) -> Posicao | '+(new Date().toLocaleDateString('pt-BR'))+'</div>'+
     '<div class="grid">';
   ROTAS.forEach(r=>{
-    const nS=String(r.num).padStart(2,'0');
+    const nS=String(r.num);
     let rows='';
     r.municipios.forEach(m=>{
       rows+='<div class="row"><span class="rseq" style="color:'+r.cor+'">'+String(m.seq).padStart(2,'0')+'</span>'+
@@ -276,7 +251,7 @@ function printGuide(){
 function bPrint(){
   const g=document.getElementById('pgrid');g.innerHTML='';
   ROTAS.forEach(r=>{
-    const nS=String(r.num).padStart(2,'0');
+    const nS=String(r.num);
     const mH=r.municipios.map(m=>'<div class="pcm"><span class="pcmseq" style="color:'+r.cor+'">'+String(m.seq).padStart(2,'0')+'</span><span class="pcmcep">'+(m.slam||m.cep)+'</span><span class="pcmnm">'+m.nome+'</span><span class="pcmkm">'+m.km+'km</span></div>').join('');
     const d=document.createElement('div');d.className='pc';
     d.innerHTML='<div class="pch" style="background:'+r.cor+'"><div class="pcnum">'+nS+'</div><div><div class="pcinm">'+r.nome+'</div><div class="pcidir">'+r.dir+'</div></div></div><div class="pcb">'+mH+'</div>';
@@ -330,7 +305,6 @@ function renderMap(){
   border.setAttribute('stroke','#1e3552'); 
   border.setAttribute('stroke-width','2');
   
-  // EVENTO DE CLIQUE FORA NO MAPA: Fecha os balões fixados e remove travas do DOM
   border.addEventListener('click', (e) => {
     if(e.target === border) {
       if(mttTimer) clearTimeout(mttTimer);
@@ -385,7 +359,7 @@ function renderMap(){
   hg.appendChild(hl);g.appendChild(hg);
   
   ROTAS.forEach(r=>{
-    const isRoad=(r.num===9||r.num===10);
+    const isRoad=(r.num==='I'||r.num==='J');
     const pts=r.municipios.map(m=>LATLNG[m.cep]?proj(LATLNG[m.cep].lat,LATLNG[m.cep].lng):null).filter(Boolean);
     if(pts.length){
       const lineCoords=[[hub.x,hub.y],...pts.map(p=>[p.x,p.y])];
@@ -469,11 +443,10 @@ function renderMap(){
   svg.appendChild(g);
 }
 
-// Geração dinâmica de conteúdo dentro do balão (Correção total do bug Rundefined)
 function sMT(e,c,rArg){
   const r=rArg||gR(c.rota);
   const color=r?r.cor:'#14b8a6';
-  const rotaNum = r ? String(r.num).padStart(2,'0') : String(c.rota).padStart(2,'0');
+  const rotaNum = r ? String(r.num) : String(c.rota); // 💻 AJUSTE: Exibe letra
   const ri=r?r.municipios.findIndex(m=>m.seq===c.seq):-1;
   const rm=ri>=0?r.municipios[ri]:null;
   const prev=ri>0?r.municipios[ri-1]:null;
@@ -481,7 +454,7 @@ function sMT(e,c,rArg){
   const nb=rm?bB(rm.nome):null;const nx=nL(nb?nb.days:null);
   const tt=document.getElementById('mtt');
   
-  tt.innerHTML='<div style="padding:10px 12px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="min-width:38px;height:30px;border-radius:6px;background:'+color+';display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:700;color:#fff;padding:0 6px"><div style="font-size:7px;opacity:.7">R'+rotaNum+'</div><div>'+String(c.seq).padStart(2,'0')+'</div></div><div><div style="font-size:13px;font-weight:700">'+c.nome+'</div><div style="font-size:10px;color:'+color+'">'+(r?r.nome:'')+'</div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:10px;margin-bottom:6px"><div><div style="color:var(--mu);font-size:8px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:1px">Anterior</div>'+(prev?prev.nome:'Inicio')+'</div><div><div style="color:var(--mu);font-size:8px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:1px">Proximo</div>'+(next?next.nome:'Fim da rota')+'</div></div>'+(nb?'<div style="font-size:10px;display:flex;align-items:center;gap:6px"><span class="'+nx.c+'" style="font-size:9px;font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;padding:1px 6px;border-radius:3px">'+nx.l+'</span><span style="font-weight:600">'+nb.boat.n+'</span></div>':'')+'</div>';
+  tt.innerHTML='<div style="padding:10px 12px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="min-width:38px;height:30px;border-radius:6px;background:'+color+';display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:700;color:#fff;padding:0 6px"><div style="font-size:7px;opacity:.7">Rota '+rotaNum+'</div><div>'+String(c.seq).padStart(2,'0')+'</div></div><div><div style="font-size:13px;font-weight:700">'+c.nome+'</div><div style="font-size:10px;color:'+color+'">'+(r?r.nome:'')+'</div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:10px;margin-bottom:6px"><div><div style="color:var(--mu);font-size:8px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:1px">Anterior</div>'+(prev?prev.nome:'Inicio')+'</div><div><div style="color:var(--mu);font-size:8px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:1px">Proximo</div>'+(next?next.nome:'Fim da rota')+'</div></div>'+(nb?'<div style="font-size:10px;display:flex;align-items:center;gap:6px"><span class="'+nx.c+'" style="font-size:9px;font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;padding:1px 6px;border-radius:3px">'+nx.l+'</span><span style="font-weight:600">'+nb.boat.n+'</span></div>':'')+'</div>';
   
   const mc=document.getElementById('sc-m').getBoundingClientRect();
   let lx=e.clientX-mc.left+14,ty=e.clientY-mc.top-12;
@@ -491,7 +464,7 @@ function sMT(e,c,rArg){
 
 function oMS(c,rArg){
   const r=rArg||gR(c.rota);const color=r?r.cor:'#14b8a6';
-  const rotaNum = r ? String(r.num).padStart(2,'0') : String(c.rota).padStart(2,'0');
+  const rotaNum = r ? String(r.num) : String(c.rota);
   const ri=r?r.municipios.findIndex(m=>m.seq===c.seq):-1;
   const rm=ri>=0?r.municipios[ri]:null;
   const prev=ri>0?r.municipios[ri-1]:null;
@@ -509,9 +482,10 @@ function oMS(c,rArg){
 }
 function bL(){
   const l=document.getElementById('mleg');l.innerHTML='<div class="mlttl">Rotas</div>';
-  ROTAS.forEach(r=>{const row=document.createElement('div');row.className='mlr';row.dataset.rota=r.num;row.innerHTML='<div class="mlnum" style="background:'+r.cor+'">'+String(r.num).padStart(2,'0')+'</div><span class="mlnm">'+r.nome+'</span>';row.onclick=()=>{focR=focR===r.num?null:r.num;if(mttTimer)clearTimeout(mttTimer);const tt=document.getElementById('mtt');tt.className='';tt.removeAttribute('data-fixed');renderMap();updL();};l.appendChild(row);});
+  ROTAS.forEach(r=>{const row=document.createElement('div');row.className='mlr';row.dataset.rota=r.num;row.innerHTML='<div class="mlnum" style="background:'+r.cor+'">'+r.num+'</div><span class="mlnm">'+r.nome+'</span>';row.onclick=()=>{focR=focR===r.num?null:r.num;if(mttTimer)clearTimeout(mttTimer);const tt=document.getElementById('mtt');tt.className='';tt.removeAttribute('data-fixed');renderMap();updL();};l.appendChild(row);});
 }
-function updL(){document.querySelectorAll('.mlr[data-rota]').forEach(el=>el.classList.toggle('dim',!!focR&&parseInt(el.dataset.rota)!==focR));}
+// 💻 AJUSTE: Removido parseInt() para evitar bug de NaN com as Letras das Rotas
+function updL(){document.querySelectorAll('.mlr[data-rota]').forEach(el=>el.classList.toggle('dim',!!focR&&el.dataset.rota!==focR));}
 function applyT(){const g=document.getElementById("mg");if(g)g.setAttribute("transform","translate("+T.x+","+T.y+") scale("+T.s+")");}
 function zI(){T.s=Math.min(5,T.s*1.3);applyT();}function zO(){T.s=Math.max(0.4,T.s/1.3);applyT();}function zR(){T={s:1,x:0,y:0};focR=null;if(mttTimer)clearTimeout(mttTimer);const tt=document.getElementById('mtt');tt.className='';tt.removeAttribute('data-fixed');renderMap();updL();}
 
@@ -559,7 +533,7 @@ function renderSelBar(){
     return '<div class="sel-chip"><div class="sel-chip-dot" style="background:'+rota.cor+'"></div>'+
       '<span class="sel-chip-seq">'+String(mun.seq).padStart(2,'0')+'</span>'+
       '<span class="sel-chip-nm">'+mun.nome+'</span>'+
-      '<span class="sel-chip-r">R'+String(rota.num).padStart(2,'0')+'</span></div>';
+      '<span class="sel-chip-r">Rota '+rota.num+'</span></div>';
   }).join('');
   document.querySelectorAll('.mrow[data-cep]').forEach(el=>{
     el.classList.toggle('selected',!!SEL[el.dataset.cep]);
@@ -579,11 +553,11 @@ function openSelPanel(){
   body.innerHTML='';
   const totalRotas=Object.keys(byRota).length;
   document.getElementById('sp-ttl').textContent=keys.length+' municípios · '+totalRotas+' rota'+(totalRotas>1?'s':'');
-  Object.values(byRota).sort((a,b)=>a.rota.num-b.rota.num).forEach(({rota,muns})=>{
+  Object.values(byRota).sort((a,b)=>a.rota.num.localeCompare(b.rota.num)).forEach(({rota,muns})=>{
     const sorted=muns.sort((a,b)=>a.seq-b.seq);
     const block=document.createElement('div');block.className='sp-rota-block';
     let html='<div class="sp-rota-head" style="background:'+rota.cor+'1a">'+
-      '<div class="sp-rota-num" style="background:'+rota.cor+'">'+String(rota.num).padStart(2,'0')+'</div>'+
+      '<div class="sp-rota-num" style="background:'+rota.cor+'">'+rota.num+'</div>'+
       '<div style="flex:1"><div>'+rota.nome+'</div><div style="font-size:10px;color:var(--mu);font-weight:400">'+rota.dir+'</div></div>'+
       '<div style="font-size:11px;color:'+rota.cor+';font-weight:700">'+sorted.length+' mun.</div></div>';
     sorted.forEach(m=>{
@@ -617,7 +591,7 @@ function mrowClick(e,cepK,rNum,mSeq){
   if(selMode){
     toggleSel(cepK,mun,rota);
     const chk=document.getElementById('chk_'+cepK);
-    if(chk)chk.innerHTML=SEL[cepKey]?'<span style="color:var(--re);font-weight:700">✓</span>':'';
+    if(chk)chk.innerHTML=SEL[cepK]?'<span style="color:var(--re);font-weight:700">✓</span>':'';
   } else {
     lookup(mun.cep);SS('t',document.querySelector('.htab.on'));
   }
