@@ -1,5 +1,5 @@
 /* ============================================================
-   RIVER OPS — TRIAGEM — lógica da aplicação com Letras de A a J
+   RIVER OPS — TRIAGEM — lógica da aplicação (Letras e Números Limpos)
    Depende de js/data.js (deve ser carregado ANTES deste arquivo).
    ============================================================ */
 
@@ -117,8 +117,8 @@ function lookupSlam(sig){
   if(recs.length===1){lookup(recs[0].mun.cep);return;}
   let h='<div class="nfd" style="text-align:left"><div style="font-size:13px;font-weight:700;margin-bottom:10px;text-align:center">Sigla '+sig+' atende '+recs.length+' municipios</div>';
   recs.forEach(rec=>{
-    // 💻 AJUSTE: r.num agora exibe a letra direto (sem zeros forçados)
-    h+='<div onclick="lookup(\''+rec.mun.cep+'\')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;margin-bottom:6px;cursor:pointer"><div style="width:34px;height:34px;border-radius:8px;background:'+rec.rota.cor+';display:flex;align-items:center;justify-content:center;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;font-weight:700;color:#fff;flex-shrink:0">'+rec.rota.num+'</div><div style="flex:1"><div style="font-size:13px;font-weight:600">'+rec.mun.nome+'</div><div style="font-size:10px;color:var(--mu)">Rota '+rec.rota.num+' - '+rec.rota.nome+' - CEP '+rec.mun.cep+'</div></div></div>';
+    // 💻 AJUSTE: m.seq agora exibe o número limpo (sem preenchimento de zeros à esquerda)
+    h+='<div onclick="lookup(\''+rec.mun.cep+'\')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;margin-bottom:6px;cursor:pointer"><div style="width:34px;height:34px;border-radius:8px;background:'+rec.rota.cor+';display:flex;align-items:center;justify-content:center;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;font-weight:700;color:#fff;flex-shrink:0">'+rec.mun.seq+'</div><div style="flex:1"><div style="font-size:13px;font-weight:600">'+rec.mun.nome+'</div><div style="font-size:10px;color:var(--mu)">Rota '+rec.rota.num+' - '+rec.rota.nome+' - CEP '+rec.mun.cep+'</div></div></div>';
   });
   h+='</div>'; rc.innerHTML=h; rc.className='show';
 }
@@ -135,7 +135,8 @@ function lookup(cep5){
       let h='<div class="nfd" style="text-align:left"><div style="font-size:13px;font-weight:700;margin-bottom:4px;text-align:center">CEP '+cep5+' nao encontrado exatamente</div><div style="font-size:11px;color:var(--mu);text-align:center;margin-bottom:10px">Encontrei '+matches.length+' municipios com CEP parecido — confirme qual e o correto:</div>';
       matches.forEach(k=>{
         const rec=IDX[k];
-        h+='<div onclick="lookup(\''+k+'\')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;margin-bottom:6px;cursor:pointer"><div style="width:34px;height:34px;border-radius:8px;background:'+rec.rota.cor+';display:flex;align-items:center;justify-content:center;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;font-weight:700;color:#fff;flex-shrink:0">'+rec.rota.num+'</div><div style="flex:1"><div style="font-size:13px;font-weight:600">'+rec.mun.nome+'</div><div style="font-size:10px;color:var(--mu)">Rota '+rec.rota.num+' - '+rec.rota.nome+' - CEP '+k+'-000</div></div></div>';
+        // 💻 AJUSTE: Exibe rec.mun.seq sem zeros
+        h+='<div onclick="lookup(\''+k+'\')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;margin-bottom:6px;cursor:pointer"><div style="width:34px;height:34px;border-radius:8px;background:'+rec.rota.cor+';display:flex;align-items:center;justify-content:center;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;font-weight:700;color:#fff;flex-shrink:0">'+rec.mun.seq+'</div><div style="flex:1"><div style="font-size:13px;font-weight:600">'+rec.mun.nome+'</div><div style="font-size:10px;color:var(--mu)">Rota '+rec.rota.num+' - '+rec.rota.nome+' - CEP '+k+'-000</div></div></div>';
       });
       h+='</div>'; rc.innerHTML=h; rc.className='show';return;
     }
@@ -145,7 +146,7 @@ function lookup(cep5){
   }
   sR(cep5);
   const{rota:r,mun:m,prev,next}=hit; const nb=bB(m.nome); const nx=nL(nb?nb.days:null);
-  const nS=String(r.num); const emb=gE(m.nome); // 💻 AJUSTE: Remove padStart das letras
+  const nS=String(r.num); const emb=gE(m.nome); 
   const boats = emb ? (emb.e || emb.estream || []) : [];
   
   if (ultimaRotaAtiva === null || ultimaRotaAtiva === r.num) {
@@ -177,19 +178,21 @@ function lookup(cep5){
     });
     if(boats.length>4)bH+='<div style="font-size:10px;color:var(--mu);text-align:center;padding:5px">+'+(boats.length-4)+' embarcacoes - ver aba Rotas</div>';
   }
-  rc.innerHTML='<div class="rcm" style="border-color:'+r.cor+'"><div class="rch" style="background:'+r.cor+'1a"><div class="rcnum" style="color:'+r.cor+'">'+nS+'</div><div><div class="rcrl">ROTA - POSICAO NA CALHA</div><div style="margin-bottom:6px"><span class="rcpos" style="background:'+r.cor+'">'+String(hit.pos).padStart(2,'0')+' de '+hit.total+'</span></div><div class="rcrn" style="color:'+r.cor+'">'+r.nome+'</div><div class="rcmn">'+m.nome+' - '+m.km+'km de Manaus</div>'+(m.slam?'<div style="margin-top:6px"><span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;font-weight:700;background:rgba(255,255,255,.12);padding:3px 10px;border-radius:6px;letter-spacing:.05em">SLAM '+m.slam+'</span></div>':'')+'</div></div><div class="rcb"><div class="rcgrid"><div class="rcs"><div class="rcsl">CEP</div><div class="rcsv" style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px">'+cep5+'-000</div></div><div class="rcs"><div class="rcsl">Posicao</div><div class="rcsv">'+hit.pos+'/'+hit.total+'</div></div><div class="rcs"><div class="rcsl">Transit Time</div><div class="rcsv">'+m.tt+'</div></div><div class="rcs"><div class="rcsl">Prox. Saida</div><div class="rcsv '+(nb?(nb.days===0?'re':nb.days===1?'wa':'ok'):'')+'">'+nx.l+'</div></div></div><div class="adjr">'+aP+aN+'</div>'+bH+'</div></div>';
+  // 💻 AJUSTE: Alterado hit.pos e total para exibir direto sem forçar zeros na triagem
+  rc.innerHTML='<div class="rcm" style="border-color:'+r.cor+'"><div class="rch" style="background:'+r.cor+'1a"><div class="rcnum" style="color:'+r.cor+'">'+nS+'</div><div><div class="rcrl">ROTA - POSICAO NA CALHA</div><div style="margin-bottom:6px"><span class="rcpos" style="background:'+r.cor+'">'+hit.pos+' de '+hit.total+'</span></div><div class="rcrn" style="color:'+r.cor+'">'+r.nome+'</div><div class="rcmn">'+m.nome+' - '+m.km+'km de Manaus</div>'+(m.slam?'<div style="margin-top:6px"><span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;font-weight:700;background:rgba(255,255,255,.12);padding:3px 10px;border-radius:6px;letter-spacing:.05em">SLAM '+m.slam+'</span></div>':'')+'</div></div><div class="rcb"><div class="rcgrid"><div class="rcs"><div class="rcsl">CEP</div><div class="rcsv" style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px">'+cep5+'-000</div></div><div class="rcs"><div class="rcsl">Posicao</div><div class="rcsv">'+hit.pos+' / '+hit.total+'</div></div><div class="rcs"><div class="rcsl">Transit Time</div><div class="rcsv">'+m.tt+'</div></div><div class="rcs"><div class="rcsl">Prox. Saida</div><div class="rcsv '+(nb?(nb.days===0?'re':nb.days===1?'wa':'ok'):'')+'">'+nx.l+'</div></div></div><div class="adjr">'+aP+aN+'</div>'+bH+'</div></div>';
   rc.className='show';
 }
 
 function bRO(){
   const body=document.getElementById('rbdy');body.innerHTML='';
   ROTAS.forEach(r=>{
-    const nS=String(r.num); // 💻 AJUSTE: Exibe Letra direto
+    const nS=String(r.num); 
     const mH=r.municipios.map(m=>{
       const nb=bB(m.nome);const nx=nL(nb?nb.days:null);const cepK=m.cep+'_'+m.seq;
+      // 💻 AJUSTE: m.seq impresso direto sem padStart na aba de listagem de rotas
       return '<div class="mrow" data-cep="'+cepK+'" onclick="mrowClick(event,\''+cepK+'\',\''+r.num+'\','+m.seq+')">'+
         '<div style="width:18px;height:18px;border-radius:4px;border:1.5px solid var(--bd);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-right:2px;font-size:10px" id="chk_'+cepK+'"></div>'+
-        '<span class="mseq" style="color:'+r.cor+'">'+String(m.seq).padStart(2,'0')+'</span><span class="mcep">'+m.cep+'</span><span class="mname">'+m.nome+(m.slam?' <span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:9px;color:'+r.cor+';font-weight:700">'+m.slam+'</span>':'')+'</span><span class="mkm">'+m.km+'km</span><span class="mtt">'+m.tt+'</span><span class="mnx '+nx.c+'">'+nx.l+'</span></div>';
+        '<span class="mseq" style="color:'+r.cor+'">'+m.seq+'</span><span class="mcep">'+m.cep+'</span><span class="mname">'+m.nome+(m.slam?' <span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:9px;color:'+r.cor+';font-weight:700">'+m.slam+'</span>':'')+'</span><span class="mkm">'+m.km+'km</span><span class="mtt">'+m.tt+'</span><span class="mnx '+nx.c+'">'+nx.l+'</span></div>';
     }).join('');
     const d=document.createElement('div');d.className='rcard';d.dataset.n=r.num;
     d.innerHTML='<div class="rhead" onclick="this.closest(\'.rcard\').classList.toggle(\'open\')"><div class="rnb" style="background:'+r.cor+'">'+nS+'</div><div class="rinfo"><div class="rnome">'+r.nome+'</div><div class="rsub">'+r.dir+' - '+r.municipios.length+' municipios</div></div><span class="rchv">&#9658;</span></div><div class="rbody">'+mH+'</div>';
@@ -216,7 +219,8 @@ function buildGuideHTML(){
     const nS=String(r.num);
     let rows='';
     r.municipios.forEach(m=>{
-      rows+='<div class="row"><span class="rseq" style="color:'+r.cor+'">'+String(m.seq).padStart(2,'0')+'</span>'+
+      // 💻 AJUSTE: m.seq sem zeros no documento limpo de impressão
+      rows+='<div class="row"><span class="rseq" style="color:'+r.cor+'">'+m.seq+'</span>'+
         '<span class="rcode">'+(m.slam||m.cep)+'</span><span class="rnm">'+m.nome+'</span><span class="rkm">'+m.km+'km</span></div>';
     });
     body+='<div class="card"><div class="head" style="background:'+r.cor+'">'+
@@ -252,14 +256,14 @@ function bPrint(){
   const g=document.getElementById('pgrid');g.innerHTML='';
   ROTAS.forEach(r=>{
     const nS=String(r.num);
-    const mH=r.municipios.map(m=>'<div class="pcm"><span class="pcmseq" style="color:'+r.cor+'">'+String(m.seq).padStart(2,'0')+'</span><span class="pcmcep">'+(m.slam||m.cep)+'</span><span class="pcmnm">'+m.nome+'</span><span class="pcmkm">'+m.km+'km</span></div>').join('');
+    // 💻 AJUSTE: m.seq sem zeros no layout do painel interno do Guia
+    const mH=r.municipios.map(m=>'<div class="pcm"><span class="pcmseq" style="color:'+r.cor+'">'+m.seq+'</span><span class="pcmcep">'+(m.slam||m.cep)+'</span><span class="pcmnm">'+m.nome+'</span><span class="pcmkm">'+m.km+'km</span></div>').join('');
     const d=document.createElement('div');d.className='pc';
     d.innerHTML='<div class="pch" style="background:'+r.cor+'"><div class="pcnum">'+nS+'</div><div><div class="pcinm">'+r.nome+'</div><div class="pcidir">'+r.dir+'</div></div></div><div class="pcb">'+mH+'</div>';
     g.appendChild(d);
   });
 }
 
-// ── SISTEMA DE DESENHO VETORIAL DO MAPA (SVG GEOGRÁFICO) ──
 let T={s:1,x:0,y:0},focR=null,mttTimer=null;
 function gR(n){return ROTAS.find(r=>r.num===n);}
 function renderMap(){
@@ -400,8 +404,8 @@ function renderMap(){
       nt.setAttribute('font-weight','700');nt.setAttribute('fill','#fff');
       nt.setAttribute('font-family','ui-monospace,Menlo,Consolas,monospace');
       nt.setAttribute('pointer-events','none');
-      nt.textContent=String(m.seq).padStart(2,'0');dot.appendChild(nt);
-      grp.appendChild(dot);
+      // 💻 AJUSTE: Exibe m.seq direto nas bolinhas flutuantes do mapa interactivo
+      nt.textContent=m.seq;grp.appendChild(dot);
       const lbl=document.createElementNS(NS,'text');
       lbl.setAttribute('class','cm-label');
       lbl.setAttribute('x',p.x+9);lbl.setAttribute('y',p.y+3.5);
@@ -446,7 +450,7 @@ function renderMap(){
 function sMT(e,c,rArg){
   const r=rArg||gR(c.rota);
   const color=r?r.cor:'#14b8a6';
-  const rotaNum = r ? String(r.num) : String(c.rota); // 💻 AJUSTE: Exibe letra
+  const rotaNum = r ? String(r.num) : String(c.rota); 
   const ri=r?r.municipios.findIndex(m=>m.seq===c.seq):-1;
   const rm=ri>=0?r.municipios[ri]:null;
   const prev=ri>0?r.municipios[ri-1]:null;
@@ -454,7 +458,8 @@ function sMT(e,c,rArg){
   const nb=rm?bB(rm.nome):null;const nx=nL(nb?nb.days:null);
   const tt=document.getElementById('mtt');
   
-  tt.innerHTML='<div style="padding:10px 12px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="min-width:38px;height:30px;border-radius:6px;background:'+color+';display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:700;color:#fff;padding:0 6px"><div style="font-size:7px;opacity:.7">Rota '+rotaNum+'</div><div>'+String(c.seq).padStart(2,'0')+'</div></div><div><div style="font-size:13px;font-weight:700">'+c.nome+'</div><div style="font-size:10px;color:'+color+'">'+(r?r.nome:'')+'</div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:10px;margin-bottom:6px"><div><div style="color:var(--mu);font-size:8px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:1px">Anterior</div>'+(prev?prev.nome:'Inicio')+'</div><div><div style="color:var(--mu);font-size:8px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:1px">Proximo</div>'+(next?next.nome:'Fim da rota')+'</div></div>'+(nb?'<div style="font-size:10px;display:flex;align-items:center;gap:6px"><span class="'+nx.c+'" style="font-size:9px;font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;padding:1px 6px;border-radius:3px">'+nx.l+'</span><span style="font-weight:600">'+nb.boat.n+'</span></div>':'')+'</div>';
+  // 💻 AJUSTE: Caixa de contexto do mapa exibe c.seq direto
+  tt.innerHTML='<div style="padding:10px 12px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="min-width:38px;height:30px;border-radius:6px;background:'+color+';display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:700;color:#fff;padding:0 6px"><div style="font-size:7px;opacity:.7">Rota '+rotaNum+'</div><div>'+c.seq+'</div></div><div><div style="font-size:13px;font-weight:700">'+c.nome+'</div><div style="font-size:10px;color:'+color+'">'+(r?r.nome:'')+'</div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:10px;margin-bottom:6px"><div><div style="color:var(--mu);font-size:8px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:1px">Anterior</div>'+(prev?prev.nome:'Inicio')+'</div><div><div style="color:var(--mu);font-size:8px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:1px">Proximo</div>'+(next?next.nome:'Fim da rota')+'</div></div>'+(nb?'<div style="font-size:10px;display:flex;align-items:center;gap:6px"><span class="'+nx.c+'" style="font-size:9px;font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;padding:1px 6px;border-radius:3px">'+nx.l+'</span><span style="font-weight:600">'+nb.boat.n+'</span></div>':'')+'</div>';
   
   const mc=document.getElementById('sc-m').getBoundingClientRect();
   let lx=e.clientX-mc.left+14,ty=e.clientY-mc.top-12;
@@ -477,14 +482,14 @@ function oMS(c,rArg){
     bH='<div class="bttl" style="margin-top:12px">Embarcacoes</div>';
     boats.slice(0,3).forEach(b=>{const bx=nL(nD(b.d));bH+='<div class="brow2"><span class="bnx '+bx.c+'">'+bx.l+'</span><div style="flex:1"><div class="bnm">'+b.n+'</div><div class="binfo">'+b.d+(b.p?' - '+b.p:'')+'</div></div>'+(b.t?'<a href="tel:'+b.t.replace(/\D/g,'')+'" style="font-size:20px;text-decoration:none;margin-left:6px">&#128222;</a>':'')+'</div>';});
   }
-  document.getElementById('shc').innerHTML='<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px"><div style="min-width:60px;height:52px;border-radius:12px;background:'+color+';display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;flex-shrink:0"><div style="font-size:9px;opacity:.7;letter-spacing:.08em">ROTA '+rotaNum+'</div><div style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:22px;font-weight:700;line-height:1">'+String(c.seq).padStart(2,'0')+'</div></div><div><div style="font-size:18px;font-weight:700">'+c.nome+'</div><div style="font-size:12px;color:'+color+';margin-top:2px">'+(r?r.nome:'')+' - '+c.seq+' de '+(r?r.municipios.length:'-')+'</div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px"><div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:10px 12px"><div style="font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">Anterior na calha</div><div style="font-size:13px;font-weight:600">'+(prev?prev.nome:'Inicio (Manaus)')+'</div></div><div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:10px 12px"><div style="font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">Proximo na calha</div><div style="font-size:13px;font-weight:600">'+(next?next.nome:'Fim da rota')+'</div></div></div>'+(nb?'<div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:10px 12px;margin-bottom:12px"><div style="font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Proxima embarcacao</div><div style="display:flex;align-items:center;gap:8px"><span class="'+nx.c+'" style="font-size:10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;padding:2px 7px;border-radius:4px">'+nx.l+'</span><span style="font-size:13px;font-weight:600">'+nb.boat.n+'</span>'+(nb.boat.t?'<a href="tel:'+nb.boat.t.replace(/\D/g,'')+'" style="font-size:20px;text-decoration:none;margin-left:auto">&#128222;</a>':'')+'</div></div>':'')+bH;
+  // 💻 AJUSTE: Menu mobile tátil exibe c.seq direto
+  document.getElementById('shc').innerHTML='<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px"><div style="min-width:60px;height:52px;border-radius:12px;background:'+color+';display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;flex-shrink:0"><div style="font-size:9px;opacity:.7;letter-spacing:.08em">ROTA '+rotaNum+'</div><div style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:22px;font-weight:700;line-height:1">'+c.seq+'</div></div><div><div style="font-size:18px;font-weight:700">'+c.nome+'</div><div style="font-size:12px;color:'+color+';margin-top:2px">'+(r?r.nome:'')+' - '+c.seq+' de '+(r?r.municipios.length:'-')+'</div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px"><div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:10px 12px"><div style="font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">Anterior na calha</div><div style="font-size:13px;font-weight:600">'+(prev?prev.nome:'Inicio (Manaus)')+'</div></div><div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:10px 12px"><div style="font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">Proximo na calha</div><div style="font-size:13px;font-weight:600">'+(next?next.nome:'Fim da rota')+'</div></div></div>'+(nb?'<div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:10px 12px;margin-bottom:12px"><div style="font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Proxima embarcacao</div><div style="display:flex;align-items:center;gap:8px"><span class="'+nx.c+'" style="font-size:10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;padding:2px 7px;border-radius:4px">'+nx.l+'</span><span style="font-size:13px;font-weight:600">'+nb.boat.n+'</span>'+(nb.boat.t?'<a href="tel:'+nb.boat.t.replace(/\D/g,'')+'" style="font-size:20px;text-decoration:none;margin-left:auto">&#128222;</a>':'')+'</div></div>':'')+bH;
   document.getElementById('sh').classList.add('on');
 }
 function bL(){
   const l=document.getElementById('mleg');l.innerHTML='<div class="mlttl">Rotas</div>';
   ROTAS.forEach(r=>{const row=document.createElement('div');row.className='mlr';row.dataset.rota=r.num;row.innerHTML='<div class="mlnum" style="background:'+r.cor+'">'+r.num+'</div><span class="mlnm">'+r.nome+'</span>';row.onclick=()=>{focR=focR===r.num?null:r.num;if(mttTimer)clearTimeout(mttTimer);const tt=document.getElementById('mtt');tt.className='';tt.removeAttribute('data-fixed');renderMap();updL();};l.appendChild(row);});
 }
-// 💻 AJUSTE: Removido parseInt() para evitar bug de NaN com as Letras das Rotas
 function updL(){document.querySelectorAll('.mlr[data-rota]').forEach(el=>el.classList.toggle('dim',!!focR&&el.dataset.rota!==focR));}
 function applyT(){const g=document.getElementById("mg");if(g)g.setAttribute("transform","translate("+T.x+","+T.y+") scale("+T.s+")");}
 function zI(){T.s=Math.min(5,T.s*1.3);applyT();}function zO(){T.s=Math.max(0.4,T.s/1.3);applyT();}function zR(){T={s:1,x:0,y:0};focR=null;if(mttTimer)clearTimeout(mttTimer);const tt=document.getElementById('mtt');tt.className='';tt.removeAttribute('data-fixed');renderMap();updL();}
@@ -530,8 +535,9 @@ function renderSelBar(){
   cnt.textContent=keys.length+' selecionado'+(keys.length>1?'s':'');
   chips.innerHTML=keys.map(k=>{
     const {mun,rota}=SEL[k];
+    // 💻 AJUSTE: Painel de multi-seleção exibe mun.seq limpo
     return '<div class="sel-chip"><div class="sel-chip-dot" style="background:'+rota.cor+'"></div>'+
-      '<span class="sel-chip-seq">'+String(mun.seq).padStart(2,'0')+'</span>'+
+      '<span class="sel-chip-seq">'+mun.seq+'</span>'+
       '<span class="sel-chip-nm">'+mun.nome+'</span>'+
       '<span class="sel-chip-r">Rota '+rota.num+'</span></div>';
   }).join('');
@@ -564,8 +570,9 @@ function openSelPanel(){
       const ri=rota.municipios.findIndex(x=>x.seq===m.seq);
       const prev=rota.municipios[ri-1];
       const next=rota.municipios[ri+1];
+      // 💻 AJUSTE: Modal expandido exibe m.seq limpo sem forçar zeros à esquerda
       html+='<div class="sp-mun">'+
-        '<span class="sp-mun-seq" style="color:'+rota.cor+'">'+String(m.seq).padStart(2,'0')+'</span>'+
+        '<span class="sp-mun-seq" style="color:'+rota.cor+'">'+m.seq+'</span>'+
         '<span class="sp-mun-slam">'+(m.slam||m.cep)+'</span>'+
         '<div style="flex:1">'+
           '<div class="sp-mun-nm">'+m.nome+'</div>'+
