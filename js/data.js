@@ -107,7 +107,7 @@ const ROTAS=[
 {num:'J',nome:'Rio Jurua',cor:'#ec4899',dir:'Alto Jurua -> sudoeste',municipios:[
 {seq:'A',nome:'Carauari',         cep:'69800',km:800, tt:'15d',slam:'RRI9'},
 {seq:'B',nome:'Jurua',            cep:'69820',km:820, tt:'15d',slam:'RJU9'},
-{seq:'C',nome:'Itamarati',        cep:'69814',km:985, tt:'13d',slam:'RRT9'}]}
+{seq:'C',nome:'Itamarati',        cep:'69814',km:985, tt:'15d',slam:'RRT9'}]}
 ];
 
 // Embarcações por município
