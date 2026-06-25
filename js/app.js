@@ -282,43 +282,56 @@ function showMapPopup(hit, svgPt, transform, label) {
   let popup = document.getElementById('map-popup');
   if (!popup) {
     popup = document.createElement('div'); popup.id = 'map-popup';
-    popup.style.cssText = 'position:absolute;z-index:200;background:#12151b;border-radius:10px;padding:14px 16px;min-width:210px;max-width:260px;box-shadow:0 4px 24px rgba(0,0,0,0.85);border:1px solid #232838;font-family:inherit;';
+    popup.style.cssText = 'position:absolute;z-index:200;background:#12151b;border-radius:10px;padding:14px 16px;min-width:210px;max-width:270px;box-shadow:0 4px 24px rgba(0,0,0,0.85);border:1px solid #232838;font-family:inherit;';
     document.getElementById('sc-m').appendChild(popup);
   }
-  const { rota: r, mun: m } = hit;
+
+  const { rota: r, mun: m, prev, next } = hit;
   const nb = bB(m.nome); const nx = nb ? labelDays(nb.days) : { l: '---' };
+
   const svgEl = document.getElementById('msvg'); const rect = svgEl.getBoundingClientRect(); const sc = document.getElementById('sc-m').getBoundingClientRect();
   const ratioX = rect.width / 900, ratioY = rect.height / 600;
   const px = svgPt.x * transform.s * ratioX + transform.x * ratioX + (rect.left - sc.left) + 22;
   const py = svgPt.y * transform.s * ratioY + transform.y * ratioY + (rect.top - sc.top) - 75;
   popup.style.display = 'block';
-  popup.style.left = Math.min(Math.max(px, 8), sc.width - 270) + 'px';
+  popup.style.left = Math.min(Math.max(px, 8), sc.width - 280) + 'px';
   popup.style.top = Math.max(py, 8) + 'px';
   popup.style.pointerEvents = 'none';
+
   popup.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-      <span style="font-size:22px;font-weight:900;color:${r.cor};font-family:monospace;">${label}</span>
-      <span style="font-size:10px;background:${r.cor}22;color:${r.cor};padding:2px 8px;border-radius:4px;font-weight:700;">Rota ${r.num}</span>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-size:20px;font-weight:900;color:${r.cor};font-family:monospace;">${label}</span>
+      <span style="font-size:10px;background:${r.cor}22;color:${r.cor};padding:2px 8px;border-radius:4px;font-weight:700;">${r.nome.toUpperCase()}</span>
     </div>
-    <div style="font-size:11px;color:#555;margin-bottom:4px;font-family:monospace;">${m.seq}</div>
-    <div style="font-size:15px;font-weight:700;color:#e8eaf0;margin-bottom:8px;">${m.nome}</div>
-    <div style="font-size:11px;color:#737a8c;display:flex;flex-direction:column;gap:4px;">
-      <span>TT: <b style="color:#9ba3b4">${m.tt}</b></span>
-      <span>${m.km} km de Manaus</span>
-      <span>Prox. saida: <b style="color:#14b8a6">${nx.l}</b></span>
-      ${nb ? `<span style="color:#555">${nb.embarcacao}${nb.porto ? ' - ' + nb.porto : ''}</span>` : ''}
+
+    <div style="font-size:16px;font-weight:800;color:#e8eaf0;margin-bottom:10px;">${m.nome}</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;">
+      <div style="background:#0b0d11;border-radius:6px;padding:7px;text-align:center;">
+        <div style="font-size:9px;color:#737a8c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Transit Time</div>
+        <div style="font-size:16px;font-weight:900;color:${r.cor};">${m.tt}</div>
+      </div>
+      <div style="background:#0b0d11;border-radius:6px;padding:7px;text-align:center;">
+        <div style="font-size:9px;color:#737a8c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Distância</div>
+        <div style="font-size:16px;font-weight:900;color:#e8eaf0;">${m.km} km</div>
+      </div>
     </div>
-    <div style="margin-top:10px;border-top:1px solid #232838;padding-top:8px;">
-      <button onclick="irParaTriagem('${m.seq}')" style="width:100%;background:${r.cor};border:none;color:#fff;padding:8px;border-radius:5px;font-weight:800;cursor:pointer;font-size:12px;pointer-events:all;">
-        BIPAR ESTE NODE
-      </button>
+
+    <div style="background:#0b0d11;border-radius:6px;padding:8px;display:flex;flex-direction:column;gap:5px;">
+      <div style="font-size:10px;color:#737a8c;text-transform:uppercase;letter-spacing:.5px;">Calha</div>
+      ${prev
+        ? `<div style="font-size:11px;color:#9ba3b4;">⬅ <b style="color:#e8eaf0;font-family:monospace;">${prev.seq}</b> ${prev.nome}</div>`
+        : `<div style="font-size:11px;color:#334155;">⬅ Início da calha</div>`}
+      <div style="font-size:11px;color:${r.cor};font-weight:700;padding:2px 0;">● ${m.nome}</div>
+      ${next
+        ? `<div style="font-size:11px;color:#9ba3b4;">➡ <b style="color:#e8eaf0;font-family:monospace;">${next.seq}</b> ${next.nome}</div>`
+        : `<div style="font-size:11px;color:#334155;">➡ Fim da calha</div>`}
     </div>`;
-  setTimeout(() => { popup.style.pointerEvents = 'all'; document.addEventListener('click', fecharPopupMapa, { once: true }); }, 50);
-}
-function fecharPopupMapa() { const p = document.getElementById('map-popup'); if (p) p.style.display = 'none'; }
-function irParaTriagem(nodeSeq) {
-  fecharPopupMapa(); SS('t', document.querySelector('.htab'));
-  setTimeout(() => { const ci = document.getElementById('ci'); ci.value = nodeSeq; lookupNode(nodeSeq); ci.focus(); }, 100);
+
+  setTimeout(() => {
+    popup.style.pointerEvents = 'all';
+    document.addEventListener('click', fecharPopupMapa, { once: true });
+  }, 50);
 }
 
 /* FILTRO DE ROTA */
