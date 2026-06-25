@@ -1,464 +1,5 @@
-Com certeza! Como avançamos bastante e fizemos vários ajustes finos entre o **HTML**, o **JavaScript** e o **CSS**, consolidei a aplicação inteira em uma estrutura única, limpa e blindada contra quebras.
-
-Aqui está o código completo de cada arquivo do seu ecossistema, prontinho para você copiar e colar:
-
----
-
-## 1. `index.html` (Interface e Layout)
-
-Substitua o conteúdo do seu arquivo principal por este. Ele já conta com a separação da área de trabalho do pátio (`.p-view-grid`) e a área oculta widescreen (`#capture-area`), além do novo botão de cópia de texto.
-
-```html
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>RIVER OPS · Triagem</title>
-<link rel="stylesheet" href="css/style.css">
-<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-</head>
-<body>
-
-<div id="hdr">
-  <div class="dot"></div>
-  <div>
-    <div class="lt">RIVER OPS</div>
-    <div style="font-size:13px;font-weight:900;color:var(--ac);letter-spacing:.04em;margin-top:2px">FACIL EXPRESS LTDA</div>
-  </div>
-  <div class="htabs">
-    <button class="htab on" onclick="SS('t',this)">⚡ Triagem</button>
-    <button class="htab" onclick="SS('r',this)">📋 Rotas</button>
-    <button class="htab" onclick="SS('m',this)">🗺️ Mapa</button>
-    <button class="htab" onclick="SS('l',this)">🚢 Portos</button>
-  </div>
-  <div class="hbg" id="hbg">BUSCA PADRÃO AMAZON SELECIONADA</div>
-</div>
-
-<div id="btabs">
-  <div class="brow">
-    <button class="btab on" id="bt-t" onclick="SS('t',null)"><span class="bti">⚡</span>Triagem</button>
-    <button class="btab" id="bt-r" onclick="SS('r',null)"><span class="bti">📋</span>Rotas</button>
-    <button class="btab" id="bt-m" onclick="SS('m',null)"><span class="bti">🗺️</span>Mapa</button>
-    <button class="btab" id="bt-l" onclick="SS('l',null)"><span class="bti">🚢</span>Portos</button>
-  </div>
-</div>
-
-<div id="app">
-
-  <!-- TRIAGEM -->
-  <div class="scr" id="sc-t">
-    <div class="csec">
-      <label class="clbl">DIGITE OU BIPE O CÓDIGO DO NODE (EX: RAL9, RTE9, RTO9)</label>
-      <input id="ci" type="text" placeholder="CÓDIGO DA ETIQUETA"
-        autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="characters"
-        oninput="onCI(this.value)" onkeydown="onK(event)">
-      <div class="chint">Responde diretamente ao código da etiqueta Amazon.</div>
-    </div>
-    <div id="rcard"></div>
-    <div id="recb">
-      <div class="rect">Buscas recentes</div>
-      <div class="chips" id="rchp"></div>
-    </div>
-  </div>
-
-  <!-- ROTAS -->
-  <div class="scr h" id="sc-r">
-    <div class="rhdr">
-      <div class="rsw">
-        <span class="rsi">🔍</span>
-        <input type="text" placeholder="Buscar município ou node..." oninput="fR(this.value)">
-      </div>
-    </div>
-    <div class="rbdy" id="rbdy"></div>
-  </div>
-
-  <!-- MAPA -->
-  <div class="scr h" id="sc-m" style="position:relative;display:flex;flex-direction:column;">
-    <div style="display:flex;align-items:center;gap:6px;padding:8px 10px;background:#0b0d11;border-bottom:1px solid #1a1e26;flex-shrink:0;flex-wrap:wrap;">
-      <span style="font-size:10px;color:#737a8c;font-weight:700;letter-spacing:1px;white-space:nowrap;">ROTA:</span>
-      <div id="map-filters" style="display:flex;gap:4px;flex-wrap:wrap;flex:1;"></div>
-      <div style="display:flex;gap:4px;flex-shrink:0;">
-        <button class="mcb" onclick="zI()">+</button>
-        <button class="mcb" onclick="zO()">-</button>
-        <button class="mcb" onclick="zR()">&#x27F3;</button>
-      </div>
-    </div>
-    <svg id="msvg" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" style="flex:1;width:100%;"></svg>
-  </div>
-
-  <!-- PORTOS -->
-  <div class="scr h" id="sc-l">
-    <div class="p-layout">
-      
-      <div class="p-pool">
-        <div class="p-pool-title">Adicionar Município ao Manifesto</div>
-        <div class="p-select-row">
-          <select id="p-select-mun" class="p-select"></select>
-          <select id="p-select-target" class="p-select">
-            <option value="esc">Porto Escadaria</option>
-            <option value="rod">Porto Roadway</option>
-            <option value="v-rod">Rodoviário</option>
-          </select>
-          <button class="p-btn-add" onclick="addMunToPorto()">+ Vincular</button>
-        </div>
-      </div>
-
-      <!-- ÁREA DE OPERAÇÃO VISÍVEL: Organizada em lista confortável para telas de celulares -->
-      <div class="p-view-grid">
-        <div class="p-col" id="view-col-esc">
-          <div class="p-col-title esc">PORTO ESCADARIA (0)</div>
-          <div class="p-items-list"></div>
-        </div>
-        <div class="p-col" id="view-col-rod">
-          <div class="p-col-title rod">PORTO ROADWAY (0)</div>
-          <div class="p-items-list"></div>
-        </div>
-        <div class="p-col" id="view-col-v-rod">
-          <div class="p-col-title v-rod">RODOVIÁRIO (0)</div>
-          <div class="p-items-list"></div>
-        </div>
-      </div>
-
-      <!-- ÁREA OCULTA DO PRINT: Força a disposição horizontal widescreen com 3 colunas e oculta botões "X" -->
-      <div id="capture-area">
-        <div style="text-align:center; font-weight:900; font-size:14px; color:#14b8a6; margin-bottom:16px; letter-spacing:1px; font-family: sans-serif;">
-          FÁCIL EXPRESS LTDA · DESPACHO DIÁRIO
-        </div>
-        <div class="p-grid-3">
-          <div class="p-col" id="print-col-esc">
-            <div class="p-col-title esc">PORTO ESCADARIA</div>
-            <div class="p-items-list"></div>
-          </div>
-          <div class="p-col" id="print-col-rod">
-            <div class="p-col-title rod">PORTO ROADWAY</div>
-            <div class="p-items-list"></div>
-          </div>
-          <div class="p-col" id="print-col-v-rod">
-            <div class="p-col-title v-rod">RODOVIÁRIO</div>
-            <div class="p-items-list"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="p-action-row">
-        <button class="whatsapp-btn" onclick="gerarImagemWhatsapp()">📸 Gerar Imagem</button>
-        <button class="whatsapp-btn" style="background:#0284c7;" onclick="copiarTextoWhatsapp()">📋 Copiar Texto para WhatsApp</button>
-        <button class="p-btn-reset" onclick="resetarTabelaPortos()">⟲ Resetar</button>
-      </div>
-
-    </div>
-  </div>
-
-</div>
-
-<script src="js/data.js"></script>
-<script src="js/app.js"></script>
-</body>
-</html>
-
-```
-
----
-
-## 2. `css/style.css` (Folha de Estilos e Responsividade)
-
-Cole este código no seu arquivo CSS. Ele corrige os travamentos de tela do mobile e formata o print horizontal de modo paisagem automaticamente.
-
-```css
 /* ============================================================
-   RIVER OPS — VARIÁVEIS GLOBAIS E CORES DO SISTEMA
-   ============================================================ */
-:root {
-  --bg: #0b0d11;      /* Fundo master escuro da aplicação */
-  --s1: #12151b;      /* Fundo intermediário para barras superiores e painéis */
-  --s2: #1a1e26;      /* Fundo claro para cartões de informação e caixas de texto */
-  --bd: #232838;      /* Tom padrão de contornos e limitadores físicos */
-  --tx: #e8eaf0;      /* Texto de alto contraste para leitura rápida no galpão */
-  --mu: #737a8c;      /* Texto suavizado para legendas e dados secundários */
-  --ac: #14b8a6;      /* Tom corporativo institucional (Teal Suave) */
-  --re: #ef4444;      /* Indicador cromático crítico (Vermelho para alertas) */
-  --ok: #22c55e;      /* Indicador de conformidade (Verde para embarques ok) */
-  --wa: #f59e0b;      /* Indicador de transição (Laranja para saídas de amanhã) */
-  
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Roboto Mono', monospace;
-}
-
-/* Reset de Margens e Toque do Dispositivo */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  -webkit-tap-highlight-color: transparent; /* Elimina atraso de clique no mobile */
-}
-
-html, body {
-  background: var(--bg);
-  color: var(--tx);
-  font-family: var(--font-sans);
-  font-size: 14px;
-  height: 100%;
-  overflow-x: hidden;
-  overflow-y: auto; /* Permite rolagem da página quando o conteúdo esticar */
-}
-
-/* ESTILIZAÇÃO DO HEADER (BARRA SUPERIOR) */
-#hdr {
-  position: fixed; top: 0; left: 0; right: 0;
-  height: 50px;
-  background: var(--s1);
-  border-bottom: 1px solid var(--bd);
-  display: flex; align-items: center;
-  padding: 0 14px; gap: 10px;
-  z-index: 300;
-}
-
-/* Ponto Pulsante Online */
-.dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: var(--ac);
-  box-shadow: 0 0 7px var(--ac);
-  animation: bk 2s infinite;
-  flex-shrink: 0;
-}
-@keyframes bk { 0%,100% { opacity: 1 } 50% { opacity: .3 } }
-
-.lt { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
-.ls { font-size: 9px; color: var(--mu); letter-spacing: .06em; text-transform: uppercase; }
-
-/* Abas de Navegação no Topo (Desktop) */
-.htabs { display: flex; gap: 4px; margin-left: auto; }
-.htab {
-  padding: 5px 11px; border-radius: 5px;
-  border: 1px solid var(--bd); background: var(--s2); color: var(--mu);
-  font-size: 11px; font-weight: 600; cursor: pointer; font-family: var(--font-sans);
-  white-space: nowrap;
-}
-.htab.on { background: var(--ac); border-color: var(--ac); color: #fff; }
-.hbg { font-family: var(--font-mono); font-size: 9px; padding: 3px 7px; border-radius: 4px; border: 1px solid var(--bd); color: var(--mu); background: var(--s2); flex-shrink: 0; }
-
-/* MENU INFERIOR MOBILE */
-#btabs {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  height: 58px; background: var(--s1); border-top: 1px solid var(--bd);
-  z-index: 300; display: none;
-}
-.brow { display: flex; height: 100%; }
-.btab {
-  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
-  cursor: pointer; border: none; background: transparent; color: var(--mu);
-  font-family: var(--font-sans); font-size: 9px; font-weight: 600; padding: 0; text-transform: uppercase;
-}
-.btab.on { color: var(--ac); }
-.bti { font-size: 17px; line-height: 1; }
-
-/* ÁREA DE CONTEÚDO DINÂMICO */
-#app { position: fixed; top: 50px; left: 0; right: 0; bottom: 0; display: flex; overflow: hidden; }
-.scr { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
-.scr.h { display: none; }
-
-/* ABA 1: DESIGN DA TELA DE TRIAGEM */
-#sc-t { align-items: center; overflow-y: auto; padding: 20px 16px; gap: 14px; }
-.csec { width: 100%; max-width: 680px; margin-top: 55px; } 
-.clbl { font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--mu); margin-bottom: 8px; display: block; text-align: center; }
-
-/* Input de Triagem Calibrado para Letras e Números */
-#ci {
-  width: 100%; height: 72px;
-  font-family: var(--font-mono); font-size: 36px; font-weight: 700;
-  background: var(--s1); border: 2px solid var(--bd); border-radius: 12px; color: var(--tx);
-  text-align: center; letter-spacing: .18em; outline: none; transition: border-color .2s; padding: 0 16px; caret-color: var(--ac);
-}
-#ci:focus { border-color: var(--ac); box-shadow: 0 0 0 3px rgba(20,184,166,.15); }
-#ci::placeholder { color: var(--bd); font-size: 22px; letter-spacing: normal; }
-.clbl, .chint { font-size: 10px; color: var(--mu); text-align: center; margin-top: 7px; line-height: 1.6; }
-
-/* Caixa de Resultados Expandida para 680px */
-#rcard { width: 100%; max-width: 680px; display: none; }
-#rcard.show { display: block; }
-.rcm { border-radius: 14px; overflow: hidden; border: 2px solid; animation: pop .18s ease; }
-@keyframes pop { 0% { transform: scale(.96); opacity: .5 } 100% { transform: scale(1); opacity: 1 } }
-.rch { display: flex; align-items: center; gap: 14px; padding: 18px 20px; }
-.rcnum { font-family: var(--font-mono); font-size: 72px; font-weight: 700; line-height: 1; flex-shrink: 0; width: 95px; text-align: center; }
-.rcpos { display: inline-flex; align-items: center; justify-content: center; border-radius: 7px; font-family: var(--font-mono); font-size: 14px; font-weight: 700; padding: 3px 10px; margin-bottom: 6px; color: #fff; }
-.rcrl { font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; opacity: .65; margin-bottom: 3px; }
-.rcrn { font-size: 18px; font-weight: 700; line-height: 1.2; }
-.rcmn { font-size: 12px; opacity: .75; margin-top: 4px; }
-.rcb { background: var(--s1); padding: 14px 16px; }
-.rcgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
-.rcs { background: var(--s2); border: 1px solid var(--bd); border-radius: 8px; padding: 9px 11px; }
-.rcsl { font-size: 8px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--mu); margin-bottom: 3px; }
-.rcsv { font-size: 14px; font-weight: 700; }
-.rcsv.re { color: var(--re); } .rcsv.ok { color: var(--ok); } .rcsv.wa { color: var(--wa); }
-.adjr { display: flex; gap: 8px; margin-bottom: 12px; }
-.adjc { flex: 1; background: var(--s2); border: 1px solid var(--bd); border-radius: 8px; padding: 10px 12px; }
-.adjd { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--mu); margin-bottom: 4px; }
-.adjn { font-size: 12px; font-weight: 700; }
-.adjcep { font-family: var(--font-mono); font-size: 10px; color: var(--mu); margin-top: 2px; }
-.adjkm { font-size: 9px; color: var(--mu); margin-top: 1px; }
-.bttl { font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--mu); margin-bottom: 8px; }
-.brow2 { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: var(--s2); border: 1px solid var(--bd); border-radius: 8px; margin-bottom: 5px; }
-.bnx { font-family: var(--font-mono); font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; flex-shrink: 0; }
-.nt { background: rgba(239,68,68,.2); color: var(--re); border: 1px solid rgba(239,68,68,.3); }
-.nw { background: rgba(245,158,11,.15); color: var(--wa); border: 1px solid rgba(245,158,11,.3); }
-.ns { background: rgba(34,197,94,.1); color: var(--ok); border: 1px solid rgba(34,197,94,.25); }
-.bnm { font-size: 12px; font-weight: 600; flex: 1; }
-.binfo { font-size: 9px; color: var(--mu); margin-top: 1px; }
-
-/* Blocos de Consultas Recentes */
-.recb { width: 100%; max-width: 680px; display: none; }
-.rect { font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--mu); margin-bottom: 8px; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip { background: var(--s2); border: 1px solid var(--bd); border-radius: 6px; padding: 5px 10px; font-family: var(--font-mono); font-size: 12px; cursor: pointer; }
-.chip:active { border-color: var(--ac); color: var(--ac); }
-
-/* ABA DE ROTAS E FILTROS COMPACTOS */
-#sc-r { overflow: hidden; }
-.rhdr { padding: 12px 14px; border-bottom: 1px solid var(--bd); flex-shrink: 0; }
-.rsw { position: relative; }
-.rsw input { width: 100%; background: var(--bg); border: 1px solid var(--bd); border-radius: 8px; padding: 9px 12px 9px 32px; color: var(--tx); font-size: 13px; font-family: var(--font-sans); outline: none; }
-.rsw input:focus { border-color: var(--ac); }
-.rsi { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--mu); font-size: 12px; }
-.rbdy { overflow-y: auto; flex: 1; padding: 10px; }
-.rcard { background: var(--s1); border: 1px solid var(--bd); border-radius: 12px; margin-bottom: 8px; overflow: hidden; }
-.rhead { display: flex; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer; user-select: none; }
-.rnb { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 18px; font-weight: 700; flex-shrink: 0; color: #fff; }
-.rinfo { flex: 1; min-width: 0; }
-.rnome { font-size: 13px; font-weight: 700; margin-bottom: 1px; }
-.rsub { font-size: 10px; color: var(--mu); }
-.rchv { color: var(--mu); font-size: 10px; transition: transform .2s; flex-shrink: 0; }
-.rcard.open .rchv { transform: rotate(90deg); }
-.rbody { display: none; border-top: 1px solid var(--bd); }
-.rcard.open .rbody { display: block; }
-.mrow { display: flex; align-items: center; gap: 8px; padding: 9px 14px; border-bottom: 1px solid rgba(255,255,255,.04); cursor: pointer; min-height: 42px; }
-.mrow:last-child { border-bottom: none; }
-.mrow:active { background: var(--s2); }
-.mseq { font-family: var(--font-mono); font-size: 11px; font-weight: 700; width: 22px; text-align: center; flex-shrink: 0; }
-.mcep { font-family: var(--font-mono); font-size: 10px; color: var(--mu); width: 52px; flex-shrink: 0; }
-.mkm { font-family: var(--font-mono); font-size: 9px; color: var(--mu); width: 40px; text-align: right; flex-shrink: 0; }
-.mname { font-size: 12px; font-weight: 600; flex: 1; }
-.mtt { font-size: 9px; color: var(--mu); flex-shrink: 0; margin-right: 4px; }
-.mnx { font-size: 9px; font-family: var(--font-mono); padding: 1px 6px; border-radius: 3px; font-weight: 700; flex-shrink: 0; }
-
-/* DESIGN INTERATIVO DO MAPA */
-#sc-m { position: relative; overflow: hidden; background: #070c14; } 
-#msvg { width: 100%; height: 100%; display: block; touch-action: none; background: #070c14; }
-.mc2 { position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 5px; z-index: 10; }
-.mcb { width: 34px; height: 34px; background: var(--s1); border: 1px solid var(--bd); border-radius: 7px; color: var(--tx); font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.mcb:active { border-color: var(--ac); color: var(--ac); }
-#mleg { position: absolute; bottom: 10px; left: 10px; background: rgba(18,21,27,0.85); backdrop-filter: blur(4px); border: 1px solid var(--bd); border-radius: 9px; padding: 10px 12px; z-index: 10; max-width: 178px; }
-.mlttl{ font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--mu); margin-bottom: 7px; }
-.mlr { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; cursor: pointer; border-radius: 4px; padding: 2px 3px; }
-.mlr:active { background: var(--s2); }
-.mlnum { width: 22px; height: 22px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0; }
-.mlr.dim .mlnum, .mlr.dim .mlnm { opacity: .14; }
-#mtt { position: absolute; background: rgba(18,21,27,0.96); backdrop-filter: blur(6px); border: 1px solid var(--bd); border-radius: 8px; padding: 0; pointer-events: none; z-index: 100; display: none; min-width: 220px; box-shadow: 0 4px 20px rgba(0,0,0,.5); overflow: hidden; }
-#mtt.on { display: block; }
-
-/* MANIFESTO DE PORTOS (SISTEMA INTEGRADO E RESPONSIVO) */
-.p-layout { display: flex; flex-direction: column; gap: 15px; padding: 15px; }
-
-/* Área secreta do print guardada fora do fluxo visual de dados */
-#capture-area {
-  padding: 20px;
-  background: #0b0d11;
-  border-radius: 8px;
-  width: 950px; /* Mantém a proporção horizontal widescreen perfeita da imagem */
-  position: fixed;
-  left: -9999px; /* Oculta o container mestre para não quebrar a tela de edição */
-  box-sizing: border-box;
-}
-
-#capture-area .p-grid-3 { 
-  display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important; 
-  gap: 12px !important; 
-  background: #12151b; 
-  padding: 15px; 
-  border-radius: 8px; 
-  border: 1px solid #232838; 
-}
-
-/* Painel de preenchimento inteligente e responsivo */
-.p-view-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-}
-
-.p-col { background: #1a1e26; border: 1px solid #232838; border-radius: 6px; padding: 10px; min-height: 80px; }
-.p-col-title { font-weight: 800; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; text-align: center; padding-bottom: 8px; border-bottom: 2px solid #232838; margin-bottom: 10px; }
-.p-col-title.esc { color: #22d3ee; } 
-.p-col-title.rod { color: #f97316; } 
-.p-col-title.v-rod { color: #ff6644; }
-.p-item { background: #12151b; border: 1px solid #232838; border-radius: 4px; padding: 7px 10px; margin-bottom: 5px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; gap: 8px; }
-.p-item span { flex: 1; }
-.p-item button { background: none; border: none; color: #ef4444; font-weight: bold; cursor: pointer; font-size: 16px; line-height: 1; padding: 4px 8px; flex-shrink: 0; }
-.p-pool { background: #1a1e26; border: 1px solid #232838; border-radius: 6px; padding: 15px; }
-.p-pool-title { font-size: 11px; font-weight: bold; color: #737a8c; text-transform: uppercase; margin-bottom: 10px; }
-.p-select-row { display: flex; gap: 8px; flex-wrap: wrap; }
-.p-select { flex: 1; min-width: 120px; background: #12151b; border: 1px solid #232838; color: #e8eaf0; padding: 10px; border-radius: 6px; outline: none; font-size: 13px; }
-.p-btn-add { background: #14b8a6; border: none; color: #fff; padding: 0 18px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; white-space: nowrap; }
-.whatsapp-btn { background: #22c55e; border: none; color: white; padding: 12px; font-weight: bold; border-radius: 6px; flex: 1; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-.p-action-row { display: flex; gap: 10px; margin-top: 5px; flex-wrap: wrap; }
-.p-btn-reset { background: #334155; border: none; color: #e8eaf0; padding: 0 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; white-space: nowrap; }
-
-/* COMPORTAMENTO DO SISTEMA GERAL DE MARCAÇÃO EM SELEÇÃO */
-#sh { position: fixed; bottom: -450px; left: 0; right: 0; background: var(--s1); border-top: 1px solid var(--bd); border-radius: 14px 14px 0 0; padding: 16px 16px 36px; z-index: 400; transition: bottom .25s ease; max-height: 88%; overflow-y: auto; }
-#sh.on { bottom: 0; }
-.shdl { width: 34px; height: 4px; background: var(--bd); border-radius: 2px; margin: 0 auto 14px; }
-.shcl { position: absolute; top: 14px; right: 14px; background: var(--s2); border: 1px solid var(--bd); border-radius: 6px; padding: 4px 10px; font-size: 11px; color: var(--mu); cursor: pointer; }
-
-/* BARRA DE SELEÇÃO E HISTÓRICO */
-#sel-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 500; background: var(--s1); border-top: 2px solid var(--ac); padding: 10px 14px; display: none; align-items: center; gap: 10px; flex-wrap: wrap; }
-#sel-bar.on { display: flex; }
-.sel-count { font-size: 12px; font-weight: 700; color: var(--ac); flex-shrink: 0; }
-.sel-chips { display: flex; flex-wrap: wrap; gap: 5px; flex: 1; overflow: hidden; max-height: 54px; overflow-y: auto; }
-
-/* CONDICIONAIS DE DIMENSIONAMENTO E MEDIA QUERIES */
-@media (min-width: 992px) {
-  .p-view-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-  }
-}
-
-@media (max-width: 991px) { 
-  .p-item { flex-wrap: nowrap !important; }
-}
-
-@media (max-width: 767px) {
-  #btabs { display: block; }
-  .htabs, #hbg { display: none !important; }
-  #app { bottom: 58px; }
-  #ci { font-size: 26px; height: 60px; }
-  .rcnum { font-size: 48px; width: 65px; }
-  .rcgrid { grid-template-columns: repeat(2, 1fr); }
-  .adjr { flex-direction: column; }
-  .p-select-row { flex-direction: column; } 
-  .p-btn-add { padding: 10px; }
-}
-
-/* Utilitários Extras */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--bd); border-radius: 2px; }
-
-```
-
----
-
-## 3. `js/app.js` (Lógica e Regras de Negócio)
-
-Cole este código no seu arquivo JavaScript. Ele gerencia as travas de bipes da triagem, as simplificações de rotas, as sincronizações duplas de portos e o gerador de imagens móveis.
-
-```javascript
-/* ============================================================
-   RIVER OPS — TRIAGEM — APP.JS (VERSÃO FINAL UNIFICADA)
+   RIVER OPS — TRIAGEM — APP.JS (VERSÃO ATUALIZADA)
    ============================================================ */
 
 /* ── ÍNDICES ──────────────────────────────────────────────────
@@ -868,8 +409,7 @@ function renderMap() {
       grp.appendChild(bb);
 
       const nt = document.createElementNS(NS, 'text');
-      const textX = p.x; const textY = p.y + 3.5;
-      nt.setAttribute('x', String(textX)); nt.setAttribute('y', String(textY));
+      nt.setAttribute('x', p.x); nt.setAttribute('y', p.y + 3.5);
       nt.setAttribute('text-anchor', 'middle'); nt.setAttribute('font-size', '8');
       nt.setAttribute('font-weight', '900'); nt.setAttribute('fill', ativo ? '#fff' : r.cor);
       nt.setAttribute('font-family', 'monospace'); nt.textContent = label; grp.appendChild(nt);
@@ -892,10 +432,11 @@ function renderMap() {
    AJUSTE: Centralizado de forma absoluta e segura na tela para evitar cantos.
    ------------------------------------------------------------ */
 function showMapPopup(hit, svgPt, transform, label) {
-  if (!hit) return; 
+  if (!hit) return; // Proteção contra nós nulos
   let popup = document.getElementById('map-popup');
   if (!popup) {
     popup = document.createElement('div'); popup.id = 'map-popup';
+    // Estilos inline originais preservados com correções absolutas de centralização estável
     popup.style.cssText = 'position:absolute;z-index:200;background:#12151b;border-radius:10px;padding:14px 16px;width:240px;box-shadow:0 4px 24px rgba(0,0,0,0.85);border:2px solid #232838;font-family:inherit;top:50%;left:50%;transform:translate(-50%, -50%);';
     document.getElementById('sc-m').appendChild(popup);
   }
@@ -1017,6 +558,12 @@ function zR() { T = { s: 1, x: 0, y: 0 }; rotaFiltrada = null; renderMap(); buil
 /* ── ABA PORTOS ─────────────────────────────────────────────── */
 let manifestoPortos = { esc: [], rod: [], 'v-rod': [] };
 
+const LISTA_PADRAO_PORTOS = {
+  esc:     ['RAU9','RUC9','RAO9','RUR9','RRE9','RQI9','RPI9','RAN9','RNA9','RNO9','RDA9','RBR9','RTP9','RCR9','RJR9'].map(k => NODEIDX[k]).filter(Boolean),
+  rod:     ['RME9','RRA9','RBA9','RPA9','RCO9','RTE9','RAL9','RUA9','RAA9','RJA9','RFO9','RJT9','RIN9','RTO9','RAM9','RUI9','RBE9','RAT9','RUT9','RBC9','RSG9'].map(k => NODEIDX[k]).filter(Boolean),
+  'v-rod': ['RNH9','RBO9','RPU9','RMN9','RID9','RMP9','RPF9','RBL9','RPE9','RIT9','RNR9','RSV9','RIP9','RCC9','RAP9','RHM9','RLB9'].map(k => NODEIDX[k]).filter(Boolean)
+};
+
 function popularSeletorPortos() {
   const select = document.getElementById('p-select-mun'); if (!select) return; select.innerHTML = '';
   ROTAS.forEach(r => r.municipios.forEach(m => {
@@ -1037,98 +584,70 @@ function removeMunPorto(porto, seq) {
   manifestoPortos[porto] = manifestoPortos[porto].filter(x => x && x.mun.seq !== seq); renderTabelaPortos();
 }
 
-/* AJUSTE RESPONSIVO: Aloca os dados simultaneamente na lista visível do celular e na gêmea oculta do print */
 function renderTabelaPortos() {
   ['esc', 'rod', 'v-rod'].forEach(p => {
-    const containerView = document.querySelector('#view-col-' + p + ' .p-items-list');
-    const containerPrint = document.querySelector('#print-col-' + p + ' .p-items-list');
-    
-    if (containerView) containerView.innerHTML = '';
-    if (containerPrint) containerPrint.innerHTML = '';
-    
-    const tituloView = document.querySelector('#view-col-' + p + ' .p-col-title');
-    const tituloPrint = document.querySelector('#print-col-' + p + ' .p-col-title');
-    const nomes = { esc: 'PORTO ESCADARIA', rod: 'PORTO ROADWAY', 'v-rod': 'RODOVIÁRIO' };
-    
-    if (tituloView) tituloView.textContent = nomes[p] + ' (' + manifestoPortos[p].length + ')';
-    if (tituloPrint) tituloPrint.textContent = nomes[p] + ' (' + manifestoPortos[p].length + ')';
-    
+    const container = document.querySelector('#col-' + p + ' .p-items-list'); if (!container) return;
+    container.innerHTML = '';
+    const titulo = document.querySelector('#col-' + p + ' .p-col-title');
+    if (titulo) {
+      const nomes = { esc: 'PORTO ESCADARIA', rod: 'PORTO ROADWAY', 'v-rod': 'RODOVIARIO' };
+      titulo.textContent = nomes[p] + ' (' + manifestoPortos[p].length + ')';
+    }
     manifestoPortos[p].forEach(hit => {
       if (!hit) return;
-      
-      // Lista operacional visível no celular
-      let itemView = document.createElement('div'); 
-      itemView.className = 'p-item';
-      itemView.innerHTML = '<span><b style="font-family:monospace">' + hit.mun.seq + '</b> - ' + hit.mun.nome + '</span><button onclick="removeMunPorto(\'' + p + '\',\'' + hit.mun.seq + '\')">X</button>';
-      if (containerView) containerView.appendChild(itemView);
-
-      // Lista do print sem botões de exclusão "X"
-      let itemPrint = document.createElement('div'); 
-      itemPrint.className = 'p-item';
-      itemPrint.innerHTML = '<span><b style="font-family:monospace">' + hit.mun.seq + '</b> - ' + hit.mun.nome + '</span>';
-      if (containerPrint) containerPrint.appendChild(itemPrint);
+      let item = document.createElement('div'); item.className = 'p-item';
+      item.innerHTML = '<span><b style="font-family:monospace">' + hit.mun.seq + '</b> - ' + hit.mun.nome + '</span><button onclick="removeMunPorto(\'' + p + '\',\'' + hit.mun.seq + '\')">X</button>';
+      container.appendChild(item);
     });
   });
 }
 
-/* AJUSTE MESTRE: Varre a base estruturada e distribui dinamicamente 100% dos municípios pelas calhas */
 function resetarTabelaPortos() {
-  manifestoPortos.esc = [];
-  manifestoPortos.rod = [];
-  manifestoPortos['v-rod'] = [];
-
-  ROTAS.forEach(r => {
-    r.municipios.forEach(m => {
-      const hit = NODEIDX[String(m.seq).toUpperCase().trim()];
-      if (!hit) return;
-
-      // Terrestres e Rodoviários (H e I) -> RODOVIÁRIO
-      if (r.num === 'H' || r.num === 'I') {
-        manifestoPortos['v-rod'].push(hit);
-      } 
-      // Médio e Alto Solimões (D e E) -> PORTO ROADWAY
-      else if (r.num === 'D' || r.num === 'E') {
-        manifestoPortos.rod.push(hit);
-      } 
-      // Demais calhas fluviais (A, B, C, F, G, J) -> PORTO ESCADARIA
-      else {
-        manifestoPortos.esc.push(hit);
-      }
-    });
-  });
-
+  manifestoPortos.esc = [...LISTA_PADRAO_PORTOS.esc];
+  manifestoPortos.rod = [...LISTA_PADRAO_PORTOS.rod];
+  manifestoPortos['v-rod'] = [...LISTA_PADRAO_PORTOS['v-rod']];
   renderTabelaPortos();
 }
 
-/* AJUSTE: Cópia e renderização de segurança com suporte a plano B para navegadores mobile */
 function gerarImagemWhatsapp() {
   const area = document.getElementById('capture-area');
   if (typeof html2canvas === 'undefined') { alert('html2canvas nao carregado.'); return; }
   
+  // Executa o print forçando a escala horizontal limpa
   html2canvas(area, { backgroundColor: '#0b0d11', scale: 2 }).then(canvas => {
     canvas.toBlob(blob => {
       if (!blob) { alert('Erro ao gerar imagem.'); return; }
       
       try {
+        // Tenta o método direto (Ideal para Computador/Alguns Celulares)
         const data = [new ClipboardItem({ 'image/png': blob })];
         navigator.clipboard.write(data).then(() => {
           alert('Imagem do manifesto HORIZONTAL copiada com sucesso! Vá ao WhatsApp e aperte Colar.');
         }).catch(err => {
+          // PLANO B AUTOMÁTICO PARA CELULAR (Se o navegador bloquear o clipboard)
           abrirImagemParaCopiaManual(canvas.toDataURL('image/png'));
         });
       } catch (e) {
+        // PLANO B AUTOMÁTICO PARA NAVEGADORES ANTIGOS
         abrirImagemParaCopiaManual(canvas.toDataURL('image/png'));
       }
     }, 'image/png');
   });
 }
 
+/* Função auxiliar de segurança para renderizar o print na tela do celular */
 function abrirImagemParaCopiaManual(dataUrl) {
+  // Remove popup anterior se o operador clicou duas vezes
   const old = document.getElementById('popup-print-seguro'); if (old) old.remove();
 
   const overlay = document.createElement('div');
   overlay.id = 'popup-print-seguro';
-  overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:16px; box-sizing:border-box;';
+  overlay.style.cssText = `
+    position:fixed; top:0; left:0; width:100%; height:100%;
+    background:rgba(0,0,0,0.9); z-index:9999;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:16px; box-sizing:border-box;
+  `;
 
   overlay.innerHTML = `
     <div style="text-align:center; color:#fff; font-size:13px; font-weight:700; margin-bottom:12px; background:#14b8a6; padding:8px 14px; border-radius:6px;">
@@ -1145,7 +664,6 @@ function abrirImagemParaCopiaManual(dataUrl) {
 
   document.body.appendChild(overlay);
 }
-
 /* ── NAVEGAÇÃO ENTRE ABAS ───────────────────────────────────── */
 function SS(name, btn) {
   cur = name;
@@ -1160,9 +678,7 @@ function SS(name, btn) {
   if (name === 't') { setTimeout(() => { const ci = document.getElementById('ci'); if (ci) ci.focus(); }, 100); }
 }
 
-/* ── INICIALIZAÇÃO CORRIGIDA (CARGA MESTRE COMPLETA) ──────────
-   AJUSTE DE FLUXO: Sincroniza a montagem da árvore mestre antes da distribuição
-   ------------------------------------------------------------ */
+/* ── INICIALIZAÇÃO ──────────────────────────────────────────── */
 bRO();
 resetarTabelaPortos();
 renderRecentes();
@@ -1175,12 +691,12 @@ const scT = document.getElementById('sc-t');
 if (scT) { scT.style.display = ''; scT.className = 'scr'; }
 
 window.addEventListener('load', () => { const ci = document.getElementById('ci'); if (ci) ci.focus(); });
-
 /* ── COPIAR MANIFESTO COMO TEXTO PARA WHATSAPP ──────────────── */
 function copiarTextoWhatsapp() {
   let texto = `*FÁCIL EXPRESS LTDA · DESPACHO DIÁRIO*\n`;
   texto += `------------------------------------------\n\n`;
 
+  // 1. Porto Escadaria
   texto += `🚢 *PORTO ESCADARIA (${manifestoPortos.esc.length})*\n`;
   if (manifestoPortos.esc.length === 0) texto += `_(Vazio)_\n`;
   manifestoPortos.esc.forEach(hit => {
@@ -1188,6 +704,7 @@ function copiarTextoWhatsapp() {
   });
   texto += `\n`;
 
+  // 2. Porto Roadway
   texto += `🚢 *PORTO ROADWAY (${manifestoPortos.rod.length})*\n`;
   if (manifestoPortos.rod.length === 0) texto += `_(Vazio)_\n`;
   manifestoPortos.rod.forEach(hit => {
@@ -1195,17 +712,17 @@ function copiarTextoWhatsapp() {
   });
   texto += `\n`;
 
+  // 3. Rodoviário
   texto += `🚚 *RODOVIÁRIO (${manifestoPortos['v-rod'].length})*\n`;
   if (manifestoPortos['v-rod'].length === 0) texto += `_(Vazio)_\n`;
   manifestoPortos['v-rod'].forEach(hit => {
     if (hit) texto += `• *${hit.mun.seq}* - ${hit.mun.nome}\n`;
   });
 
+  // Copia para a área de transferência do celular/computador
   navigator.clipboard.writeText(texto).then(() => {
     alert('Texto do manifesto copiado! Agora é só ir no WhatsApp e colar.');
   }).catch(err => {
     alert('Erro ao copiar texto automaticamente. Verifique as permissões do navegador.');
   });
 }
-
-```
