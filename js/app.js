@@ -1,5 +1,5 @@
 /* ============================================================
-   RIVER OPS — TRIAGEM — APP.JS (VERSÃO ATUALIZADA)
+   RIVER OPS — TRIAGEM — APP.JS (VERSÃO FINAL UNIFICADA)
    ============================================================ */
 
 /* ── ÍNDICES ──────────────────────────────────────────────────
@@ -415,7 +415,6 @@ function renderMap() {
       nt.setAttribute('font-family', 'monospace'); nt.textContent = label; grp.appendChild(nt);
 
       if (ativo) {
-        // AJUSTE CRÍTICO DE AUTAZES: Garante envio limpo e exato da string de identificação
         grp.addEventListener('click', e => { 
           e.stopPropagation(); 
           showMapPopup(NODEIDX[String(m.seq).toUpperCase().trim()], p, T, label); 
@@ -428,15 +427,12 @@ function renderMap() {
   svg.appendChild(g);
 }
 
-/* ── POPUP DO MAPA ────────────────────────────────────────────
-   AJUSTE: Centralizado de forma absoluta e segura na tela para evitar cantos.
-   ------------------------------------------------------------ */
+/* ── POPUP DO MAPA ──────────────────────────────────────────── */
 function showMapPopup(hit, svgPt, transform, label) {
-  if (!hit) return; // Proteção contra nós nulos
+  if (!hit) return; 
   let popup = document.getElementById('map-popup');
   if (!popup) {
     popup = document.createElement('div'); popup.id = 'map-popup';
-    // Estilos inline originais preservados com correções absolutas de centralização estável
     popup.style.cssText = 'position:absolute;z-index:200;background:#12151b;border-radius:10px;padding:14px 16px;width:240px;box-shadow:0 4px 24px rgba(0,0,0,0.85);border:2px solid #232838;font-family:inherit;top:50%;left:50%;transform:translate(-50%, -50%);';
     document.getElementById('sc-m').appendChild(popup);
   }
@@ -558,12 +554,6 @@ function zR() { T = { s: 1, x: 0, y: 0 }; rotaFiltrada = null; renderMap(); buil
 /* ── ABA PORTOS ─────────────────────────────────────────────── */
 let manifestoPortos = { esc: [], rod: [], 'v-rod': [] };
 
-const LISTA_PADRAO_PORTOS = {
-  esc:     ['RAU9','RUC9','RAO9','RUR9','RRE9','RQI9','RPI9','RAN9','RNA9','RNO9','RDA9','RBR9','RTP9','RCR9','RJR9'].map(k => NODEIDX[k]).filter(Boolean),
-  rod:     ['RME9','RRA9','RBA9','RPA9','RCO9','RTE9','RAL9','RUA9','RAA9','RJA9','RFO9','RJT9','RIN9','RTO9','RAM9','RUI9','RBE9','RAT9','RUT9','RBC9','RSG9'].map(k => NODEIDX[k]).filter(Boolean),
-  'v-rod': ['RNH9','RBO9','RPU9','RMN9','RID9','RMP9','RPF9','RBL9','RPE9','RIT9','RNR9','RSV9','RIP9','RCC9','RAP9','RHM9','RLB9'].map(k => NODEIDX[k]).filter(Boolean)
-};
-
 function popularSeletorPortos() {
   const select = document.getElementById('p-select-mun'); if (!select) return; select.innerHTML = '';
   ROTAS.forEach(r => r.municipios.forEach(m => {
@@ -584,41 +574,49 @@ function removeMunPorto(porto, seq) {
   manifestoPortos[porto] = manifestoPortos[porto].filter(x => x && x.mun.seq !== seq); renderTabelaPortos();
 }
 
+function renderTabelaPortos() {
+  ['esc', 'rod', 'v-rod'].forEach(p => {
+    const container = document.querySelector('#col-' + p + ' .p-items-list'); if (!container) return;
+    container.innerHTML = '';
+    const titulo = document.querySelector('#col-' + p + ' .p-col-title');
+    if (titulo) {
+      const nomes = { esc: 'PORTO ESCADARIA', rod: 'PORTO ROADWAY', 'v-rod': 'RODOVIARIO' };
+      titulo.textContent = nomes[p] + ' (' + manifestoPortos[p].length + ')';
+    }
+    manifestoPortos[p].forEach(hit => {
+      if (!hit) return;
+      let item = document.createElement('div'); item.className = 'p-item';
+      item.innerHTML = '<span><b style="font-family:monospace">' + hit.mun.seq + '</b> - ' + hit.mun.nome + '</span><button onclick="removeMunPorto(\'' + p + '\',\'' + hit.mun.seq + '\')">X</button>';
+      container.appendChild(item);
+    });
+  });
+}
+
 function resetarTabelaPortos() {
-  // Limpa os manifestos para garantir uma distribuição limpa
   manifestoPortos.esc = [];
   manifestoPortos.rod = [];
   manifestoPortos['v-rod'] = [];
 
-  // Percorre todas as calhas e distribui os mais de 50 municípios
   ROTAS.forEach(r => {
     r.municipios.forEach(m => {
       const hit = NODEIDX[String(m.seq).toUpperCase().trim()];
       if (!hit) return;
 
-      // 1. Calhas de Malha Rodoviária (H e I) -> Coluna RODOVIÁRIO
+      // Terrestres e Rodoviários (H e I) -> RODOVIÁRIO
       if (r.num === 'H' || r.num === 'I') {
         manifestoPortos['v-rod'].push(hit);
       } 
-      // 2. Calhas de Médio e Alto Solimões (D e E) -> Coluna PORTO ROADWAY
+      // Médio e Alto Solimões (D e E) -> PORTO ROADWAY
       else if (r.num === 'D' || r.num === 'E') {
         manifestoPortos.rod.push(hit);
       } 
-      // 3. Restante das Calhas Fluviais (A, B, C, F, G, J) -> Coluna PORTO ESCADARIA
+      // Demais calhas fluviais (A, B, C, F, G, J) -> PORTO ESCADARIA
       else {
         manifestoPortos.esc.push(hit);
       }
     });
   });
 
-  // Atualiza as tabelas na tela com os novos totais
-  renderTabelaPortos();
-}
-
-function resetarTabelaPortos() {
-  manifestoPortos.esc = [...LISTA_PADRAO_PORTOS.esc];
-  manifestoPortos.rod = [...LISTA_PADRAO_PORTOS.rod];
-  manifestoPortos['v-rod'] = [...LISTA_PADRAO_PORTOS['v-rod']];
   renderTabelaPortos();
 }
 
@@ -645,11 +643,10 @@ function SS(name, btn) {
 }
 
 /* ── INICIALIZAÇÃO ──────────────────────────────────────────── */
-bRO();                 // 1. Monta a lista mestre de rotas primeiro
-resetarTabelaPortos(); // 2. Aloca 100% dos municípios cadastrados nas colunas
-renderRecentes();      // 3. Renderiza o histórico de bipes
+bRO();                 // 1. Estrutura as rotas primeiro
+resetarTabelaPortos(); // 2. Varre as rotas estruturadas e distribui todos os municípios pelas colunas
+renderRecentes();
 
-// Esconde as abas secundárias no carregamento inicial
 ['r', 'm', 'l'].forEach(s => {
   const el = document.getElementById('sc-' + s);
   if (el) { el.style.display = 'none'; el.className = 'scr h'; }
@@ -658,12 +655,12 @@ const scT = document.getElementById('sc-t');
 if (scT) { scT.style.display = ''; scT.className = 'scr'; }
 
 window.addEventListener('load', () => { const ci = document.getElementById('ci'); if (ci) ci.focus(); });
+
 /* ── COPIAR MANIFESTO COMO TEXTO PARA WHATSAPP ──────────────── */
 function copiarTextoWhatsapp() {
   let texto = `*FÁCIL EXPRESS LTDA · DESPACHO DIÁRIO*\n`;
   texto += `------------------------------------------\n\n`;
 
-  // 1. Porto Escadaria
   texto += `🚢 *PORTO ESCADARIA (${manifestoPortos.esc.length})*\n`;
   if (manifestoPortos.esc.length === 0) texto += `_(Vazio)_\n`;
   manifestoPortos.esc.forEach(hit => {
@@ -671,7 +668,6 @@ function copiarTextoWhatsapp() {
   });
   texto += `\n`;
 
-  // 2. Porto Roadway
   texto += `🚢 *PORTO ROADWAY (${manifestoPortos.rod.length})*\n`;
   if (manifestoPortos.rod.length === 0) texto += `_(Vazio)_\n`;
   manifestoPortos.rod.forEach(hit => {
@@ -679,14 +675,12 @@ function copiarTextoWhatsapp() {
   });
   texto += `\n`;
 
-  // 3. Rodoviário
   texto += `🚚 *RODOVIÁRIO (${manifestoPortos['v-rod'].length})*\n`;
   if (manifestoPortos['v-rod'].length === 0) texto += `_(Vazio)_\n`;
   manifestoPortos['v-rod'].forEach(hit => {
     if (hit) texto += `• *${hit.mun.seq}* - ${hit.mun.nome}\n`;
   });
 
-  // Copia para a área de transferência do celular/computador
   navigator.clipboard.writeText(texto).then(() => {
     alert('Texto do manifesto copiado! Agora é só ir no WhatsApp e colar.');
   }).catch(err => {
