@@ -1,5 +1,5 @@
 /* ============================================================
-   RIVER OPS — TRIAGEM — LÓGICA CORE CORRIGIDA SEM ERROS DE SINTAXE
+   RIVER OPS — TRIAGEM — LÓGICA CORE CORRIGIDA E ADAPTADA
    ============================================================ */
 
 const IDX={}; const SLAMIDX={}; const NODEIDX={};
@@ -8,7 +8,7 @@ ROTAS.forEach(r=>r.municipios.forEach((m,i)=>{
     prev:r.municipios[i-1]||null,
     next:r.municipios[i+1]||null};
   IDX[m.cep]=rec;
-  NODEIDX[String(m.seq)]=rec; // Indexação atrelada diretamente à sigla do Node Amazon
+  NODEIDX[String(m.seq)]=rec; // Mapeamento indexado diretamente à sigla do Destino Amazon
   if(m.slam){
     if(!SLAMIDX[m.slam]) SLAMIDX[m.slam]=[];
     SLAMIDX[m.slam].push(rec); 
@@ -81,11 +81,11 @@ function renderCard(hit){
     document.getElementById('ci').value = ''; document.getElementById('ci').focus();
   }, 3000);
 
-  rc.innerHTML='<div class="rcm" style="border:2px solid '+r.cor+'; border-radius:12px; padding:15px; background:#12151b;"><div style="display:flex; justify-content:space-between; align-items:center;"><div style="font-size:38px; font-weight:900; color:'+r.cor+'">'+m.seq+'</div><div style="background:'+r.cor+'; padding:5px 12px; border-radius:6px; font-weight:bold; color:#fff;">Rota '+r.num+'</div></div><div style="font-size:22px; font-weight:bold; margin:10px 0;">'+m.nome+'</div><div style="color:#737a8c; font-size:13px;">Transit Time: '+m.tt+' | Próxima Saída: '+nx.l+'</div></div>';
+  rc.innerHTML='<div class="rcm" style="border:2px solid '+r.cor+'; border-radius:12px; padding:15px; background:#12151b;"><div style="display:flex; justify-content:space-between; align-items:center;"><div style="font-size:36px; font-weight:900; color:'+r.cor+'">'+m.seq+'</div><div style="background:'+r.cor+'; padding:5px 12px; border-radius:6px; font-weight:bold; color:#fff;">Rota '+r.num+'</div></div><div style="font-size:22px; font-weight:bold; margin:10px 0;">'+m.nome+'</div><div style="color:#737a8c; font-size:13px;">Transit Time: '+m.tt+' | Próxima Saída: '+nx.l+'</div></div>';
   rc.className='show';
 }
 
-// ── ABA DE PORTOS COM TRAVAS DE SEGURANÇA E ESTRUTURA DIÁRIA DO CHECKLIST ──
+// ── ABA DE PORTOS PREENCHIDA COM OS CÓDIGOS OFICIAIS EXTRAÍDOS ──
 let manifestoPortos = { esc: [], rod: [], "v-rod": [] };
 
 const LISTA_PADRAO_PORTOS = {
@@ -160,7 +160,7 @@ function gerarImagemWhatsapp() {
   });
 }
 
-// ── DESENHO VETORIAL DO MAPA COM TRAÇADOS DO ID DA AMAZON AMPLIADOS ──
+// ── REDESENHO DO MAPA COM PROPORÇÕES RETANGULARES AJUSTADAS PARA AS SIGLAS ──
 let T={s:1,x:0,y:0},focR=null,mttTimer=null;
 function gR(n){return ROTAS.find(r=>r.num===n);}
 function renderMap(){
@@ -205,6 +205,7 @@ function renderMap(){
       const p=proj(ll.lat,ll.lng);
       const grp=document.createElementNS(NS,'g'); grp.style.cursor='pointer';
       
+      // 💻 PROPORÇÃO CORRIGIDA: Caixa alargada horizontalmente (38x16) para acomodar perfeitamente as 4 letras sem achatar!
       const bb=document.createElementNS(NS,'rect');
       bb.setAttribute('x',p.x-19); bb.setAttribute('y',p.y-8);
       bb.setAttribute('width','38'); bb.setAttribute('height','16');
