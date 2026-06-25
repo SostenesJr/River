@@ -276,34 +276,98 @@ function fR(q) {
    município. Permite navegar anterior/próximo sem fechar.
    Fecha ao clicar no X ou fora do modal.
    ------------------------------------------------------------ */
+Vi o problema! Na função `abrirModalRota` tem template literals aninhados que quebram no Chrome. Vou corrigir só essa função:
+
+```javascript
 function abrirModalRota(nodeSeq) {
   const hit = NODEIDX[nodeSeq]; if (!hit) return;
   const { rota: r, mun: m, prev, next, pos, total } = hit;
   const nb = bB(m.nome);
   const nx = nb ? labelDays(nb.days) : { l: '---', c: 'ns' };
 
-  // Remove modal anterior se existir
   const old = document.getElementById('modal-rota'); if (old) old.remove();
 
-  // Bloco do barco
-  const embInfo = nb ? `
-    <div style="margin-top:10px;padding:8px 12px;background:#0b0d11;border-radius:6px;border-left:3px solid ${r.cor};font-size:12px;color:#9ba3b4;">
-      <span style="color:#fff;font-weight:700;">🚢 ${nb.embarcacao}</span>
-      ${nb.porto ? `<span style="color:#737a8c;"> · ${nb.porto}</span>` : ''}
-      <span style="color:${r.cor};font-weight:700;"> · ${nx.l}</span>
-    </div>` : '';
+  // Info do barco
+  const embInfo = nb
+    ? '<div style="margin-top:10px;padding:8px 12px;background:#0b0d11;border-radius:6px;border-left:3px solid ' + r.cor + ';font-size:12px;color:#9ba3b4;">'
+    + '<span style="color:#fff;font-weight:700;">🚢 ' + nb.embarcacao + '</span>'
+    + (nb.porto ? '<span style="color:#737a8c;"> · ' + nb.porto + '</span>' : '')
+    + '<span style="color:' + r.cor + ';font-weight:700;"> · ' + nx.l + '</span>'
+    + '</div>'
+    : '';
+
+  // Navegação anterior
+  const prevHTML = prev
+    ? '<div style="font-size:12px;color:#9ba3b4;margin-bottom:6px;cursor:pointer;padding:4px;border-radius:4px;" onclick="abrirModalRota(\'' + prev.seq + '\')">'
+    + '⬅ <b style="color:#e8eaf0;font-family:monospace;">' + prev.seq + '</b> — ' + prev.nome
+    + '</div>'
+    : '<div style="font-size:12px;color:#2a2e3a;margin-bottom:6px;">⬅ Início da calha</div>';
+
+  // Navegação próximo
+  const nextHTML = next
+    ? '<div style="font-size:12px;color:#9ba3b4;margin-top:6px;cursor:pointer;padding:4px;border-radius:4px;" onclick="abrirModalRota(\'' + next.seq + '\')">'
+    + '➡ <b style="color:#e8eaf0;font-family:monospace;">' + next.seq + '</b> — ' + next.nome
+    + '</div>'
+    : '<div style="font-size:12px;color:#2a2e3a;margin-top:6px;">➡ Fim da calha</div>';
+
+  // Cor da próxima saída
+  const corNx = nx.c === 'nt' ? '#22c55e' : nx.c === 'nw' ? '#f59e0b' : '#9ba3b4';
 
   const overlay = document.createElement('div');
   overlay.id = 'modal-rota';
-  overlay.style.cssText = `
-    position:fixed;top:0;left:0;width:100%;height:100%;
-    background:rgba(0,0,0,0.78);z-index:999;
-    display:flex;align-items:center;justify-content:center;
-    padding:16px;box-sizing:border-box;`;
+  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.78);z-index:999;display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;';
 
-  overlay.innerHTML = `
-    <div style="background:#12151b;border-radius:14px;padding:20px;width:100%;max-width:420px;border:2px solid ${r.cor};box-shadow:0 8px 40px rgba(0,0,0,0.9);position:relative;">
+  overlay.innerHTML =
+    '<div style="background:#12151b;border-radius:14px;padding:20px;width:100%;max-width:420px;border:2px solid ' + r.cor + ';box-shadow:0 8px 40px rgba(0,0,0,0.9);position:relative;">'
 
+    // Botão fechar
+    + '<button onclick="document.getElementById(\'modal-rota\').remove()" style="position:absolute;top:12px;right:12px;background:#1a1e26;border:none;color:#737a8c;width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;font-weight:900;">✕</button>'
+
+    // Node + Calha + Posição
+    + '<div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">'
+    + '<div style="font-size:38px;font-weight:900;color:' + r.cor + ';font-family:monospace;letter-spacing:2px;">' + m.seq + '</div>'
+    + '<div>'
+    + '<div style="background:' + r.cor + ';padding:3px 10px;border-radius:5px;font-size:11px;font-weight:900;color:#fff;letter-spacing:1px;display:inline-block;">CALHA ' + r.nome.toUpperCase() + '</div>'
+    + '<div style="font-size:10px;color:#737a8c;margin-top:3px;">Pos. ' + pos + ' de ' + total + '</div>'
+    + '</div></div>'
+
+    // Nome
+    + '<div style="font-size:22px;font-weight:800;color:#e8eaf0;margin-bottom:14px;">' + m.nome + '</div>'
+
+    // Grid TT / Distância / Próxima Saída
+    + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">'
+    + '<div style="background:#0b0d11;border-radius:6px;padding:8px;text-align:center;">'
+    + '<div style="font-size:9px;color:#737a8c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Transit Time</div>'
+    + '<div style="font-size:18px;font-weight:900;color:' + r.cor + ';">' + m.tt + '</div></div>'
+
+    + '<div style="background:#0b0d11;border-radius:6px;padding:8px;text-align:center;">'
+    + '<div style="font-size:9px;color:#737a8c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Distância</div>'
+    + '<div style="font-size:18px;font-weight:900;color:#e8eaf0;">' + m.km + ' km</div></div>'
+
+    + '<div style="background:#0b0d11;border-radius:6px;padding:8px;text-align:center;">'
+    + '<div style="font-size:9px;color:#737a8c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Prox. Saída</div>'
+    + '<div style="font-size:18px;font-weight:900;color:' + corNx + ';">' + nx.l + '</div></div>'
+    + '</div>'
+
+    // Barco
+    + embInfo
+
+    // Navegação
+    + '<div style="margin-top:10px;padding:10px;background:#0b0d11;border-radius:6px;border:1px solid #1a1e26;">'
+    + '<div style="font-size:9px;color:#737a8c;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Navegação da Calha</div>'
+    + prevHTML
+    + '<div style="font-size:12px;color:' + r.cor + ';font-weight:700;padding:6px 4px;border-top:1px solid #1a1e26;border-bottom:1px solid #1a1e26;margin:2px 0;">● ' + m.nome + '</div>'
+    + nextHTML
+    + '</div>'
+
+    + '</div>';
+
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+```
+
+O problema era exatamente os **backticks aninhados** dentro de `overlay.innerHTML = \`...\``. Troquei tudo por **concatenação de strings** com `+` que o Chrome aceita sem erro. Substitui só essa função no seu `app.js`.
       <!-- Botão fechar -->
       <button onclick="document.getElementById('modal-rota').remove()"
         style="position:absolute;top:12px;right:12px;background:#1a1e26;border:none;color:#737a8c;width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;font-weight:900;display:flex;align-items:center;justify-content:center;">✕</button>
