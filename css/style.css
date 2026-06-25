@@ -193,17 +193,17 @@ html, body {
 /* MANIFESTO DE PORTOS (SISTEMA INTEGRADO E RESPONSIVO) */
 .p-layout { display: flex; flex-direction: column; gap: 15px; padding: 15px; }
 
-/* AJUSTE: Força a área do manifesto do print a manter largura e formato horizontais estruturados */
+/* AJUSTE MESTRE: Área secreta do print guardada fora do fluxo visual de dados */
 #capture-area {
   padding: 20px;
   background: #0b0d11;
   border-radius: 8px;
-  min-width: 900px; /* Trava o formato mestre horizontal (Modo Paisagem) */
-  width: 100%;
+  width: 950px; /* Mantém a proporção horizontal widescreen perfeita da imagem */
+  position: fixed;
+  left: -9999px; /* Oculta o container mestre para não quebrar a tela de edição */
   box-sizing: border-box;
 }
 
-/* Força as colunas a ficarem sempre em 3 blocos horizontais lado a lado na imagem */
 #capture-area .p-grid-3 { 
   display: grid !important;
   grid-template-columns: repeat(3, 1fr) !important; 
@@ -214,7 +214,15 @@ html, body {
   border: 1px solid #232838; 
 }
 
-.p-col { background: #1a1e26; border: 1px solid #232838; border-radius: 6px; padding: 10px; min-height: 120px; }
+/* Painel de preenchimento inteligente e responsivo */
+.p-view-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.p-col { background: #1a1e26; border: 1px solid #232838; border-radius: 6px; padding: 10px; min-height: 80px; }
 .p-col-title { font-weight: 800; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; text-align: center; padding-bottom: 8px; border-bottom: 2px solid #232838; margin-bottom: 10px; }
 .p-col-title.esc { color: #22d3ee; } 
 .p-col-title.rod { color: #f97316; } 
@@ -243,11 +251,16 @@ html, body {
 .sel-count { font-size: 12px; font-weight: 700; color: var(--ac); flex-shrink: 0; }
 .sel-chips { display: flex; flex-wrap: wrap; gap: 5px; flex: 1; overflow: hidden; max-height: 54px; overflow-y: auto; }
 
-/* CONDICIONAIS DE DIMENSIONAMENTO E MOBILE-FIRST */
-@media (max-width: 991px) { 
-  .p-layout {
-    overflow-x: auto; /* Permite arrastar para o lado no celular para conferência da foto antes do print */
+/* CONDICIONAIS DE DIMENSIONAMENTO E MEDIA QUERIES */
+@media (min-width: 992px) {
+  .p-view-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
   }
+}
+
+@media (max-width: 991px) { 
   .p-item { flex-wrap: nowrap !important; }
 }
 
