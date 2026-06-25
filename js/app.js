@@ -432,17 +432,30 @@ function gerarImagemWhatsapp() {
   });
 }
 
-/* NAVEGACAO */
 function SS(name, btn) {
   cur = name;
-  ['t', 'r', 'm', 'l'].forEach(s => { const el = document.getElementById('sc-' + s); if (el) el.className = (s === name) ? 'scr' : 'scr h'; });
+  ['t', 'r', 'm', 'l'].forEach(s => {
+    const el = document.getElementById('sc-' + s);
+    if (el) {
+      el.className = (s === name) ? 'scr' : 'scr h';
+      el.style.display = (s === name) ? '' : 'none';
+    }
+  });
   if (btn) { document.querySelectorAll('.htab').forEach(b => b.classList.remove('on')); btn.classList.add('on'); }
   ['t', 'r', 'm', 'l'].forEach(s => { const bt = document.getElementById('bt-' + s); if (bt) bt.classList.toggle('on', s === name); });
   if (name === 'm') { buildMapFilters(); renderMap(); initMapInteractions(); }
   if (name === 'l') { popularSeletorPortos(); renderTabelaPortos(); }
   if (name === 't') { setTimeout(() => { const ci = document.getElementById('ci'); if (ci) ci.focus(); }, 100); }
 }
-
 /* INIT */
 bRO(); resetarTabelaPortos(); renderRecentes();
+
+// Garante que só a aba triagem aparece ao carregar
+['r', 'm', 'l'].forEach(s => {
+  const el = document.getElementById('sc-' + s);
+  if (el) { el.style.display = 'none'; el.className = 'scr h'; }
+});
+const scT = document.getElementById('sc-t');
+if (scT) { scT.style.display = ''; scT.className = 'scr'; }
+
 window.addEventListener('load', () => { const ci = document.getElementById('ci'); if (ci) ci.focus(); });
