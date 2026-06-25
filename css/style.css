@@ -32,7 +32,7 @@ html, body {
   font-size: 14px;
   height: 100%;
   overflow-x: hidden;
-  overflow-y: auto; /* Correção: Permite rolagem da página quando o conteúdo esticar */
+  overflow-y: auto; /* Permite rolagem da página quando o conteúdo esticar */
 }
 
 /* ESTILIZAÇÃO DO HEADER (BARRA SUPERIOR) */
@@ -185,7 +185,6 @@ html, body {
 .mlr { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; cursor: pointer; border-radius: 4px; padding: 2px 3px; }
 .mlr:active { background: var(--s2); }
 .mlnum { width: 22px; height: 22px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0; }
-.mlnm { font-size: 10px; flex: 1; }
 .mlr.dim .mlnum, .mlr.dim .mlnm { opacity: .14; }
 #mtt { position: absolute; background: rgba(18,21,27,0.96); backdrop-filter: blur(6px); border: 1px solid var(--bd); border-radius: 8px; padding: 0; pointer-events: none; z-index: 100; display: none; min-width: 220px; box-shadow: 0 4px 20px rgba(0,0,0,.5); overflow: hidden; }
 #mtt.on { display: block; }
@@ -193,7 +192,7 @@ html, body {
 /* MANIFESTO DE PORTOS (SISTEMA INTEGRADO E RESPONSIVO) */
 .p-layout { display: flex; flex-direction: column; gap: 15px; padding: 15px; }
 
-/* AJUSTE MESTRE: Área secreta do print guardada fora do fluxo visual de dados */
+/* Área secreta do print guardada fora do fluxo visual de dados */
 #capture-area {
   padding: 20px;
   background: #0b0d11;
