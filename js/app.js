@@ -1,5 +1,5 @@
 /* ============================================================
-   RIVER OPS — TRIAGEM — APP.JS (VERSÃO ATUALIZADA)
+   RIVER OPS — TRIAGEM — APP.JS (VERSÃO FINAL UNIFICADA)
    ============================================================ */
 
 /* ── ÍNDICES ──────────────────────────────────────────────────
@@ -415,7 +415,6 @@ function renderMap() {
       nt.setAttribute('font-family', 'monospace'); nt.textContent = label; grp.appendChild(nt);
 
       if (ativo) {
-        // AJUSTE CRÍTICO DE AUTAZES: Garante envio limpo e exato da string de identificação
         grp.addEventListener('click', e => { 
           e.stopPropagation(); 
           showMapPopup(NODEIDX[String(m.seq).toUpperCase().trim()], p, T, label); 
@@ -428,15 +427,12 @@ function renderMap() {
   svg.appendChild(g);
 }
 
-/* ── POPUP DO MAPA ────────────────────────────────────────────
-   AJUSTE: Centralizado de forma absoluta e segura na tela para evitar cantos.
-   ------------------------------------------------------------ */
+/* ── POPUP DO MAPA ──────────────────────────────────────────── */
 function showMapPopup(hit, svgPt, transform, label) {
-  if (!hit) return; // Proteção contra nós nulos
+  if (!hit) return; 
   let popup = document.getElementById('map-popup');
   if (!popup) {
     popup = document.createElement('div'); popup.id = 'map-popup';
-    // Estilos inline originais preservados com correções absolutas de centralização estável
     popup.style.cssText = 'position:absolute;z-index:200;background:#12151b;border-radius:10px;padding:14px 16px;width:240px;box-shadow:0 4px 24px rgba(0,0,0,0.85);border:2px solid #232838;font-family:inherit;top:50%;left:50%;transform:translate(-50%, -50%);';
     document.getElementById('sc-m').appendChild(popup);
   }
@@ -558,12 +554,6 @@ function zR() { T = { s: 1, x: 0, y: 0 }; rotaFiltrada = null; renderMap(); buil
 /* ── ABA PORTOS ─────────────────────────────────────────────── */
 let manifestoPortos = { esc: [], rod: [], 'v-rod': [] };
 
-const LISTA_PADRAO_PORTOS = {
-  esc:     ['RAU9','RUC9','RAO9','RUR9','RRE9','RQI9','RPI9','RAN9','RNA9','RNO9','RDA9','RBR9','RTP9','RCR9','RJR9'].map(k => NODEIDX[k]).filter(Boolean),
-  rod:     ['RME9','RRA9','RBA9','RPA9','RCO9','RTE9','RAL9','RUA9','RAA9','RJA9','RFO9','RJT9','RIN9','RTO9','RAM9','RUI9','RBE9','RAT9','RUT9','RBC9','RSG9'].map(k => NODEIDX[k]).filter(Boolean),
-  'v-rod': ['RNH9','RBO9','RPU9','RMN9','RID9','RMP9','RPF9','RBL9','RPE9','RIT9','RNR9','RSV9','RIP9','RCC9','RAP9','RHM9','RLB9'].map(k => NODEIDX[k]).filter(Boolean)
-};
-
 function popularSeletorPortos() {
   const select = document.getElementById('p-select-mun'); if (!select) return; select.innerHTML = '';
   ROTAS.forEach(r => r.municipios.forEach(m => {
@@ -584,15 +574,18 @@ function removeMunPorto(porto, seq) {
   manifestoPortos[porto] = manifestoPortos[porto].filter(x => x && x.mun.seq !== seq); renderTabelaPortos();
 }
 
+/* AJUSTE MESTRE DE CORRESPONDÊNCIA: Casado diretamente com os IDs de coluna do seu HTML mestre */
 function renderTabelaPortos() {
   ['esc', 'rod', 'v-rod'].forEach(p => {
     const container = document.querySelector('#col-' + p + ' .p-items-list'); if (!container) return;
     container.innerHTML = '';
+    
     const titulo = document.querySelector('#col-' + p + ' .p-col-title');
     if (titulo) {
       const nomes = { esc: 'PORTO ESCADARIA', rod: 'PORTO ROADWAY', 'v-rod': 'RODOVIARIO' };
       titulo.textContent = nomes[p] + ' (' + manifestoPortos[p].length + ')';
     }
+    
     manifestoPortos[p].forEach(hit => {
       if (!hit) return;
       let item = document.createElement('div'); item.className = 'p-item';
@@ -602,10 +595,32 @@ function renderTabelaPortos() {
   });
 }
 
+/* AJUSTE LOGÍSTICO: Mapeamento dinâmico instantâneo de todos os municípios de ROTAS sem travas estáticas */
 function resetarTabelaPortos() {
-  manifestoPortos.esc = [...LISTA_PADRAO_PORTOS.esc];
-  manifestoPortos.rod = [...LISTA_PADRAO_PORTOS.rod];
-  manifestoPortos['v-rod'] = [...LISTA_PADRAO_PORTOS['v-rod']];
+  manifestoPortos.esc = [];
+  manifestoPortos.rod = [];
+  manifestoPortos['v-rod'] = [];
+
+  ROTAS.forEach(r => {
+    r.municipios.forEach(m => {
+      const hit = NODEIDX[String(m.seq).toUpperCase().trim()];
+      if (!hit) return;
+
+      // Terrestres e Rodoviários (Calhas H e I) -> RODOVIÁRIO
+      if (r.num === 'H' || r.num === 'I') {
+        manifestoPortos['v-rod'].push(hit);
+      } 
+      // Médio e Alto Solimões (Calhas D e E) -> PORTO ROADWAY
+      else if (r.num === 'D' || r.num === 'E') {
+        manifestoPortos.rod.push(hit);
+      } 
+      // Demais calhas fluviais do estado -> PORTO ESCADARIA
+      else {
+        manifestoPortos.esc.push(hit);
+      }
+    });
+  });
+
   renderTabelaPortos();
 }
 
@@ -613,41 +628,30 @@ function gerarImagemWhatsapp() {
   const area = document.getElementById('capture-area');
   if (typeof html2canvas === 'undefined') { alert('html2canvas nao carregado.'); return; }
   
-  // Executa o print forçando a escala horizontal limpa
   html2canvas(area, { backgroundColor: '#0b0d11', scale: 2 }).then(canvas => {
     canvas.toBlob(blob => {
       if (!blob) { alert('Erro ao gerar imagem.'); return; }
       
       try {
-        // Tenta o método direto (Ideal para Computador/Alguns Celulares)
         const data = [new ClipboardItem({ 'image/png': blob })];
         navigator.clipboard.write(data).then(() => {
           alert('Imagem do manifesto HORIZONTAL copiada com sucesso! Vá ao WhatsApp e aperte Colar.');
         }).catch(err => {
-          // PLANO B AUTOMÁTICO PARA CELULAR (Se o navegador bloquear o clipboard)
           abrirImagemParaCopiaManual(canvas.toDataURL('image/png'));
         });
       } catch (e) {
-        // PLANO B AUTOMÁTICO PARA NAVEGADORES ANTIGOS
         abrirImagemParaCopiaManual(canvas.toDataURL('image/png'));
       }
     }, 'image/png');
   });
 }
 
-/* Função auxiliar de segurança para renderizar o print na tela do celular */
 function abrirImagemParaCopiaManual(dataUrl) {
-  // Remove popup anterior se o operador clicou duas vezes
   const old = document.getElementById('popup-print-seguro'); if (old) old.remove();
 
   const overlay = document.createElement('div');
   overlay.id = 'popup-print-seguro';
-  overlay.style.cssText = `
-    position:fixed; top:0; left:0; width:100%; height:100%;
-    background:rgba(0,0,0,0.9); z-index:9999;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    padding:16px; box-sizing:border-box;
-  `;
+  overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:16px; box-sizing:border-box;';
 
   overlay.innerHTML = `
     <div style="text-align:center; color:#fff; font-size:13px; font-weight:700; margin-bottom:12px; background:#14b8a6; padding:8px 14px; border-radius:6px;">
@@ -664,6 +668,7 @@ function abrirImagemParaCopiaManual(dataUrl) {
 
   document.body.appendChild(overlay);
 }
+
 /* ── NAVEGAÇÃO ENTRE ABAS ───────────────────────────────────── */
 function SS(name, btn) {
   cur = name;
@@ -678,7 +683,7 @@ function SS(name, btn) {
   if (name === 't') { setTimeout(() => { const ci = document.getElementById('ci'); if (ci) ci.focus(); }, 100); }
 }
 
-/* ── INICIALIZAÇÃO ──────────────────────────────────────────── */
+/* ── INICIALIZAÇÃO CORRIGIDA ────────────────────────────────── */
 bRO();
 resetarTabelaPortos();
 renderRecentes();
@@ -691,12 +696,12 @@ const scT = document.getElementById('sc-t');
 if (scT) { scT.style.display = ''; scT.className = 'scr'; }
 
 window.addEventListener('load', () => { const ci = document.getElementById('ci'); if (ci) ci.focus(); });
+
 /* ── COPIAR MANIFESTO COMO TEXTO PARA WHATSAPP ──────────────── */
 function copiarTextoWhatsapp() {
   let texto = `*FÁCIL EXPRESS LTDA · DESPACHO DIÁRIO*\n`;
   texto += `------------------------------------------\n\n`;
 
-  // 1. Porto Escadaria
   texto += `🚢 *PORTO ESCADARIA (${manifestoPortos.esc.length})*\n`;
   if (manifestoPortos.esc.length === 0) texto += `_(Vazio)_\n`;
   manifestoPortos.esc.forEach(hit => {
@@ -704,7 +709,6 @@ function copiarTextoWhatsapp() {
   });
   texto += `\n`;
 
-  // 2. Porto Roadway
   texto += `🚢 *PORTO ROADWAY (${manifestoPortos.rod.length})*\n`;
   if (manifestoPortos.rod.length === 0) texto += `_(Vazio)_\n`;
   manifestoPortos.rod.forEach(hit => {
@@ -712,14 +716,12 @@ function copiarTextoWhatsapp() {
   });
   texto += `\n`;
 
-  // 3. Rodoviário
   texto += `🚚 *RODOVIÁRIO (${manifestoPortos['v-rod'].length})*\n`;
   if (manifestoPortos['v-rod'].length === 0) texto += `_(Vazio)_\n`;
   manifestoPortos['v-rod'].forEach(hit => {
     if (hit) texto += `• *${hit.mun.seq}* - ${hit.mun.nome}\n`;
   });
 
-  // Copia para a área de transferência do celular/computador
   navigator.clipboard.writeText(texto).then(() => {
     alert('Texto do manifesto copiado! Agora é só ir no WhatsApp e colar.');
   }).catch(err => {
