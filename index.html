@@ -11,11 +11,12 @@
   .p-layout { display:flex; flex-direction:column; gap:15px; padding:15px; }
   .p-grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; background:#12151b; padding:15px; border-radius:8px; border:1px solid #232838; }
   
-  /* AJUSTE RESPONSIVO MOBILE CRÍTICO PARA A ABA PORTOS */
+  /* AJUSTE RESPONSIVO MOBILE CORRIGIDO (SEM TRAVAR O RODOVIÁRIO) */
   @media (max-width:991px) { 
     .p-grid-3 { grid-template-columns:1fr !important; } 
-    .p-item { flex-wrap: wrap !important; gap: 4px !important; }
-    .p-item span { min-width: 150px; }
+    .p-col { min-height: auto !important; margin-bottom: 10px; }
+    .p-item { flex-wrap: wrap !important; gap: 6px !important; }
+    .p-item span { min-width: 120px; word-break: break-all; }
   }
   
   .p-col { background:#1a1e26; border:1px solid #232838; border-radius:6px; padding:10px; min-height:120px; }
@@ -31,7 +32,7 @@
   .p-btn-add { background:#14b8a6; border:none; color:#fff; padding:0 18px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:13px; white-space:nowrap; }
   @media (max-width:480px) { .p-select-row { flex-direction:column; } .p-btn-add { padding:10px; } }
   .whatsapp-btn { background:#22c55e; border:none; color:white; padding:12px; font-weight:bold; border-radius:6px; flex:1; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; gap:8px; }
-  .p-action-row { display:flex; gap:10px; margin-top:5px; }
+  .p-action-row { display:flex; gap:10px; margin-top:5px; flex-wrap:wrap; }
   .p-btn-reset { background:#334155; border:none; color:#e8eaf0; padding:0 16px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:13px; white-space:nowrap; }
   /* CARD */
   #rcard.show .rcm { animation:fadeUp .2s ease; }
@@ -147,7 +148,8 @@
         </div>
       </div>
       <div class="p-action-row">
-        <button class="whatsapp-btn" onclick="gerarImagemWhatsapp()">📸 Gerar Imagem para WhatsApp</button>
+        <button class="whatsapp-btn" onclick="gerarImagemWhatsapp()">📸 Gerar Imagem</button>
+        <button class="whatsapp-btn" style="background:#0284c7;" onclick="copiarTextoWhatsapp()">📋 Copiar Texto para WhatsApp</button>
         <button class="p-btn-reset" onclick="resetarTabelaPortos()">⟲ Resetar</button>
       </div>
     </div>
