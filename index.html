@@ -5,6 +5,23 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>RIVER OPS · Triagem</title>
 <link rel="stylesheet" href="css/style.css">
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<style>
+  .p-layout { display: flex; flex-direction: column; gap: 15px; padding: 15px; }
+  .p-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; background: #12151b; padding: 15px; border-radius: 8px; border: 1px solid #232838; }
+  .p-col { background: #1a1e26; border: 1px solid #232838; border-radius: 6px; padding: 10px; min-height: 250px; }
+  .p-col-title { font-weight: 800; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; text-align: center; padding-bottom: 8px; border-bottom: 2px solid #232838; margin-bottom: 10px; }
+  .p-col-title.esc { color: #22d3ee; } .p-col-title.rod { color: #f97316; } .p-col-title.v-rod { color: #ff6644; }
+  .p-item { background: #12151b; border: 1px solid #232838; border-radius: 4px; padding: 6px 10px; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; }
+  .p-item button { background: none; border: none; color: #ef4444; font-weight: bold; cursor: pointer; font-size: 14px; }
+  .p-pool { background: #1a1e26; border: 1px solid #232838; border-radius: 6px; padding: 15px; }
+  .p-pool-title { font-size: 11px; font-weight: bold; color: #737a8c; text-transform: uppercase; margin-bottom: 10px; }
+  .p-select-row { display: flex; gap: 10px; margin-bottom: 15px; }
+  .p-select { flex: 1; background: #12151b; border: 1px solid #232838; color: #e8eaf0; padding: 10px; border-radius: 6px; outline: none; font-size: 13px; }
+  .p-btn-add { background: #14b8a6; border: none; color: #fff; padding: 0 20px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+  .whatsapp-btn { background: #22c55e; border: none; color: white; padding: 12px; font-weight: bold; border-radius: 6px; width: 100%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  @media (max-width: 767px) { .p-grid-3 { grid-template-columns: 1fr; } }
+</style>
 </head>
 <body>
 
@@ -15,77 +32,97 @@
     <div style="font-size:13px;font-weight:900;color:var(--ac);letter-spacing:.04em;margin-top:2px">FACIL EXPRESS LTDA</div>
   </div>
   <div class="htabs">
-    <button class="htab on" onclick="SS('t',this)">&#9889; Triagem</button>
-    <button class="htab" onclick="SS('r',this)">&#128203; Rotas</button>
-    <button class="htab" onclick="SS('m',this)">&#128506; Mapa</button>
-    <button class="htab" onclick="SS('p',this)">&#128424; Guia</button>
+    <button class="htab on" onclick="SS('t',this)">⚡ Triagem</button>
+    <button class="htab" onclick="SS('r',this)">📋 Rotas</button>
+    <button class="htab" onclick="SS('m',this)">🗺️ Mapa</button>
+    <button class="htab" onclick="SS('l',this)">🚢 Portos</button>
+    <button class="htab" onclick="SS('p',this)">🗂️ Guia</button>
   </div>
-  <div class="hbg" id="hbg">10 ROTAS &middot; 57 MUN.</div>
+  <div class="hbg" id="hbg">BUSCA POR NODE ACTIVADA</div>
 </div>
 
 <div id="btabs">
   <div class="brow">
-    <button class="btab on" id="bt-t" onclick="SS('t',null,'bt-t')"><span class="bti">&#9889;</span>Triagem</button>
-    <button class="btab" id="bt-r" onclick="SS('r',null,'bt-r')"><span class="bti">&#128203;</span>Rotas</button>
-    <button class="btab" id="bt-m" onclick="SS('m',null,'bt-m')"><span class="bti">&#128506;</span>Mapa</button>
-    <button class="btab" id="bt-p" onclick="SS('p',null,'bt-p')"><span class="bti">&#128424;</span>Guia</button>
+    <button class="btab on" id="bt-t" onclick="SS('t',null,'bt-t')"><span class="bti">⚡</span>Triagem</button>
+    <button class="btab" id="bt-r" onclick="SS('r',null,'bt-r')"><span class="bti">📋</span>Rotas</button>
+    <button class="btab" id="bt-m" onclick="SS('m',null,'bt-m')"><span class="bti">🗺️</span>Mapa</button>
+    <button class="btab" id="bt-l" onclick="SS('l',null,'bt-l')"><span class="bti">🚢</span>Portos</button>
+    <button class="btab" id="bt-p" onclick="SS('p',null,'bt-p')"><span class="bti">🗂️</span>Guia</button>
   </div>
 </div>
 
 <div id="app">
-  
   <div class="scr" id="sc-t">
     <div class="csec">
-      <label class="clbl">5 primeiros digitos do CEP da etiqueta</label>
-      <input id="ci" type="text" placeholder="CEP ou SLAM" autocomplete="off" spellcheck="false" oninput="onCI(this.value)" onkeydown="onK(event)">
-      <div class="chint">Digite o CEP (5 digitos) OU a sigla SLAM (ex: RTE9)<br>Rota = papelao no chao &nbsp;|&nbsp; Posicao = sequencia na calha &nbsp;|&nbsp; erro: buscar cidade anterior/proxima</div>
+      <label class="clbl">DIGITE OU BIPE APENAS O NÚMERO DO NODE</label>
+      <input id="ci" type="text" placeholder="EX: 21, 43, 55" autocomplete="off" spellcheck="false" oninput="onCI(this.value)" onkeydown="onK(event)">
+      <div class="chint">A busca agora responde diretamente ao ID sequencial do município.</div>
     </div>
     <div id="rcard"></div>
     <div class="recb" id="recb"><div class="rect">Buscas recentes</div><div class="chips" id="rchp"></div></div>
   </div>
 
   <div class="scr h" id="sc-r">
-    <div class="rhdr"><div class="rsw"><span class="rsi">&#9901;</span><input type="text" placeholder="Buscar municipio, CEP ou numero de rota..." oninput="fR(this.value)"></div></div>
+    <div class="rhdr"><div class="rsw"><span class="rsi">🔍</span><input type="text" placeholder="Buscar municipio..." oninput="fR(this.value)"></div></div>
     <div class="rbdy" id="rbdy"></div>
   </div>
 
   <div class="scr h" id="sc-m">
     <svg id="msvg" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg"></svg>
-    <div class="mc2"><button class="mcb" onclick="zI()">+</button><button class="mcb" onclick="zO()">-</button><button class="mcb" onclick="zR()">&#8635;</button></div>
-    <div id="mleg"></div>
-    <div id="mtt"></div>
+    <div class="mc2"><button class="mcb" onclick="zI()">+</button><button class="mcb" onclick="zO()">-</button><button class="mcb" onclick="zR()">⟳</button></div>
+    <div id="mleg"></div><div id="mtt"></div>
+  </div>
+
+  <div class="scr h" id="sc-l">
+    <div class="p-layout">
+      <div class="p-pool">
+        <div class="p-pool-title">Adicionar Município ao Manifesto de Saída</div>
+        <div class="p-select-row">
+          <select id="p-select-mun" class="p-select"></select>
+          <select id="p-select-target" class="p-select">
+            <option value="esc">PORTO ESCADARIA</option>
+            <option value="rod">PORTO ROADWAY</option>
+            <option value="v-rod">RODOVIÁRIO</option>
+          </select>
+          <button class="p-btn-add" onclick="addMunToPorto()">+ Vincular</button>
+        </div>
+      </div>
+
+      <div id="capture-area" style="padding: 15px; background: #0b0d11;">
+        <div style="text-align: center; font-weight: 900; font-size: 14px; color: #14b8a6; margin-bottom: 12px; letter-spacing: 1px;">FACIL EXPRESS LTDA - DESPACHO DIÁRIO</div>
+        <div class="p-grid-3">
+          <div class="p-col" id="col-esc">
+            <div class="p-col-title esc">PORTO ESCADARIA</div>
+            <div class="p-items-list"></div>
+          </div>
+          <div class="p-col" id="col-rod">
+            <div class="p-col-title rod">PORTO ROADWAY</div>
+            <div class="p-items-list"></div>
+          </div>
+          <div class="p-col" id="col-v-rod">
+            <div class="p-col-title v-rod">RODOVIÁRIO</div>
+            <div class="p-items-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 5px;">
+        <button class="whatsapp-btn" onclick="gerarImagemWhatsapp()">📸 Gerar Imagem para o WhatsApp</button>
+        <button class="p-btn-add" style="background: #334155; padding: 0 15px;" onclick="resetarTabelaPortos()">⟲ Resetar</button>
+      </div>
+    </div>
   </div>
 
   <div class="scr h" id="sc-p">
     <div class="ph">
-      <div class="ph-text">
-        <div style="font-size:16px;font-weight:800;color:var(--ac)">Guia RIVER - Triagem por Calha</div>
-        <div style="font-size:11px;color:var(--mu);line-height:1.5">Este guia ja esta pronto na tela abaixo. <b>No celular:</b> tire um print e mande no WhatsApp. <b>No computador:</b> Ctrl+P imprime ou salva em PDF.</div>
-      </div>
-      <button class="pbtn" onclick="printGuide()">🖨 Tentar imprimir agora</button>
+      <div class="ph-text"><div style="font-size:16px;font-weight:800;color:var(--ac)">Guia RIVER</div></div>
+      <button class="pbtn" onclick="printGuide()">🖨 Imprimir</button>
     </div>
     <div class="pgrid" id="pgrid"></div>
   </div>
 </div>
 
-<div id="sel-bar">
-  <span class="sel-count" id="sel-count">0 selecionados</span>
-  <div class="sel-chips" id="sel-chips"></div>
-  <div class="sel-actions">
-    <button class="sel-btn sel-btn-clear" onclick="clearSel()">✕ Limpar</button>
-    <button class="sel-btn sel-btn-view" onclick="openSelPanel()">Ver Rotas →</button>
-  </div>
-</div>
-
-<div id="sel-panel">
-  <div class="sp-hdr">
-    <span class="sp-ttl" id="sp-ttl">Rotas Selecionadas</span>
-    <button class="sp-close" onclick="closeSelPanel()">✕ Fechar</button>
-  </div>
-  <div class="sp-body" id="sp-body"></div>
-</div>
-
-<div id="sh"><div class="shdl"></div><button class="shcl" onclick="cSh()">fechar x</button><div id="shc"></div></div>
+<div id="sh"><div class="shdl"></div><button class="shcl" onclick="cSh()">x</button><div id="shc"></div></div>
 
 <script src="js/data.js"></script>
 <script src="js/app.js"></script>
