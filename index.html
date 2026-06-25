@@ -92,15 +92,19 @@
     <div class="rbdy" id="rbdy"></div>
   </div>
 
-  <!-- MAPA -->
-  <div class="scr h" id="sc-m" style="position:relative;">
-    <svg id="msvg" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg"></svg>
-    <div class="mc2">
+ <!-- ABA MAPA -->
+ <div class="scr h" id="sc-m" style="position:relative;display:flex;flex-direction:column;">
+  <div style="display:flex;align-items:center;gap:6px;padding:8px 10px;background:#0b0d11;border-bottom:1px solid #1a1e26;flex-shrink:0;flex-wrap:wrap;">
+    <span style="font-size:10px;color:#737a8c;font-weight:700;letter-spacing:1px;white-space:nowrap;">ROTA:</span>
+    <div id="map-filters" style="display:flex;gap:4px;flex-wrap:wrap;flex:1;"></div>
+    <div style="display:flex;gap:4px;flex-shrink:0;">
       <button class="mcb" onclick="zI()">+</button>
-      <button class="mcb" onclick="zO()">−</button>
-      <button class="mcb" onclick="zR()">⟳</button>
+      <button class="mcb" onclick="zO()">-</button>
+      <button class="mcb" onclick="zR()">&#x27F3;</button>
     </div>
   </div>
+  <svg id="msvg" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" style="flex:1;width:100%;"></svg>
+</div>
 
   <!-- PORTOS -->
   <div class="scr h" id="sc-l">
