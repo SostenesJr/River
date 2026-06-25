@@ -612,11 +612,38 @@ function resetarTabelaPortos() {
 function gerarImagemWhatsapp() {
   const area = document.getElementById('capture-area');
   if (typeof html2canvas === 'undefined') { alert('html2canvas nao carregado.'); return; }
+  
+  // Executa o print forçando a escala horizontal limpa
   html2canvas(area, { backgroundColor: '#0b0d11', scale: 2 }).then(canvas => {
-    let link = document.createElement('a'); link.download = 'despacho-facil-express.png'; link.href = canvas.toDataURL(); link.click();
+    canvas.toBlob(blob => {
+      if (!blob) { alert('Erro ao gerar imagem.'); return; }
+      
+      // Cria o item de cópia contendo o arquivo de imagem gerado
+      const item = new DataTransfer();
+      
+      try {
+        navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': blob })
+        ]).then(() => {
+          alert('Imagem do manifesto em formato HORIZONTAL copiada! Vá ao WhatsApp e aperte Colar (Ctrl+V).');
+        }).catch(err => {
+          // Fallback seguro caso o navegador bloqueie a cópia direta de arquivos
+          let link = document.createElement('a'); 
+          link.download = 'despacho-facil-express.png'; 
+          link.href = canvas.toDataURL(); 
+          link.click();
+          alert('Navegador barrou a cópia direta. O arquivo horizontal foi baixado automaticamente na sua galeria!');
+        });
+      } catch (e) {
+        // Fallback para navegadores antigos
+        let link = document.createElement('a'); 
+        link.download = 'despacho-facil-express.png'; 
+        link.href = canvas.toDataURL(); 
+        link.click();
+      }
+    }, 'image/png');
   });
 }
-
 /* ── NAVEGAÇÃO ENTRE ABAS ───────────────────────────────────── */
 function SS(name, btn) {
   cur = name;
