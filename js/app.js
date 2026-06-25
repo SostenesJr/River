@@ -618,31 +618,51 @@ function gerarImagemWhatsapp() {
     canvas.toBlob(blob => {
       if (!blob) { alert('Erro ao gerar imagem.'); return; }
       
-      // Cria o item de cópia contendo o arquivo de imagem gerado
-      const item = new DataTransfer();
-      
       try {
-        navigator.clipboard.write([
-          new ClipboardItem({ 'image/png': blob })
-        ]).then(() => {
-          alert('Imagem do manifesto em formato HORIZONTAL copiada! Vá ao WhatsApp e aperte Colar (Ctrl+V).');
+        // Tenta o método direto (Ideal para Computador/Alguns Celulares)
+        const data = [new ClipboardItem({ 'image/png': blob })];
+        navigator.clipboard.write(data).then(() => {
+          alert('Imagem do manifesto HORIZONTAL copiada com sucesso! Vá ao WhatsApp e aperte Colar.');
         }).catch(err => {
-          // Fallback seguro caso o navegador bloqueie a cópia direta de arquivos
-          let link = document.createElement('a'); 
-          link.download = 'despacho-facil-express.png'; 
-          link.href = canvas.toDataURL(); 
-          link.click();
-          alert('Navegador barrou a cópia direta. O arquivo horizontal foi baixado automaticamente na sua galeria!');
+          // PLANO B AUTOMÁTICO PARA CELULAR (Se o navegador bloquear o clipboard)
+          abrirImagemParaCopiaManual(canvas.toDataURL('image/png'));
         });
       } catch (e) {
-        // Fallback para navegadores antigos
-        let link = document.createElement('a'); 
-        link.download = 'despacho-facil-express.png'; 
-        link.href = canvas.toDataURL(); 
-        link.click();
+        // PLANO B AUTOMÁTICO PARA NAVEGADORES ANTIGOS
+        abrirImagemParaCopiaManual(canvas.toDataURL('image/png'));
       }
     }, 'image/png');
   });
+}
+
+/* Função auxiliar de segurança para renderizar o print na tela do celular */
+function abrirImagemParaCopiaManual(dataUrl) {
+  // Remove popup anterior se o operador clicou duas vezes
+  const old = document.getElementById('popup-print-seguro'); if (old) old.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'popup-print-seguro';
+  overlay.style.cssText = `
+    position:fixed; top:0; left:0; width:100%; height:100%;
+    background:rgba(0,0,0,0.9); z-index:9999;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:16px; box-sizing:border-box;
+  `;
+
+  overlay.innerHTML = `
+    <div style="text-align:center; color:#fff; font-size:13px; font-weight:700; margin-bottom:12px; background:#14b8a6; padding:8px 14px; border-radius:6px;">
+      📱 TOQUE E SEGURE NA IMAGEM ABAIXO PARA COPIAR OU SALVAR
+    </div>
+    <div style="width:100%; max-width:500px; overflow-x:auto; background:#12151b; padding:10px; border-radius:8px; border:1px solid #232838; box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+      <img src="${dataUrl}" style="width:100%; height:auto; display:block; border-radius:4px;" />
+    </div>
+    <button onclick="document.getElementById('popup-print-seguro').remove()" 
+      style="margin-top:16px; padding:10px 20px; background:#ef4444; border:none; color:#fff; font-weight:bold; border-radius:6px; cursor:pointer; width:100%; max-width:200px;">
+      VOLTAR PRO APP
+    </button>
+  `;
+
+  document.body.appendChild(overlay);
 }
 /* ── NAVEGAÇÃO ENTRE ABAS ───────────────────────────────────── */
 function SS(name, btn) {
