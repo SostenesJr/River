@@ -11,17 +11,8 @@ ROTAS.forEach(r => r.municipios.forEach((m, i) => {
   if (m.slam) { if (!SLAMIDX[m.slam]) SLAMIDX[m.slam] = []; SLAMIDX[m.slam].push(rec); }
 }));
 
-/* AUDIO */
-let audioCtx = null;
-function getAudioCtx() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
-function emitirBipe(sucesso) {
-  try {
-    const ctx = getAudioCtx(); const osc = ctx.createOscillator(); const gain = ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination);
-    if (sucesso) { osc.frequency.setValueAtTime(880, ctx.currentTime); gain.gain.setValueAtTime(0.1, ctx.currentTime); osc.start(); osc.stop(ctx.currentTime + 0.08); }
-    else { osc.type = 'sawtooth'; osc.frequency.setValueAtTime(220, ctx.currentTime); gain.gain.setValueAtTime(0.15, ctx.currentTime); osc.start(); osc.stop(ctx.currentTime + 0.35); }
-  } catch (e) {}
-}
+/* ESTADO */
+let ultimaRotaAtiva = null; let timerAutoLimpeza = null; let cur = 't';
 
 /* bB: proxima saida de barco */
 function normKey(s) { return s.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
@@ -53,9 +44,6 @@ function labelDays(d) {
   return { l: 'em ' + d + 'd', c: 'ns' };
 }
 
-/* ESTADO */
-let ultimaRotaAtiva = null; let timerAutoLimpeza = null; let cur = 't';
-
 /* TRIAGEM */
 function onCI(v) {
   const text = v.trim().toUpperCase();
@@ -65,43 +53,90 @@ function onCI(v) {
 function lookupNode(nodeId) { const hit = NODEIDX[nodeId]; if (hit) renderCard(hit); }
 function onK(e) {
   const v = document.getElementById('ci').value.trim().toUpperCase();
-  if (e.key === 'Enter' && v) { if (NODEIDX[v]) lookupNode(v); else { emitirBipe(false); flashError(); } }
+  if (e.key === 'Enter' && v) {
+    if (NODEIDX[v]) lookupNode(v);
+    else { flashError(); }
+  }
 }
 function flashError() {
   const ci = document.getElementById('ci'); ci.style.borderColor = '#ef4444';
   setTimeout(() => { ci.style.borderColor = ''; }, 600);
 }
+
 function renderCard(hit) {
-  const rc = document.getElementById('rcard'); const { rota: r, mun: m } = hit;
+  const rc = document.getElementById('rcard');
+  const { rota: r, mun: m, prev, next, pos, total } = hit;
   const nb = bB(m.nome); const nx = nb ? labelDays(nb.days) : { l: '---', c: 'ns' };
-  if (ultimaRotaAtiva === null || ultimaRotaAtiva === r.num) emitirBipe(true); else emitirBipe(false);
   ultimaRotaAtiva = r.num;
+
+  // Cancela timer anterior e define novo de 15 segundos
   if (timerAutoLimpeza) clearTimeout(timerAutoLimpeza);
   timerAutoLimpeza = setTimeout(() => {
-    document.getElementById('ci').value = ''; document.getElementById('ci').focus();
+    document.getElementById('ci').value = '';
+    document.getElementById('ci').focus();
     rc.innerHTML = ''; rc.className = ''; ultimaRotaAtiva = null;
-  }, 4000);
+  }, 15000);
+
+  // Info de barco
   let embInfo = '';
   if (nb) {
-    embInfo = `<div style="margin-top:10px;padding:8px 12px;background:#0b0d11;border-radius:6px;border-left:3px solid ${r.cor};font-size:12px;color:#9ba3b4;">
-      <span style="color:#fff;font-weight:700;">${nb.embarcacao}</span>
-      ${nb.porto ? `<span style="color:#737a8c"> &middot; ${nb.porto}</span>` : ''}
-      <span style="color:${r.cor};font-weight:700;"> &middot; ${nx.l}</span>
-    </div>`;
+    embInfo = `
+      <div style="margin-top:10px;padding:8px 12px;background:#0b0d11;border-radius:6px;border-left:3px solid ${r.cor};font-size:12px;color:#9ba3b4;">
+        <span style="color:#fff;font-weight:700;">${nb.embarcacao}</span>
+        ${nb.porto ? `<span style="color:#737a8c"> · ${nb.porto}</span>` : ''}
+        <span style="color:${r.cor};font-weight:700;"> · ${nx.l}</span>
+      </div>`;
   }
+
+  // Municipio anterior e proximo
+  const prevInfo = prev
+    ? `<div style="font-size:11px;color:#737a8c;margin-top:4px;">⬅ Anterior: <b style="color:#9ba3b4">${prev.seq} — ${prev.nome}</b></div>`
+    : `<div style="font-size:11px;color:#334155;margin-top:4px;">⬅ Primeiro da calha</div>`;
+  const nextInfo = next
+    ? `<div style="font-size:11px;color:#737a8c;margin-top:4px;">➡ Próximo: <b style="color:#9ba3b4">${next.seq} — ${next.nome}</b></div>`
+    : `<div style="font-size:11px;color:#334155;margin-top:4px;">➡ Último da calha</div>`;
+
   rc.innerHTML = `
     <div class="rcm" style="border:2px solid ${r.cor};border-radius:12px;padding:18px;background:#12151b;">
+
+      <!-- Header: node + calha -->
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <div style="font-size:42px;font-weight:900;color:${r.cor};letter-spacing:2px;font-family:monospace;">${m.seq}</div>
-        <div style="background:${r.cor};padding:5px 14px;border-radius:6px;font-weight:900;color:#fff;font-size:12px;letter-spacing:1px;">CALHA ${r.nome.toUpperCase()}</div>
+        <div style="font-size:44px;font-weight:900;color:${r.cor};letter-spacing:2px;font-family:monospace;">${m.seq}</div>
+        <div style="text-align:right;">
+          <div style="background:${r.cor};padding:4px 12px;border-radius:6px;font-weight:900;color:#fff;font-size:12px;letter-spacing:1px;">CALHA ${r.nome.toUpperCase()}</div>
+          <div style="font-size:10px;color:#737a8c;margin-top:4px;">Pos. ${pos} de ${total}</div>
+        </div>
       </div>
-      <div style="font-size:24px;font-weight:800;color:#e8eaf0;margin-bottom:4px;">${m.nome}</div>
-      <div style="display:flex;gap:16px;font-size:13px;color:#737a8c;margin-top:6px;flex-wrap:wrap;">
-        <span>TT: <b style="color:#9ba3b4">${m.tt}</b></span>
-        <span>${m.km} km</span>
-        <span>Prox. saida: <b style="color:${nx.c==='nt'?'#22c55e':nx.c==='nw'?'#f59e0b':'#9ba3b4'}">${nx.l}</b></span>
+
+      <!-- Nome do município -->
+      <div style="font-size:26px;font-weight:800;color:#e8eaf0;margin-bottom:12px;">${m.nome}</div>
+
+      <!-- Grid de infos -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">
+        <div style="background:#0b0d11;border-radius:6px;padding:8px;text-align:center;">
+          <div style="font-size:10px;color:#737a8c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Transit Time</div>
+          <div style="font-size:18px;font-weight:900;color:${r.cor};">${m.tt}</div>
+        </div>
+        <div style="background:#0b0d11;border-radius:6px;padding:8px;text-align:center;">
+          <div style="font-size:10px;color:#737a8c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Distância</div>
+          <div style="font-size:18px;font-weight:900;color:#e8eaf0;">${m.km} km</div>
+        </div>
+        <div style="background:#0b0d11;border-radius:6px;padding:8px;text-align:center;">
+          <div style="font-size:10px;color:#737a8c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Prox. Saída</div>
+          <div style="font-size:18px;font-weight:900;color:${nx.c==='nt'?'#22c55e':nx.c==='nw'?'#f59e0b':'#9ba3b4'};">${nx.l}</div>
+        </div>
       </div>
+
+      <!-- Info de barco -->
       ${embInfo}
+
+      <!-- Navegação da calha -->
+      <div style="margin-top:12px;padding:10px;background:#0b0d11;border-radius:6px;border:1px solid #1a1e26;">
+        <div style="font-size:10px;color:#737a8c;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Calha ${r.nome}</div>
+        ${prevInfo}
+        ${nextInfo}
+      </div>
+
     </div>`;
   rc.className = 'show';
   adicionarRecente(hit);
@@ -194,7 +229,6 @@ function renderMap() {
   hl.setAttribute('x', hub.x + 10); hl.setAttribute('y', hub.y + 4); hl.setAttribute('font-size', '8');
   hl.setAttribute('fill', '#14b8a6'); hl.setAttribute('font-weight', '900'); hl.setAttribute('font-family', 'monospace'); hl.textContent = 'SPO9'; g.appendChild(hl);
 
-  // Linhas das rotas com filtro
   ROTAS.forEach(r => {
     const ativo = rotaFiltrada === null || rotaFiltrada === r.num;
     const pts = r.municipios.map(m => LATLNG[m.cep] ? proj(LATLNG[m.cep].lat, LATLNG[m.cep].lng) : null).filter(Boolean);
@@ -208,7 +242,6 @@ function renderMap() {
     }
   });
 
-  // Nodes: A1, B2 ... com filtro
   ROTAS.forEach(r => {
     const ativo = rotaFiltrada === null || rotaFiltrada === r.num;
     r.municipios.forEach((m, idx) => {
@@ -299,7 +332,6 @@ function filtrarRota(num) {
   });
   fecharPopupMapa(); renderMap();
 }
-
 function buildMapFilters() {
   const cont = document.getElementById('map-filters'); if (!cont) return;
   cont.innerHTML = '';
