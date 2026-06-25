@@ -644,3 +644,38 @@ const scT = document.getElementById('sc-t');
 if (scT) { scT.style.display = ''; scT.className = 'scr'; }
 
 window.addEventListener('load', () => { const ci = document.getElementById('ci'); if (ci) ci.focus(); });
+/* ── COPIAR MANIFESTO COMO TEXTO PARA WHATSAPP ──────────────── */
+function copiarTextoWhatsapp() {
+  let texto = `*FÁCIL EXPRESS LTDA · DESPACHO DIÁRIO*\n`;
+  texto += `------------------------------------------\n\n`;
+
+  // 1. Porto Escadaria
+  texto += `🚢 *PORTO ESCADARIA (${manifestoPortos.esc.length})*\n`;
+  if (manifestoPortos.esc.length === 0) texto += `_(Vazio)_\n`;
+  manifestoPortos.esc.forEach(hit => {
+    if (hit) texto += `• *${hit.mun.seq}* - ${hit.mun.nome}\n`;
+  });
+  texto += `\n`;
+
+  // 2. Porto Roadway
+  texto += `🚢 *PORTO ROADWAY (${manifestoPortos.rod.length})*\n`;
+  if (manifestoPortos.rod.length === 0) texto += `_(Vazio)_\n`;
+  manifestoPortos.rod.forEach(hit => {
+    if (hit) texto += `• *${hit.mun.seq}* - ${hit.mun.nome}\n`;
+  });
+  texto += `\n`;
+
+  // 3. Rodoviário
+  texto += `🚚 *RODOVIÁRIO (${manifestoPortos['v-rod'].length})*\n`;
+  if (manifestoPortos['v-rod'].length === 0) texto += `_(Vazio)_\n`;
+  manifestoPortos['v-rod'].forEach(hit => {
+    if (hit) texto += `• *${hit.mun.seq}* - ${hit.mun.nome}\n`;
+  });
+
+  // Copia para a área de transferência do celular/computador
+  navigator.clipboard.writeText(texto).then(() => {
+    alert('Texto do manifesto copiado! Agora é só ir no WhatsApp e colar.');
+  }).catch(err => {
+    alert('Erro ao copiar texto automaticamente. Verifique as permissões do navegador.');
+  });
+}
