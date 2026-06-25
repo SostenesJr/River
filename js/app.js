@@ -1,5 +1,5 @@
 /* ============================================================
-   RIVER OPS — TRIAGEM — LÓGICA CORE TOTALMENTE ATUALIZADA
+   RIVER OPS — TRIAGEM — LÓGICA CORE TOTALMENTE CORRIGIDA
    ============================================================ */
 
 const IDX={}; const SLAMIDX={}; const NODEIDX={};
@@ -8,7 +8,7 @@ ROTAS.forEach(r=>r.municipios.forEach((m,i)=>{
     prev:r.municipios[i-1]||null,
     next:r.municipios[i+1]||null};
   IDX[m.cep]=rec;
-  NODEIDX[String(m.seq)]=rec; // Indexação prioritária chaveada por NODE
+  NODEIDX[String(m.seq)]=rec; 
   if(m.slam){
     if(!SLAMIDX[m.slam]) SLAMIDX[m.slam]=[];
     SLAMIDX[m.slam].push(rec); 
@@ -100,10 +100,9 @@ function renderCard(hit){
   rc.className='show';
 }
 
-// ── SISTEMA INTEGRADO DA ABA DE PORTOS (DADOS DO EXCEL) ──
+// ── ABA DE PORTOS COM TRAVAS DE SEGURANÇA CORRIGIDAS ──
 let manifestoPortos = { esc: [], rod: [], "v-rod": [] };
 
-// Amarra a listagem oficial extraída direto do seu documento de manifesto
 const LISTA_PADRAO_PORTOS = {
   esc: [
     NODEIDX["1"], NODEIDX["2"], NODEIDX["3"], NODEIDX["4"], NODEIDX["10"], NODEIDX["11"],
@@ -137,14 +136,14 @@ function addMunToPorto() {
   const targetPorto = document.getElementById('p-select-target').value;
   const hit = NODEIDX[nodeVal]; if(!hit) return;
 
-  if(manifestoPortos.esc.concat(manifestoPortos.rod, manifestoPortos["v-rod"]).some(x => x.mun.seq === hit.mun.seq)) {
+  if(manifestoPortos.esc.concat(manifestoPortos.rod, manifestoPortos["v-rod"]).some(x => x && x.mun.seq === hit.mun.seq)) {
     alert("Município já está distribuído."); return;
   }
   manifestoPortos[targetPorto].push(hit); renderTabelaPortos();
 }
 
 function removeMunPorto(porto, seq) {
-  manifestoPortos[porto] = manifestoPortos[porto].filter(x => x.mun.seq !== seq);
+  manifestoPortos[porto] = manifestoPortos[porto].filter(x => x && x.mun.seq !== seq);
   renderTabelaPortos();
 }
 
@@ -164,7 +163,7 @@ function renderTabelaPortos() {
 function resetarTabelaPortos() {
   manifestoPortos.esc = [...LISTA_PADRAO_PORTOS.esc];
   manifestoPortos.rod = [...LISTA_PADRAO_PORTOS.rod];
-  manifestoPortos["v-rod"] = [...LISTA_PADRAO_PORTOS.v-rod];
+  manifestoPortos["v-rod"] = [...LISTA_PADRAO_PORTOS["v-rod"]]; // 💻 FIX: Strings de chaves alinhadas!
   renderTabelaPortos();
 }
 
@@ -176,7 +175,7 @@ function gerarImagemWhatsapp() {
   });
 }
 
-// ── DESENHO VETORIAL DO MAPA COM TRAÇADOS AMPLIADOS ──
+// ── SISTEMA DE DESENHO VETORIAL DO MAPA AMPLIADO ──
 let T={s:1,x:0,y:0},focR=null,mttTimer=null;
 function gR(n){return ROTAS.find(r=>r.num===n);}
 function renderMap(){
@@ -221,7 +220,6 @@ function renderMap(){
       const p=proj(ll.lat,ll.lng);
       const grp=document.createElementNS(NS,'g'); grp.style.cursor='pointer';
       
-      // AMPLIAÇÃO DOS MARCADORES DO MAPA SOLICITADO
       const bb=document.createElementNS(NS,'rect');
       bb.setAttribute('x',p.x-11); bb.setAttribute('y',p.y-9);
       bb.setAttribute('width','22'); bb.setAttribute('height','18');
@@ -269,3 +267,4 @@ function initMapInteractions(){
 bRO(); initMapInteractions(); popularSeletorPortos(); resetarTabelaPortos();
 function zI(){T.s*=1.3; renderMap();} function zO(){T.s/=1.3; renderMap();} function zR(){T={s:1,x:0,y:0}; renderMap();}
 function cSh(){} function printGuide(){}
+function setup(){}
