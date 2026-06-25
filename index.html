@@ -35,6 +35,7 @@
 
 <div id="app">
 
+  <!-- TRIAGEM -->
   <div class="scr" id="sc-t">
     <div class="csec">
       <label class="clbl">DIGITE OU BIPE O CÓDIGO DO NODE (EX: RAL9, RTE9, RTO9)</label>
@@ -50,6 +51,7 @@
     </div>
   </div>
 
+  <!-- ROTAS -->
   <div class="scr h" id="sc-r">
     <div class="rhdr">
       <div class="rsw">
@@ -60,6 +62,7 @@
     <div class="rbdy" id="rbdy"></div>
   </div>
 
+  <!-- MAPA -->
   <div class="scr h" id="sc-m" style="position:relative;display:flex;flex-direction:column;">
     <div style="display:flex;align-items:center;gap:6px;padding:8px 10px;background:#0b0d11;border-bottom:1px solid #1a1e26;flex-shrink:0;flex-wrap:wrap;">
       <span style="font-size:10px;color:#737a8c;font-weight:700;letter-spacing:1px;white-space:nowrap;">ROTA:</span>
@@ -73,6 +76,7 @@
     <svg id="msvg" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" style="flex:1;width:100%;"></svg>
   </div>
 
+  <!-- PORTOS -->
   <div class="scr h" id="sc-l">
     <div class="p-layout">
       
@@ -89,6 +93,7 @@
         </div>
       </div>
 
+      <!-- ÁREA DE OPERAÇÃO VISÍVEL: Organizada em lista confortável para telas de celulares -->
       <div class="p-view-grid">
         <div class="p-col" id="view-col-esc">
           <div class="p-col-title esc">PORTO ESCADARIA (0)</div>
@@ -104,6 +109,7 @@
         </div>
       </div>
 
+      <!-- ÁREA OCULTA DO PRINT: Força a disposição horizontal widescreen com 3 colunas e oculta botões "X" -->
       <div id="capture-area">
         <div style="text-align:center; font-weight:900; font-size:14px; color:#14b8a6; margin-bottom:16px; letter-spacing:1px; font-family: sans-serif;">
           FÁCIL EXPRESS LTDA · DESPACHO DIÁRIO
