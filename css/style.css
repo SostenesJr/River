@@ -32,7 +32,7 @@ html, body {
   font-size: 14px;
   height: 100%;
   overflow-x: hidden;
-  overflow-y: auto; /* Permite rolagem da página quando o conteúdo esticar */
+  overflow-y: auto; /* Correção: Permite rolagem da página quando o conteúdo esticar */
 }
 
 /* ESTILIZAÇÃO DO HEADER (BARRA SUPERIOR) */
@@ -105,7 +105,7 @@ html, body {
 }
 #ci:focus { border-color: var(--ac); box-shadow: 0 0 0 3px rgba(20,184,166,.15); }
 #ci::placeholder { color: var(--bd); font-size: 22px; letter-spacing: normal; }
-.clbl, .chint { font-size: 10px; color: var(--mu); text-align: center; margin-top: 7px; line-height: 1.6; }
+.chint { font-size: 10px; color: var(--mu); text-align: center; margin-top: 7px; line-height: 1.6; }
 
 /* Caixa de Resultados Expandida para 680px */
 #rcard { width: 100%; max-width: 680px; display: none; }
@@ -185,43 +185,15 @@ html, body {
 .mlr { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; cursor: pointer; border-radius: 4px; padding: 2px 3px; }
 .mlr:active { background: var(--s2); }
 .mlnum { width: 22px; height: 22px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.mlnm { font-size: 10px; flex: 1; }
 .mlr.dim .mlnum, .mlr.dim .mlnm { opacity: .14; }
 #mtt { position: absolute; background: rgba(18,21,27,0.96); backdrop-filter: blur(6px); border: 1px solid var(--bd); border-radius: 8px; padding: 0; pointer-events: none; z-index: 100; display: none; min-width: 220px; box-shadow: 0 4px 20px rgba(0,0,0,.5); overflow: hidden; }
 #mtt.on { display: block; }
 
 /* MANIFESTO DE PORTOS (SISTEMA INTEGRADO E RESPONSIVO) */
 .p-layout { display: flex; flex-direction: column; gap: 15px; padding: 15px; }
-
-/* Área secreta do print guardada fora do fluxo visual de dados */
-#capture-area {
-  padding: 20px;
-  background: #0b0d11;
-  border-radius: 8px;
-  width: 950px; /* Mantém a proporção horizontal widescreen perfeita da imagem */
-  position: fixed;
-  left: -9999px; /* Oculta o container mestre para não quebrar a tela de edição */
-  box-sizing: border-box;
-}
-
-#capture-area .p-grid-3 { 
-  display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important; 
-  gap: 12px !important; 
-  background: #12151b; 
-  padding: 15px; 
-  border-radius: 8px; 
-  border: 1px solid #232838; 
-}
-
-/* Painel de preenchimento inteligente e responsivo */
-.p-view-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-}
-
-.p-col { background: #1a1e26; border: 1px solid #232838; border-radius: 6px; padding: 10px; min-height: 80px; }
+.p-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; background: #12151b; padding: 15px; border-radius: 8px; border: 1px solid #232838; }
+.p-col { background: #1a1e26; border: 1px solid #232838; border-radius: 6px; padding: 10px; min-height: 120px; }
 .p-col-title { font-weight: 800; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; text-align: center; padding-bottom: 8px; border-bottom: 2px solid #232838; margin-bottom: 10px; }
 .p-col-title.esc { color: #22d3ee; } 
 .p-col-title.rod { color: #f97316; } 
@@ -250,17 +222,12 @@ html, body {
 .sel-count { font-size: 12px; font-weight: 700; color: var(--ac); flex-shrink: 0; }
 .sel-chips { display: flex; flex-wrap: wrap; gap: 5px; flex: 1; overflow: hidden; max-height: 54px; overflow-y: auto; }
 
-/* CONDICIONAIS DE DIMENSIONAMENTO E MEDIA QUERIES */
-@media (min-width: 992px) {
-  .p-view-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-  }
-}
-
+/* CONDICIONAIS DE DIMENSIONAMENTO E MOBILE-FIRST */
 @media (max-width: 991px) { 
-  .p-item { flex-wrap: nowrap !important; }
+  .p-grid-3 { grid-template-columns: 1fr !important; } 
+  .p-col { min-height: auto !important; margin-bottom: 10px; }
+  .p-item { flex-wrap: wrap !important; gap: 6px !important; }
+  .p-item span { min-width: 120px; word-break: break-all; }
 }
 
 @media (max-width: 767px) {
