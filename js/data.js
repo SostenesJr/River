@@ -94,7 +94,7 @@ const ROTAS=[
 {seq:'RBB9',nome:'Balbina',          cep:'69755',km:140, tt:'1d', slam:'RBB9'},
 {seq:'RAC9',nome:'Rio Preto Eva',    cep:'69103',km:88,  tt:'1d', slam:'RAC9'},
 {seq:'RIT9',nome:'Itacoatiara',      cep:'69100',km:176, tt:'1d', slam:'RIT9'},
-{seq:'RNR9',nome:'Novo Remanso',     cep:'69107',km:100, tt:'1d', slam:'RIT'},
+{seq:'RNR9',nome:'Novo Remanso',     cep:'69107',km:100, tt:'1d', slam:'RNR9'},
 {seq:'RSI9',nome:'Silves',           cep:'69105',km:200, tt:'2d', slam:'RSI9'},
 {seq:'RNG9',nome:'Itapiranga',       cep:'69115',km:255, tt:'2d', slam:'RNG9'},
 {seq:'RAR9',nome:'Careiro Castanho', cep:'69415',km:90,  tt:'1d', slam:'RAR9'}]},
