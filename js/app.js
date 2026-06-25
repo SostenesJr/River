@@ -1,5 +1,23 @@
+Analisando os quatro arquivos enviados (`index.html`, `style.css`, `data.js` e `app.js`), encontrei exatamente onde a comunicação quebrou e causou o comportamento visto na imagem **image_93353c.png**.
+
+### 🔍 O Motivo do Bug
+
+No seu arquivo `index.html`, criamos os IDs divididos para não estragar o preenchimento no celular:
+
+* A lista visível usa os IDs: `#view-col-esc`, `#view-col-rod` e `#view-col-v-rod`.
+* A lista oculta do print usa: `#print-col-esc`, `#print-col-rod` e `#print-col-v-rod`.
+
+Porém, no seu arquivo `app.js`, a função `renderTabelaPortos()` estava tentando buscar os contêineres usando a regra antiga `#col-esc`, `#col-rod` e `#col-v-rod`. Como esses elementos antigos não existem mais no HTML, os municípios ficavam salvos na memória interna (bloqueando novos vínculos sob o aviso de que "já estavam alocados"), mas **o JavaScript não encontrava o local correto para desenhá-los na tela**.
+
+Aqui está a correção definitiva. Substitua completamente o conteúdo do seu arquivo **`js/app.js`** por este código unificado e calibrado com os novos seletores e tabelas gêmeas:
+
+---
+
+### Código Atualizado e Corrigido: `js/app.js`
+
+```javascript
 /* ============================================================
-   RIVER OPS — TRIAGEM — APP.JS (VERSÃO FINAL UNIFICADA)
+   RIVER OPS — TRIAGEM — APP.JS (VERSÃO ATUALIZADA INTEGRADA)
    ============================================================ */
 
 /* ── ÍNDICES ──────────────────────────────────────────────────
@@ -468,7 +486,7 @@ function showMapPopup(hit, svgPt, transform, label) {
     <button onclick="fecharPopupMapa()" style="margin-top:10px;width:100%;padding:6px;background:#1a1e26;border:none;color:#737a8c;border-radius:4px;cursor:pointer;font-size:11px;font-weight:700;">FECHAR DETALHES</button>`;
 
   setTimeout(() => {
-    document.addEventListener('click', fecharPopupMapa, { once: true });
+    document.getElementById('sc-m').addEventListener('click', fecharPopupMapa, { once: true });
   }, 50);
 }
 
@@ -574,28 +592,41 @@ function removeMunPorto(porto, seq) {
   manifestoPortos[porto] = manifestoPortos[porto].filter(x => x && x.mun.seq !== seq); renderTabelaPortos();
 }
 
-/* AJUSTE MESTRE DE CORRESPONDÊNCIA: Casado diretamente com os IDs de coluna do seu HTML mestre */
+/* SINCRO CORRIGIDA: Aponta para as IDs do seu HTML mestre (view-col-... e print-col-...) */
 function renderTabelaPortos() {
   ['esc', 'rod', 'v-rod'].forEach(p => {
-    const container = document.querySelector('#col-' + p + ' .p-items-list'); if (!container) return;
-    container.innerHTML = '';
+    const containerView = document.querySelector('#view-col-' + p + ' .p-items-list');
+    const containerPrint = document.querySelector('#print-col-' + p + ' .p-items-list');
     
-    const titulo = document.querySelector('#col-' + p + ' .p-col-title');
-    if (titulo) {
-      const nomes = { esc: 'PORTO ESCADARIA', rod: 'PORTO ROADWAY', 'v-rod': 'RODOVIARIO' };
-      titulo.textContent = nomes[p] + ' (' + manifestoPortos[p].length + ')';
-    }
+    if (containerView) containerView.innerHTML = '';
+    if (containerPrint) containerPrint.innerHTML = '';
+    
+    const tituloView = document.querySelector('#view-col-' + p + ' .p-col-title');
+    const tituloPrint = document.querySelector('#print-col-' + p + ' .p-col-title');
+    const nomes = { esc: 'PORTO ESCADARIA', rod: 'PORTO ROADWAY', 'v-rod': 'RODOVIÁRIO' };
+    
+    if (tituloView) tituloView.textContent = nomes[p] + ' (' + manifestoPortos[p].length + ')';
+    if (tituloPrint) tituloPrint.textContent = nomes[p] + ' (' + manifestoPortos[p].length + ')';
     
     manifestoPortos[p].forEach(hit => {
       if (!hit) return;
-      let item = document.createElement('div'); item.className = 'p-item';
-      item.innerHTML = '<span><b style="font-family:monospace">' + hit.mun.seq + '</b> - ' + hit.mun.nome + '</span><button onclick="removeMunPorto(\'' + p + '\',\'' + hit.mun.seq + '\')">X</button>';
-      container.appendChild(item);
+      
+      // Renderiza na lista visível
+      let itemView = document.createElement('div'); 
+      itemView.className = 'p-item';
+      itemView.innerHTML = '<span><b style="font-family:monospace">' + hit.mun.seq + '</b> - ' + hit.mun.nome + '</span><button onclick="removeMunPorto(\'' + p + '\',\'' + hit.mun.seq + '\')">X</button>';
+      if (containerView) containerView.appendChild(itemView);
+
+      // Renderiza na lista oculta do print horizontal
+      let itemPrint = document.createElement('div'); 
+      itemPrint.className = 'p-item';
+      itemPrint.innerHTML = '<span><b style="font-family:monospace">' + hit.mun.seq + '</b> - ' + hit.mun.nome + '</span>';
+      if (containerPrint) containerPrint.appendChild(itemPrint);
     });
   });
 }
 
-/* AJUSTE LOGÍSTICO: Mapeamento dinâmico instantâneo de todos os municípios de ROTAS sem travas estáticas */
+/* DISTRIBUIÇÃO MESTRE: Varre o data.js completo e preenche as listas gêmeas automaticamente */
 function resetarTabelaPortos() {
   manifestoPortos.esc = [];
   manifestoPortos.rod = [];
@@ -606,15 +637,15 @@ function resetarTabelaPortos() {
       const hit = NODEIDX[String(m.seq).toUpperCase().trim()];
       if (!hit) return;
 
-      // Terrestres e Rodoviários (Calhas H e I) -> RODOVIÁRIO
+      // Terrestres e Rodoviários (H e I) -> RODOVIÁRIO
       if (r.num === 'H' || r.num === 'I') {
         manifestoPortos['v-rod'].push(hit);
       } 
-      // Médio e Alto Solimões (Calhas D e E) -> PORTO ROADWAY
+      // Médio e Alto Solimões (D e E) -> PORTO ROADWAY
       else if (r.num === 'D' || r.num === 'E') {
         manifestoPortos.rod.push(hit);
       } 
-      // Demais calhas fluviais do estado -> PORTO ESCADARIA
+      // Demais calhas logísticas fluviais do Amazonas -> PORTO ESCADARIA
       else {
         manifestoPortos.esc.push(hit);
       }
@@ -728,3 +759,5 @@ function copiarTextoWhatsapp() {
     alert('Erro ao copiar texto automaticamente. Verifique as permissões do navegador.');
   });
 }
+
+```
