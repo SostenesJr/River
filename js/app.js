@@ -1,5 +1,5 @@
 /* ============================================================
-   RIVER OPS — TRIAGEM — LÓGICA CORE TOTALMENTE CORRIGIDA
+   RIVER OPS — TRIAGEM — LÓGICA CORE CORRIGIDA SEM ERROS DE SINTAXE
    ============================================================ */
 
 const IDX={}; const SLAMIDX={}; const NODEIDX={};
@@ -8,7 +8,7 @@ ROTAS.forEach(r=>r.municipios.forEach((m,i)=>{
     prev:r.municipios[i-1]||null,
     next:r.municipios[i+1]||null};
   IDX[m.cep]=rec;
-  NODEIDX[String(m.seq)]=rec; 
+  NODEIDX[String(m.seq)]=rec; // Indexação atrelada diretamente à sigla do Node Amazon
   if(m.slam){
     if(!SLAMIDX[m.slam]) SLAMIDX[m.slam]=[];
     SLAMIDX[m.slam].push(rec); 
@@ -55,31 +55,16 @@ function nL(d){
 let ultimaRotaAtiva = null; let timerAutoLimpeza = null;
 
 function onCI(v){
-  const text=v.trim();
+  const text=v.trim().toUpperCase();
   if(!text) return;
-  const hasLetter=/[A-Za-z]/.test(text);
-  if(hasLetter){
-    const sig=text.toUpperCase().replace(/[^A-Z0-9]/g,'');
-    if(sig.length>=3) lookupSlam(sig);
-  } else {
-    if(NODEIDX[text]) lookupNode(text);
+  if(NODEIDX[text]) {
+    lookupNode(text);
   }
 }
 
 function lookupNode(nodeId){
   const hit=NODEIDX[nodeId];
   if(hit) renderCard(hit);
-}
-
-function lookupSlam(sig){
-  const rc=document.getElementById('rcard'); const recs=SLAMIDX[sig];
-  if(!recs||!recs.length){ emitirBipe(false); return; }
-  if(recs.length===1){ renderCard(recs[0]); return; }
-  let h='<div class="nfd" style="text-align:left; background: #1a1e26; padding:10px; border-radius:6px;">';
-  recs.forEach(rec=>{
-    h+='<div onclick="NODEIDX[\''+rec.mun.seq+'\']?renderCard(NODEIDX[\''+rec.mun.seq+'\']):null" style="display:flex;align-items:center;gap:10px;padding:8px;background:#12151b;margin-bottom:5px;cursor:pointer;border-radius:4px;"><div style="background:'+rec.rota.cor+';padding:4px 10px;border-radius:4px;font-weight:bold;">'+rec.mun.seq+'</div><div>'+rec.mun.nome+' (Rota '+rec.rota.num+')</div></div>';
-  });
-  h+='</div>'; rc.innerHTML=h; rc.className='show';
 }
 
 function onK(e){if(e.key==='Enter') onCI(document.getElementById('ci').value);}
@@ -96,29 +81,29 @@ function renderCard(hit){
     document.getElementById('ci').value = ''; document.getElementById('ci').focus();
   }, 3000);
 
-  rc.innerHTML='<div class="rcm" style="border:2px solid '+r.cor+'; border-radius:12px; padding:15px; background:#12151b;"><div style="display:flex; justify-content:space-between; align-items:center;"><div style="font-size:42px; font-weight:900; color:'+r.cor+'">Node '+m.seq+'</div><div style="background:'+r.cor+'; padding:5px 12px; border-radius:6px; font-weight:bold; color:#fff;">Rota '+r.num+'</div></div><div style="font-size:22px; font-weight:bold; margin:10px 0;">'+m.nome+'</div><div style="color:#737a8c; font-size:13px;">Transit Time: '+m.tt+' | Próxima Saída: '+nx.l+'</div></div>';
+  rc.innerHTML='<div class="rcm" style="border:2px solid '+r.cor+'; border-radius:12px; padding:15px; background:#12151b;"><div style="display:flex; justify-content:space-between; align-items:center;"><div style="font-size:38px; font-weight:900; color:'+r.cor+'">'+m.seq+'</div><div style="background:'+r.cor+'; padding:5px 12px; border-radius:6px; font-weight:bold; color:#fff;">Rota '+r.num+'</div></div><div style="font-size:22px; font-weight:bold; margin:10px 0;">'+m.nome+'</div><div style="color:#737a8c; font-size:13px;">Transit Time: '+m.tt+' | Próxima Saída: '+nx.l+'</div></div>';
   rc.className='show';
 }
 
-// ── ABA DE PORTOS COM TRAVAS DE SEGURANÇA CORRIGIDAS ──
+// ── ABA DE PORTOS COM TRAVAS DE SEGURANÇA E ESTRUTURA DIÁRIA DO CHECKLIST ──
 let manifestoPortos = { esc: [], rod: [], "v-rod": [] };
 
 const LISTA_PADRAO_PORTOS = {
   esc: [
-    NODEIDX["1"], NODEIDX["2"], NODEIDX["3"], NODEIDX["4"], NODEIDX["10"], NODEIDX["11"],
-    NODEIDX["12"], NODEIDX["13"], NODEIDX["14"], NODEIDX["15"], NODEIDX["19"], NODEIDX["36"],
-    NODEIDX["38"], NODEIDX["39"], NODEIDX["55"], NODEIDX["56"]
+    NODEIDX["RAU9"], NODEIDX["RUC9"], NODEIDX["RAO9"], NODEIDX["RUR9"], NODEIDX["RRE9"], NODEIDX["RQI9"],
+    NODEIDX["RPI9"], NODEIDX["RAN9"], NODEIDX["RNA9"], NODEIDX["RNO9"], NODEIDX["RDA9"], NODEIDX["RBR9"],
+    NODEIDX["RTP9"], NODEIDX["RCR9"], NODEIDX["RJR9"]
   ],
   rod: [
-    NODEIDX["5"], NODEIDX["6"], NODEIDX["7"], NODEIDX["8"], NODEIDX["20"], NODEIDX["21"],
-    NODEIDX["22"], NODEIDX["23"], NODEIDX["24"], NODEIDX["25"], NODEIDX["26"], NODEIDX["27"],
-    NODEIDX["28"], NODEIDX["29"], NODEIDX["30"], NODEIDX["31"], NODEIDX["32"], NODEIDX["33"],
-    NODEIDX["34"], NODEIDX["35"], NODEIDX["37"]
+    NODEIDX["RME9"], NODEIDX["RRA9"], NODEIDX["RBA9"], NODEIDX["RPA9"], NODEIDX["RCO9"], NODEIDX["RTE9"],
+    NODEIDX["RAL9"], NODEIDX["RUA9"], NODEIDX["RAA9"], NODEIDX["RJA9"], NODEIDX["RFO9"], NODEIDX["RJT9"],
+    NODEIDX["RIN9"], NODEIDX["RTO9"], NODEIDX["RAM9"], NODEIDX["RUI9"], NODEIDX["RBE9"], NODEIDX["RAT9"],
+    NODEIDX["RUT9"], NODEIDX["RBC9"], NODEIDX["RSG9"]
   ],
   "v-rod": [
-    NODEIDX["9"], NODEIDX["16"], NODEIDX["17"], NODEIDX["18"], NODEIDX["41"], NODEIDX["42"],
-    NODEIDX["43"], NODEIDX["44"], NODEIDX["46"], NODEIDX["47"], NODEIDX["48"], NODEIDX["49"],
-    NODEIDX["50"], NODEIDX["51"], NODEIDX["52"], NODEIDX["53"], NODEIDX["54"]
+    NODEIDX["RNH9"], NODEIDX["RBO9"], NODEIDX["RPU9"], NODEIDX["RMN9"], NODEIDX["RID9"], NODEIDX["RMP9"],
+    NODEIDX["RNA9"], NODEIDX["RPF9"], NODEIDX["RBL9"], NODEIDX["RPE9"], NODEIDX["RIT9"], NODEIDX["RNR9"],
+    NODEIDX["RSV9"], NODEIDX["RIP9"], NODEIDX["RCC9"], NODEIDX["RAP9"], NODEIDX["RHM9"], NODEIDX["RLB9"]
   ]
 };
 
@@ -154,7 +139,7 @@ function renderTabelaPortos() {
     manifestoPortos[p].forEach(hit => {
       if(!hit) return;
       let item = document.createElement('div'); item.className = 'p-item';
-      item.innerHTML = `<span><b>${hit.mun.seq}</b> - ${hit.mun.nome}</span><button onclick="removeMunPorto('${p}', ${hit.mun.seq})">✕</button>`;
+      item.innerHTML = `<span><b>${hit.mun.seq}</b> - ${hit.mun.nome}</span><button onclick="removeMunPorto('${p}', '${hit.mun.seq}')">✕</button>`;
       container.appendChild(item);
     });
   });
@@ -163,7 +148,7 @@ function renderTabelaPortos() {
 function resetarTabelaPortos() {
   manifestoPortos.esc = [...LISTA_PADRAO_PORTOS.esc];
   manifestoPortos.rod = [...LISTA_PADRAO_PORTOS.rod];
-  manifestoPortos["v-rod"] = [...LISTA_PADRAO_PORTOS["v-rod"]]; // 💻 FIX: Strings de chaves alinhadas!
+  manifestoPortos["v-rod"] = [...LISTA_PADRAO_PORTOS["v-rod"]];
   renderTabelaPortos();
 }
 
@@ -175,7 +160,7 @@ function gerarImagemWhatsapp() {
   });
 }
 
-// ── SISTEMA DE DESENHO VETORIAL DO MAPA AMPLIADO ──
+// ── DESENHO VETORIAL DO MAPA COM TRAÇADOS DO ID DA AMAZON AMPLIADOS ──
 let T={s:1,x:0,y:0},focR=null,mttTimer=null;
 function gR(n){return ROTAS.find(r=>r.num===n);}
 function renderMap(){
@@ -221,14 +206,14 @@ function renderMap(){
       const grp=document.createElementNS(NS,'g'); grp.style.cursor='pointer';
       
       const bb=document.createElementNS(NS,'rect');
-      bb.setAttribute('x',p.x-11); bb.setAttribute('y',p.y-9);
-      bb.setAttribute('width','22'); bb.setAttribute('height','18');
-      bb.setAttribute('rx','4'); bb.setAttribute('fill',r.cor);
+      bb.setAttribute('x',p.x-19); bb.setAttribute('y',p.y-8);
+      bb.setAttribute('width','38'); bb.setAttribute('height','16');
+      bb.setAttribute('rx','3'); bb.setAttribute('fill',r.cor);
       bb.setAttribute('filter','url(#gw)'); grp.appendChild(bb);
       
       const nt=document.createElementNS(NS,'text');
       nt.setAttribute('x',p.x); nt.setAttribute('y',p.y+3.5);
-      nt.setAttribute('text-anchor','middle'); nt.setAttribute('font-size','11');
+      nt.setAttribute('text-anchor','middle'); nt.setAttribute('font-size','8.5');
       nt.setAttribute('font-weight','900'); nt.setAttribute('fill','#fff');
       nt.setAttribute('font-family','monospace'); nt.textContent=m.seq; grp.appendChild(nt);
       
@@ -242,7 +227,7 @@ function renderMap(){
 function bRO(){
   const body=document.getElementById('rbdy'); if(!body) return; body.innerHTML='';
   ROTAS.forEach(r=>{
-    const mH=r.municipios.map(m=> `<div class="mrow" style="padding:10px; background:#1a1e26; margin-bottom:4px; border-radius:4px; cursor:pointer;" onclick="lookupNode('${m.seq}')"><span style="color:${r.cor}; font-weight:bold; margin-right:10px;">Node ${m.seq}</span><span>${m.nome}</span></div>`).join('');
+    const mH=r.municipios.map(m=> `<div class="mrow" style="padding:10px; background:#1a1e26; margin-bottom:4px; border-radius:4px; cursor:pointer;" onclick="lookupNode('${m.seq}')"><span style="color:${r.cor}; font-weight:bold; margin-right:10px;">${m.seq}</span><span>${m.nome}</span></div>`).join('');
     let d=document.createElement('div'); d.innerHTML=`<div style="font-weight:bold; margin:12px 0 6px; color:${r.cor}">Calha ${r.nome} (Rota ${r.num})</div>`+mH; body.appendChild(d);
   });
 }
