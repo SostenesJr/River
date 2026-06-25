@@ -14,7 +14,7 @@ const LATLNG={
   '69260':{lat:-3.894,lng:-59.094},'69230':{lat:-4.392,lng:-59.594},
   '69290':{lat:-5.121,lng:-60.381},'69280':{lat:-5.808,lng:-61.297},
   '69470':{lat:-3.836,lng:-62.059},'69460':{lat:-4.085,lng:-63.141},
-  '69553':{lat:-3.354,lng:-64.711}, // Tefé reposicionado perfeitamente
+  '69553':{lat:-3.354,lng:-64.711},
   '69655':{lat:-3.189,lng:-65.341},'69650':{lat:-3.215,lng:-64.867},
   '59553':{lat:-3.367,lng:-64.709},'69665':{lat:-1.835,lng:-65.356},
   '69660':{lat:-1.879,lng:-66.160},'69670':{lat:-2.513,lng:-66.095},
@@ -79,7 +79,7 @@ const ROTAS=[
 {seq:29,nome:'Santo Antonio do Ica',     cep:'69690',km:960, tt:'7d', slam:'RTO9'},
 {seq:30,nome:'Amatura',                  cep:'69680',km:1020,tt:'7d', slam:'RAM9'},
 {seq:31,nome:'Sao Paulo Olivenca',       cep:'69685',km:1080,tt:'7d',slam:'RUI9'},
-{seq:32,Benjamin Constant',        cep:'69695',km:1120,tt:'8d', slam:'RBE9'},
+{seq:32,nome:'Benjamin Constant',        cep:'69695',km:1120,tt:'8d', slam:'RBE9'}, // 💻 FIX: Chave corrigida aqui!
 {seq:33,nome:'Atalaia do Norte',         cep:'69697',km:1150,tt:'8d', slam:'RAT9'},
 {seq:34,nome:'Tabatinga',                cep:'69640',km:1160,tt:'8d', slam:'RUT9'}]},
 {num:'F',nome:'Rio Negro',cor:'#3b82f6',dir:'Manaus -> noroeste',municipios:[
