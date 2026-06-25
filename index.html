@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>RIVER OPS · Triagem</title>
 <link rel="stylesheet" href="css/style.css">
-<!-- Biblioteca necessária para capturar a tabela e converter em imagem WhatsApp -->
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <style>
   .p-layout { display: flex; flex-direction: column; gap: 15px; padding: 15px; }
@@ -39,7 +38,7 @@
     <button class="htab" onclick="SS('l',this)">🚢 Portos</button>
     <button class="htab" onclick="SS('p',this)">🗂️ Guia</button>
   </div>
-  <div class="hbg" id="hbg">BUSCA POR NODE ACTIVADA</div>
+  <div class="hbg" id="hbg">BUSCA PADRÃO AMAZON ACTIVE</div>
 </div>
 
 <div id="btabs">
@@ -53,31 +52,27 @@
 </div>
 
 <div id="app">
-  <!-- ABA 1: TRIAGEM POR NODE -->
   <div class="scr" id="sc-t">
     <div class="csec">
-      <label class="clbl">DIGITE OU BIPE APENAS O NÚMERO DO NODE</label>
-      <input id="ci" type="text" placeholder="EX: 21, 43, 55" autocomplete="off" spellcheck="false" oninput="onCI(this.value)" onkeydown="onK(event)">
-      <div class="chint">A busca agora responde diretamente ao ID sequencial do município.</div>
+      <label class="clbl">DIGITE OU BIPE APENAS O CÓDIGO DO NODE (PADRÃO AMAZON)</label>
+      <input id="ci" type="text" placeholder="EX: RAL9, RTE9, RAU9" autocomplete="off" spellcheck="false" oninput="onCI(this.value)" onkeydown="onK(event)">
+      <div class="chint">A busca responde diretamente ao identificador oficial de etiqueta.</div>
     </div>
     <div id="rcard"></div>
     <div class="recb" id="recb"><div class="rect">Buscas recentes</div><div class="chips" id="rchp"></div></div>
   </div>
 
-  <!-- ABA 2: ROTAS -->
   <div class="scr h" id="sc-r">
     <div class="rhdr"><div class="rsw"><span class="rsi">🔍</span><input type="text" placeholder="Buscar municipio..." oninput="fR(this.value)"></div></div>
     <div class="rbdy" id="rbdy"></div>
   </div>
 
-  <!-- ABA 3: MAPA -->
   <div class="scr h" id="sc-m">
     <svg id="msvg" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg"></svg>
     <div class="mc2"><button class="mcb" onclick="zI()">+</button><button class="mcb" onclick="zO()">-</button><button class="mcb" onclick="zR()">⟳</button></div>
     <div id="mleg"></div><div id="mtt"></div>
   </div>
 
-  <!-- ABA NEW: PORTO E LOGÍSTICA DE MANIFESTO -->
   <div class="scr h" id="sc-l">
     <div class="p-layout">
       <div class="p-pool">
@@ -93,7 +88,6 @@
         </div>
       </div>
 
-      <!-- ÁREA DE CAPTURA DA IMAGEM -->
       <div id="capture-area" style="padding: 15px; background: #0b0d11;">
         <div style="text-align: center; font-weight: 900; font-size: 14px; color: #14b8a6; margin-bottom: 12px; letter-spacing: 1px;">FACIL EXPRESS LTDA - DESPACHO DIÁRIO</div>
         <div class="p-grid-3">
@@ -119,7 +113,6 @@
     </div>
   </div>
 
-  <!-- ABA 4: GUIA -->
   <div class="scr h" id="sc-p">
     <div class="ph">
       <div class="ph-text"><div style="font-size:16px;font-weight:800;color:var(--ac)">Guia RIVER</div></div>
