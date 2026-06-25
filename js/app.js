@@ -584,22 +584,35 @@ function removeMunPorto(porto, seq) {
   manifestoPortos[porto] = manifestoPortos[porto].filter(x => x && x.mun.seq !== seq); renderTabelaPortos();
 }
 
-function renderTabelaPortos() {
-  ['esc', 'rod', 'v-rod'].forEach(p => {
-    const container = document.querySelector('#col-' + p + ' .p-items-list'); if (!container) return;
-    container.innerHTML = '';
-    const titulo = document.querySelector('#col-' + p + ' .p-col-title');
-    if (titulo) {
-      const nomes = { esc: 'PORTO ESCADARIA', rod: 'PORTO ROADWAY', 'v-rod': 'RODOVIARIO' };
-      titulo.textContent = nomes[p] + ' (' + manifestoPortos[p].length + ')';
-    }
-    manifestoPortos[p].forEach(hit => {
+function resetarTabelaPortos() {
+  // Limpa os manifestos para garantir uma distribuição limpa
+  manifestoPortos.esc = [];
+  manifestoPortos.rod = [];
+  manifestoPortos['v-rod'] = [];
+
+  // Percorre todas as calhas e distribui os mais de 50 municípios
+  ROTAS.forEach(r => {
+    r.municipios.forEach(m => {
+      const hit = NODEIDX[String(m.seq).toUpperCase().trim()];
       if (!hit) return;
-      let item = document.createElement('div'); item.className = 'p-item';
-      item.innerHTML = '<span><b style="font-family:monospace">' + hit.mun.seq + '</b> - ' + hit.mun.nome + '</span><button onclick="removeMunPorto(\'' + p + '\',\'' + hit.mun.seq + '\')">X</button>';
-      container.appendChild(item);
+
+      // 1. Calhas de Malha Rodoviária (H e I) -> Coluna RODOVIÁRIO
+      if (r.num === 'H' || r.num === 'I') {
+        manifestoPortos['v-rod'].push(hit);
+      } 
+      // 2. Calhas de Médio e Alto Solimões (D e E) -> Coluna PORTO ROADWAY
+      else if (r.num === 'D' || r.num === 'E') {
+        manifestoPortos.rod.push(hit);
+      } 
+      // 3. Restante das Calhas Fluviais (A, B, C, F, G, J) -> Coluna PORTO ESCADARIA
+      else {
+        manifestoPortos.esc.push(hit);
+      }
     });
   });
+
+  // Atualiza as tabelas na tela com os novos totais
+  renderTabelaPortos();
 }
 
 function resetarTabelaPortos() {
@@ -632,10 +645,11 @@ function SS(name, btn) {
 }
 
 /* ── INICIALIZAÇÃO ──────────────────────────────────────────── */
-bRO();
-resetarTabelaPortos();
-renderRecentes();
+bRO();                 // 1. Monta a lista mestre de rotas primeiro
+resetarTabelaPortos(); // 2. Aloca 100% dos municípios cadastrados nas colunas
+renderRecentes();      // 3. Renderiza o histórico de bipes
 
+// Esconde as abas secundárias no carregamento inicial
 ['r', 'm', 'l'].forEach(s => {
   const el = document.getElementById('sc-' + s);
   if (el) { el.style.display = 'none'; el.className = 'scr h'; }
