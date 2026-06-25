@@ -1,10 +1,10 @@
 /* ============================================================
-   RIVER OPS — TRIAGEM — APP.JS
+   RIVER OPS — TRIAGEM — APP.JS (VERSÃO ATUALIZADA)
    ============================================================ */
 
 /* ── ÍNDICES ──────────────────────────────────────────────────
    Monta três dicionários para busca rápida:
-   IDX       → por CEP
+   IDX        → por CEP
    NODEIDX   → por código do node (ex: RAL9)
    SLAMIDX   → por código SLAM
    ------------------------------------------------------------ */
@@ -12,13 +12,13 @@ const IDX = {}; const SLAMIDX = {}; const NODEIDX = {};
 ROTAS.forEach(r => r.municipios.forEach((m, i) => {
   const rec = {
     rota: r, mun: m,
-    pos: i + 1,                        // posição na calha (1-based)
+    pos: i + 1,                         // posição na calha (1-based)
     total: r.municipios.length,        // total de municípios na calha
     prev: r.municipios[i - 1] || null, // município anterior
     next: r.municipios[i + 1] || null  // município seguinte
   };
   IDX[m.cep] = rec;
-  NODEIDX[String(m.seq)] = rec;
+  NODEIDX[String(m.seq).toUpperCase().trim()] = rec; // Caixa alta e trim para evitar erros de busca
   if (m.slam) { if (!SLAMIDX[m.slam]) SLAMIDX[m.slam] = []; SLAMIDX[m.slam].push(rec); }
 }));
 
@@ -28,7 +28,7 @@ let timerAutoLimpeza = null; // timer que limpa o card da triagem
 let cur = 't';               // aba ativa
 
 /* ── BARCOS: PRÓXIMA SAÍDA ────────────────────────────────────
-   normKey   → normaliza string para busca sem acento
+   normKey  → normaliza string para busca sem acento
    pD        → converte string de dia (ex: "Quarta-feira") em número 0-6
    bB        → busca em EMBS e retorna o barco com saída mais próxima
    labelDays → converte número de dias em label legível
@@ -54,7 +54,7 @@ function bB(munNome) {
   embData.estream.forEach(emb => {
     pD(emb.d).forEach(dNum => {
       let diff = dNum - hoje; if (diff < 0) diff += 7;
-      if (diff < menorDias) { menorDias = diff; melhor = { days: diff, embarcacao: emb.n, porto: emb.p }; }
+      if (diff < menorDias) { menorDias = diff; melhor = { days: diff, embarcacao: emb.n, porto: emb.p, diaSemana: emb.d }; }
     });
   });
   return melhor;
@@ -68,24 +68,45 @@ function labelDays(d) {
 }
 
 /* ── ABA TRIAGEM ──────────────────────────────────────────────
-   onCI      → chamado a cada tecla no input, busca em tempo real
+   onCI      → chamado a cada tecla no input, busca em tempo real com travas
    lookupNode → busca o node e chama renderCard
    onK       → captura Enter para confirmar
    flashError → pisca borda vermelha se node não encontrado
    ------------------------------------------------------------ */
 function onCI(v) {
+  // AJUSTE: Limita estritamente o tamanho máximo para 4 caracteres (Tamanho do Node)
+  if (v.length > 4) {
+    v = v.substring(0, 4);
+    document.getElementById('ci').value = v;
+  }
+
   const text = v.trim().toUpperCase();
   if (!text) { document.getElementById('rcard').innerHTML = ''; return; }
+  
+  // REGRA EXTRA DE SEGURANÇA: ignora códigos indesejados que começam com 701
+  if (text.startsWith('701')) {
+    document.getElementById('ci').value = '';
+    document.getElementById('rcard').innerHTML = '';
+    return;
+  }
+  
   if (NODEIDX[text]) lookupNode(text);
 }
 
 function lookupNode(nodeId) {
-  const hit = NODEIDX[nodeId]; if (hit) renderCard(hit);
+  const hit = NODEIDX[String(nodeId).toUpperCase().trim()]; if (hit) renderCard(hit);
 }
 
 function onK(e) {
-  const v = document.getElementById('ci').value.trim().toUpperCase();
+  let v = document.getElementById('ci').value.trim().toUpperCase();
+  if (v.length > 4) v = v.substring(0, 4);
+
   if (e.key === 'Enter' && v) {
+    if (v.startsWith('701')) {
+      document.getElementById('ci').value = '';
+      document.getElementById('rcard').innerHTML = '';
+      return;
+    }
     if (NODEIDX[v]) lookupNode(v); else flashError();
   }
 }
@@ -97,13 +118,7 @@ function flashError() {
 }
 
 /* ── RENDER CARD (TRIAGEM) ────────────────────────────────────
-   Exibe card completo com:
-   - Código node + calha + posição
-   - Nome do município
-   - Grid: Transit Time / Distância / Próxima Saída
-   - Info do barco (se existir em EMBS)
-   - Navegação: município anterior e próximo da calha
-   Timer de 15s limpa o card e foca o input automaticamente
+   Exibe card completo com dia da saída real adicionado
    ------------------------------------------------------------ */
 function renderCard(hit) {
   const rc = document.getElementById('rcard');
@@ -120,18 +135,17 @@ function renderCard(hit) {
     rc.innerHTML = ''; rc.className = ''; ultimaRotaAtiva = null;
   }, 15000);
 
-  // Bloco de info do barco (só aparece se tiver dados em EMBS)
+  // AJUSTE: Bloco de info com o dia da saída real explícito
   let embInfo = '';
   if (nb) {
     embInfo = `
       <div style="margin-top:10px;padding:8px 12px;background:#0b0d11;border-radius:6px;border-left:3px solid ${r.cor};font-size:12px;color:#9ba3b4;">
         <span style="color:#fff;font-weight:700;">${nb.embarcacao}</span>
         ${nb.porto ? `<span style="color:#737a8c"> · ${nb.porto}</span>` : ''}
-        <span style="color:${r.cor};font-weight:700;"> · ${nx.l}</span>
+        <span style="color:${r.cor};font-weight:700;"> · Saída: ${nb.diaSemana} (${nx.l})</span>
       </div>`;
   }
 
-  // Navegação na calha
   const prevInfo = prev
     ? `<div style="font-size:11px;color:#737a8c;margin-top:4px;">⬅ Anterior: <b style="color:#9ba3b4">${prev.seq} — ${prev.nome}</b></div>`
     : `<div style="font-size:11px;color:#334155;margin-top:4px;">⬅ Primeiro da calha</div>`;
@@ -180,17 +194,13 @@ function renderCard(hit) {
   adicionarRecente(hit);
 }
 
-/* ── RECENTES ─────────────────────────────────────────────────
-   Guarda os últimos 6 nodes bipados como chips clicáveis
-   ------------------------------------------------------------ */
+/* ── RECENTES ───────────────────────────────────────────────── */
 let recentes = [];
-
 function adicionarRecente(hit) {
   recentes = recentes.filter(x => x.mun.seq !== hit.mun.seq);
   recentes.unshift(hit); if (recentes.length > 6) recentes.pop();
   renderRecentes();
 }
-
 function renderRecentes() {
   const cont = document.getElementById('rchp'); if (!cont) return;
   const recb = document.getElementById('recb');
@@ -202,43 +212,27 @@ function renderRecentes() {
 }
 
 /* ── ABA ROTAS ────────────────────────────────────────────────
-   bRO  → monta a lista de municípios por calha
-          Cada item mostra: node, nome, TT, km, barco e navegação
-          Ao clicar abre modal com detalhes (sem mudar de aba)
-   fR   → filtra a lista por texto digitado
+   AJUSTE: Limpo e focado estritamente em Transit Time, Distância e Barcos Disponíveis.
    ------------------------------------------------------------ */
 function bRO() {
   const body = document.getElementById('rbdy'); if (!body) return; body.innerHTML = '';
   ROTAS.forEach(r => {
 
-    // Cabeçalho da calha
     const header = `
       <div style="font-weight:800;margin:18px 0 8px;color:${r.cor};font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:8px 12px;background:#12151b;border-radius:6px;border-left:3px solid ${r.cor};">
         Calha ${r.nome} · Rota ${r.num} · ${r.municipios.length} municípios · ${r.dir}
       </div>`;
 
-    // Linha de cada município
-    const mH = r.municipios.map((m, i) => {
-      const prev = r.municipios[i - 1] || null;
-      const next = r.municipios[i + 1] || null;
+    const mH = r.municipios.map((m) => {
       const nb = bB(m.nome);
       const nx = nb ? labelDays(nb.days) : { l: '---', c: 'ns' };
 
-      // Linha do barco (só se tiver dados)
+      // Linha simplificada do barco
       const embLine = nb
         ? `<div style="margin-top:5px;font-size:11px;color:#737a8c;">
-            🚢 <b style="color:#e8eaf0;">${nb.embarcacao}</b>
-            ${nb.porto ? `· ${nb.porto}` : ''}
-            · <b style="color:${nx.c==='nt'?'#22c55e':nx.c==='nw'?'#f59e0b':'#9ba3b4'};">${nx.l}</b>
+            🚢 <b style="color:#e8eaf0;">${nb.embarcacao}</b> ${nb.porto ? `· ${nb.porto}` : ''} · Saída: <b style="color:#e8eaf0;">${nb.diaSemana}</b> (<span style="color:${nx.c==='nt'?'#22c55e':nx.c==='nw'?'#f59e0b':'#9ba3b4'};">${nx.l}</span>)
            </div>`
-        : '';
-
-      // Navegação anterior/próximo
-      const navLine = `
-        <div style="margin-top:5px;font-size:11px;color:#555;display:flex;gap:12px;flex-wrap:wrap;">
-          ${prev ? `<span>⬅ <b style="color:#737a8c;font-family:monospace;">${prev.seq}</b> ${prev.nome}</span>` : `<span style="color:#2a2e3a;">⬅ Início</span>`}
-          ${next ? `<span>➡ <b style="color:#737a8c;font-family:monospace;">${next.seq}</b> ${next.nome}</span>` : `<span style="color:#2a2e3a;">➡ Fim</span>`}
-        </div>`;
+        : `<div style="margin-top:5px;font-size:11px;color:#475569;">🚢 Nenhuma embarcação cadastrada</div>`;
 
       return `
         <div class="mrow"
@@ -253,7 +247,6 @@ function bRO() {
             </div>
           </div>
           ${embLine}
-          ${navLine}
         </div>`;
     }).join('');
 
@@ -270,44 +263,35 @@ function fR(q) {
   );
 }
 
-/* ── MODAL DE DETALHE (ABA ROTAS) ────────────────────────────
-   Abre um overlay centralizado com todas as informações do
-   município. Permite navegar anterior/próximo sem fechar.
-   Fecha ao clicar no X ou fora do modal.
-   ------------------------------------------------------------ */
+/* ── MODAL DE DETALHE (ABA ROTAS) ──────────────────────────── */
 function abrirModalRota(nodeSeq) {
-  const hit = NODEIDX[nodeSeq]; if (!hit) return;
+  const hit = NODEIDX[String(nodeSeq).toUpperCase().trim()]; if (!hit) return;
   const { rota: r, mun: m, prev, next, pos, total } = hit;
   const nb = bB(m.nome);
   const nx = nb ? labelDays(nb.days) : { l: '---', c: 'ns' };
 
-  // Remove modal anterior se existir
   const old = document.getElementById('modal-rota'); if (old) old.remove();
 
-  // Bloco do barco
   const embInfo = nb ? `
     <div style="margin-top:10px;padding:8px 12px;background:#0b0d11;border-radius:6px;border-left:3px solid ${r.cor};font-size:12px;color:#9ba3b4;">
       <span style="color:#fff;font-weight:700;">🚢 ${nb.embarcacao}</span>
       ${nb.porto ? `<span style="color:#737a8c;"> · ${nb.porto}</span>` : ''}
-      <span style="color:${r.cor};font-weight:700;"> · ${nx.l}</span>
+      <span style="color:${r.cor};font-weight:700;"> · Dia: ${nb.diaSemana} (${nx.l})</span>
     </div>` : '';
 
   const overlay = document.createElement('div');
   overlay.id = 'modal-rota';
   overlay.style.cssText = `
     position:fixed;top:0;left:0;width:100%;height:100%;
-    background:rgba(0,0,0,0.78);z-index:999;
+    background:rgba(0,0,0,0.85);z-index:999;
     display:flex;align-items:center;justify-content:center;
     padding:16px;box-sizing:border-box;`;
 
   overlay.innerHTML = `
     <div style="background:#12151b;border-radius:14px;padding:20px;width:100%;max-width:420px;border:2px solid ${r.cor};box-shadow:0 8px 40px rgba(0,0,0,0.9);position:relative;">
-
-      <!-- Botão fechar -->
       <button onclick="document.getElementById('modal-rota').remove()"
         style="position:absolute;top:12px;right:12px;background:#1a1e26;border:none;color:#737a8c;width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;font-weight:900;display:flex;align-items:center;justify-content:center;">✕</button>
 
-      <!-- Node + Calha + Posição -->
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
         <div style="font-size:38px;font-weight:900;color:${r.cor};font-family:monospace;letter-spacing:2px;">${m.seq}</div>
         <div>
@@ -316,10 +300,8 @@ function abrirModalRota(nodeSeq) {
         </div>
       </div>
 
-      <!-- Nome do município -->
       <div style="font-size:22px;font-weight:800;color:#e8eaf0;margin-bottom:14px;">${m.nome}</div>
 
-      <!-- Grid: TT / Distância / Próxima Saída -->
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">
         <div style="background:#0b0d11;border-radius:6px;padding:8px;text-align:center;">
           <div style="font-size:9px;color:#737a8c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Transit Time</div>
@@ -335,39 +317,23 @@ function abrirModalRota(nodeSeq) {
         </div>
       </div>
 
-      <!-- Info do barco -->
       ${embInfo}
 
-      <!-- Navegação anterior / atual / próximo — clicável -->
       <div style="margin-top:10px;padding:10px;background:#0b0d11;border-radius:6px;border:1px solid #1a1e26;">
         <div style="font-size:9px;color:#737a8c;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Navegação da Calha</div>
-        ${prev
-          ? `<div style="font-size:12px;color:#9ba3b4;margin-bottom:6px;cursor:pointer;padding:4px;border-radius:4px;" onclick="abrirModalRota('${prev.seq}')">
-              ⬅ <b style="color:#e8eaf0;font-family:monospace;">${prev.seq}</b> — ${prev.nome}
-             </div>`
-          : `<div style="font-size:12px;color:#2a2e3a;margin-bottom:6px;">⬅ Início da calha</div>`}
+        ${prev ? `<div style="font-size:12px;color:#9ba3b4;margin-bottom:6px;cursor:pointer;padding:4px;border-radius:4px;" onclick="abrirModalRota('${prev.seq}')">⬅ <b style="color:#e8eaf0;font-family:monospace;">${prev.seq}</b> — ${prev.nome}</div>` : `<div style="font-size:12px;color:#2a2e3a;margin-bottom:6px;">⬅ Início da calha</div>`}
         <div style="font-size:12px;color:${r.cor};font-weight:700;padding:6px 4px;border-top:1px solid #1a1e26;border-bottom:1px solid #1a1e26;margin:2px 0;">● ${m.nome}</div>
-        ${next
-          ? `<div style="font-size:12px;color:#9ba3b4;margin-top:6px;cursor:pointer;padding:4px;border-radius:4px;" onclick="abrirModalRota('${next.seq}')">
-              ➡ <b style="color:#e8eaf0;font-family:monospace;">${next.seq}</b> — ${next.nome}
-             </div>`
-          : `<div style="font-size:12px;color:#2a2e3a;margin-top:6px;">➡ Fim da calha</div>`}
+        ${next ? `<div style="font-size:12px;color:#9ba3b4;margin-top:6px;cursor:pointer;padding:4px;border-radius:4px;" onclick="abrirModalRota('${next.seq}')">➡ <b style="color:#e8eaf0;font-family:monospace;">${next.seq}</b> — ${next.nome}</div>` : `<div style="font-size:12px;color:#2a2e3a;margin-top:6px;">➡ Fim da calha</div>`}
       </div>
-
     </div>`;
 
-  // Fecha ao clicar fora do card
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
   document.body.appendChild(overlay);
 }
 
-/* ── MAPA ─────────────────────────────────────────────────────
-   Labels: A1, A2... B1, B2... J1, J2...
-   Filtro por calha via botões no topo
-   Clique em node abre popup com TT, km e navegação
-   ------------------------------------------------------------ */
-let T = { s: 1, x: 0, y: 0 }; // estado de transformação do SVG
-let rotaFiltrada = null;        // null = todas visíveis
+/* ── MAPA ───────────────────────────────────────────────────── */
+let T = { s: 1, x: 0, y: 0 }; 
+let rotaFiltrada = null;        
 
 function mapLabel(rotaNum, idx) { return rotaNum + idx; }
 
@@ -381,7 +347,6 @@ function renderMap() {
   const m0 = merc(LAT0), m1 = merc(LAT1);
   function proj(lat, lng) { return { x: (lng - LNG0) / (LNG1 - LNG0) * W, y: (m1 - merc(lat)) / (m1 - m0) * H }; }
 
-  // Defs: grid de fundo + filtro glow
   const defs = document.createElementNS(NS, 'defs');
   defs.innerHTML = '<pattern id="gr" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M30 0L0 0 0 30" fill="none" stroke="#0f172a" stroke-width=".4"/></pattern><filter id="gw"><feGaussianBlur stdDeviation="1.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>';
   svg.appendChild(defs);
@@ -389,16 +354,13 @@ function renderMap() {
   const g = document.createElementNS(NS, 'g'); g.id = 'mg';
   g.setAttribute('transform', `translate(${T.x},${T.y}) scale(${T.s})`);
 
-  // Fundo
   const bg = document.createElementNS(NS, 'rect'); bg.setAttribute('width', W); bg.setAttribute('height', H); bg.setAttribute('fill', '#070c14'); g.appendChild(bg);
   const gr = document.createElementNS(NS, 'rect'); gr.setAttribute('width', W); gr.setAttribute('height', H); gr.setAttribute('fill', 'url(#gr)'); g.appendChild(gr);
 
-  // Borda do Amazonas
   const bPts = AM_BORDER.map(([lat, lng]) => { const p = proj(lat, lng); return p.x + ',' + p.y; }).join(' ');
   const border = document.createElementNS(NS, 'polygon');
   border.setAttribute('points', bPts); border.setAttribute('fill', '#0f1b2d'); border.setAttribute('stroke', '#1e3552'); border.setAttribute('stroke-width', '2'); g.appendChild(border);
 
-  // Rios
   RIOS.forEach(rv => {
     const pts = rv.coords.map(([lat, lng]) => { const p = proj(lat, lng); return p.x + ' ' + p.y; });
     const path = document.createElementNS(NS, 'polyline');
@@ -407,7 +369,6 @@ function renderMap() {
     path.setAttribute('opacity', '0.75'); path.setAttribute('stroke-linecap', 'round'); g.appendChild(path);
   });
 
-  // Hub Manaus (SPO9)
   const hub = proj(-3.119, -60.021);
   const hc = document.createElementNS(NS, 'circle');
   hc.setAttribute('cx', hub.x); hc.setAttribute('cy', hub.y); hc.setAttribute('r', '7'); hc.setAttribute('fill', '#14b8a6'); hc.setAttribute('filter', 'url(#gw)'); g.appendChild(hc);
@@ -415,7 +376,6 @@ function renderMap() {
   hl.setAttribute('x', hub.x + 10); hl.setAttribute('y', hub.y + 4); hl.setAttribute('font-size', '8');
   hl.setAttribute('fill', '#14b8a6'); hl.setAttribute('font-weight', '900'); hl.setAttribute('font-family', 'monospace'); hl.textContent = 'SPO9'; g.appendChild(hl);
 
-  // Linhas das calhas (com opacidade por filtro)
   ROTAS.forEach(r => {
     const ativo = rotaFiltrada === null || rotaFiltrada === r.num;
     const pts = r.municipios.map(m => LATLNG[m.cep] ? proj(LATLNG[m.cep].lat, LATLNG[m.cep].lng) : null).filter(Boolean);
@@ -429,7 +389,6 @@ function renderMap() {
     }
   });
 
-  // Nodes: label A1, B2... com filtro de visibilidade
   ROTAS.forEach(r => {
     const ativo = rotaFiltrada === null || rotaFiltrada === r.num;
     r.municipios.forEach((m, idx) => {
@@ -456,7 +415,11 @@ function renderMap() {
       nt.setAttribute('font-family', 'monospace'); nt.textContent = label; grp.appendChild(nt);
 
       if (ativo) {
-        grp.addEventListener('click', e => { e.stopPropagation(); showMapPopup(NODEIDX[m.seq], p, T, label); });
+        // AJUSTE CRÍTICO DE AUTAZES: Garante envio limpo e exato da string de identificação
+        grp.addEventListener('click', e => { 
+          e.stopPropagation(); 
+          showMapPopup(NODEIDX[String(m.seq).toUpperCase().trim()], p, T, label); 
+        });
       }
       g.appendChild(grp);
     });
@@ -466,33 +429,23 @@ function renderMap() {
 }
 
 /* ── POPUP DO MAPA ────────────────────────────────────────────
-   Aparece ao clicar em um node no mapa.
-   Mostra: label, calha, nome, TT, km, anterior e próximo.
-   Fecha ao clicar em qualquer lugar fora.
+   AJUSTE: Centralizado de forma absoluta e segura na tela para evitar cantos.
    ------------------------------------------------------------ */
 function showMapPopup(hit, svgPt, transform, label) {
+  if (!hit) return; // Proteção contra nós nulos
   let popup = document.getElementById('map-popup');
   if (!popup) {
     popup = document.createElement('div'); popup.id = 'map-popup';
-    popup.style.cssText = 'position:absolute;z-index:200;background:#12151b;border-radius:10px;padding:14px 16px;min-width:210px;max-width:270px;box-shadow:0 4px 24px rgba(0,0,0,0.85);border:1px solid #232838;font-family:inherit;';
+    // Estilos inline originais preservados com correções absolutas de centralização estável
+    popup.style.cssText = 'position:absolute;z-index:200;background:#12151b;border-radius:10px;padding:14px 16px;width:240px;box-shadow:0 4px 24px rgba(0,0,0,0.85);border:2px solid #232838;font-family:inherit;top:50%;left:50%;transform:translate(-50%, -50%);';
     document.getElementById('sc-m').appendChild(popup);
   }
 
   const { rota: r, mun: m, prev, next } = hit;
   const nb = bB(m.nome); const nx = nb ? labelDays(nb.days) : { l: '---' };
 
-  // Calcula posição do popup relativa ao container do mapa
-  const svgEl = document.getElementById('msvg');
-  const rect = svgEl.getBoundingClientRect();
-  const sc = document.getElementById('sc-m').getBoundingClientRect();
-  const ratioX = rect.width / 900, ratioY = rect.height / 600;
-  const px = svgPt.x * transform.s * ratioX + transform.x * ratioX + (rect.left - sc.left) + 22;
-  const py = svgPt.y * transform.s * ratioY + transform.y * ratioY + (rect.top - sc.top) - 75;
-
   popup.style.display = 'block';
-  popup.style.left = Math.min(Math.max(px, 8), sc.width - 280) + 'px';
-  popup.style.top = Math.max(py, 8) + 'px';
-  popup.style.pointerEvents = 'none';
+  popup.style.pointerEvents = 'all';
 
   popup.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
@@ -515,10 +468,10 @@ function showMapPopup(hit, svgPt, transform, label) {
       ${prev ? `<div style="font-size:11px;color:#9ba3b4;">⬅ <b style="color:#e8eaf0;font-family:monospace;">${prev.seq}</b> ${prev.nome}</div>` : `<div style="font-size:11px;color:#334155;">⬅ Início da calha</div>`}
       <div style="font-size:11px;color:${r.cor};font-weight:700;padding:2px 0;">● ${m.nome}</div>
       ${next ? `<div style="font-size:11px;color:#9ba3b4;">➡ <b style="color:#e8eaf0;font-family:monospace;">${next.seq}</b> ${next.nome}</div>` : `<div style="font-size:11px;color:#334155;">➡ Fim da calha</div>`}
-    </div>`;
+    </div>
+    <button onclick="fecharPopupMapa()" style="margin-top:10px;width:100%;padding:6px;background:#1a1e26;border:none;color:#737a8c;border-radius:4px;cursor:pointer;font-size:11px;font-weight:700;">FECHAR DETALHES</button>`;
 
   setTimeout(() => {
-    popup.style.pointerEvents = 'all';
     document.addEventListener('click', fecharPopupMapa, { once: true });
   }, 50);
 }
@@ -527,10 +480,7 @@ function fecharPopupMapa() {
   const p = document.getElementById('map-popup'); if (p) p.style.display = 'none';
 }
 
-/* ── FILTRO DE CALHA NO MAPA ──────────────────────────────────
-   Clica numa calha → isola ela, resto fica opaco
-   Clica de novo → reseta para todas visíveis
-   ------------------------------------------------------------ */
+/* ── FILTRO DE CALHA NO MAPA ────────────────────────────────── */
 function filtrarRota(num) {
   rotaFiltrada = (rotaFiltrada === num) ? null : num;
   document.querySelectorAll('.mfbtn').forEach(b => {
@@ -546,7 +496,6 @@ function buildMapFilters() {
   const cont = document.getElementById('map-filters'); if (!cont) return;
   cont.innerHTML = '';
 
-  // Botão "TODAS"
   const all = document.createElement('button'); all.className = 'mfbtn'; all.dataset.rota = '';
   all.textContent = 'TODAS';
   all.style.cssText = 'background:#1a1e26;border:1px solid #334155;color:#e8eaf0;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.5px;transition:all .15s;white-space:nowrap;';
@@ -557,7 +506,6 @@ function buildMapFilters() {
   };
   cont.appendChild(all);
 
-  // Um botão por calha (A até J)
   ROTAS.forEach(r => {
     const btn = document.createElement('button'); btn.className = 'mfbtn'; btn.dataset.rota = r.num; btn.textContent = r.num; btn.title = r.nome;
     btn.style.cssText = `background:${r.cor}22;border:1.5px solid ${r.cor};color:${r.cor};padding:6px 10px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;min-width:38px;transition:all .15s;letter-spacing:.5px;`;
@@ -571,7 +519,6 @@ function initMapInteractions() {
   const msvg = document.getElementById('msvg'); if (!msvg) return;
   let drag = false, ds = {};
 
-  // Mouse
   msvg.addEventListener('mousedown', e => { drag = true; ds = { x: e.clientX - T.x, y: e.clientY - T.y }; });
   document.addEventListener('mousemove', e => {
     if (!drag) return; T.x = e.clientX - ds.x; T.y = e.clientY - ds.y;
@@ -579,7 +526,6 @@ function initMapInteractions() {
   });
   document.addEventListener('mouseup', () => { drag = false; });
 
-  // Touch arrasto
   msvg.addEventListener('touchstart', e => {
     if (e.touches.length === 1) { drag = true; ds = { x: e.touches[0].clientX - T.x, y: e.touches[0].clientY - T.y }; }
   }, { passive: true });
@@ -590,7 +536,6 @@ function initMapInteractions() {
   }, { passive: true });
   msvg.addEventListener('touchend', () => { drag = false; });
 
-  // Pinch to zoom (dois dedos)
   let lastDist = null;
   msvg.addEventListener('touchstart', e => { if (e.touches.length === 2) lastDist = null; }, { passive: true });
   msvg.addEventListener('touchmove', e => {
@@ -610,11 +555,7 @@ function zI() { T.s = Math.min(T.s * 1.3, 8); renderMap(); }
 function zO() { T.s = Math.max(T.s / 1.3, 0.5); renderMap(); }
 function zR() { T = { s: 1, x: 0, y: 0 }; rotaFiltrada = null; renderMap(); buildMapFilters(); }
 
-/* ── ABA PORTOS ───────────────────────────────────────────────
-   Manifesto de despacho: Escadaria / Roadway / Rodoviário
-   Pode adicionar/remover municípios manualmente
-   Gera imagem PNG para WhatsApp via html2canvas
-   ------------------------------------------------------------ */
+/* ── ABA PORTOS ─────────────────────────────────────────────── */
 let manifestoPortos = { esc: [], rod: [], 'v-rod': [] };
 
 const LISTA_PADRAO_PORTOS = {
@@ -633,7 +574,7 @@ function popularSeletorPortos() {
 function addMunToPorto() {
   const nodeVal = document.getElementById('p-select-mun').value;
   const targetPorto = document.getElementById('p-select-target').value;
-  const hit = NODEIDX[nodeVal]; if (!hit) return;
+  const hit = NODEIDX[String(nodeVal).toUpperCase().trim()]; if (!hit) return;
   const jaExiste = [...manifestoPortos.esc, ...manifestoPortos.rod, ...manifestoPortos['v-rod']].some(x => x && x.mun.seq === hit.mun.seq);
   if (jaExiste) { alert('Municipio ja esta distribuido.'); return; }
   manifestoPortos[targetPorto].push(hit); renderTabelaPortos();
@@ -676,10 +617,7 @@ function gerarImagemWhatsapp() {
   });
 }
 
-/* ── NAVEGAÇÃO ENTRE ABAS ─────────────────────────────────────
-   Mostra/esconde seções via display + className
-   Inicializa mapa e portos apenas quando necessário
-   ------------------------------------------------------------ */
+/* ── NAVEGAÇÃO ENTRE ABAS ───────────────────────────────────── */
 function SS(name, btn) {
   cur = name;
   ['t', 'r', 'm', 'l'].forEach(s => {
@@ -693,15 +631,11 @@ function SS(name, btn) {
   if (name === 't') { setTimeout(() => { const ci = document.getElementById('ci'); if (ci) ci.focus(); }, 100); }
 }
 
-/* ── INICIALIZAÇÃO ────────────────────────────────────────────
-   Monta lista de rotas, reseta portos e garante que só
-   a aba Triagem aparece ao carregar a página
-   ------------------------------------------------------------ */
+/* ── INICIALIZAÇÃO ──────────────────────────────────────────── */
 bRO();
 resetarTabelaPortos();
 renderRecentes();
 
-// Esconde todas as abas exceto Triagem no carregamento
 ['r', 'm', 'l'].forEach(s => {
   const el = document.getElementById('sc-' + s);
   if (el) { el.style.display = 'none'; el.className = 'scr h'; }
