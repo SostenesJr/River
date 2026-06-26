@@ -1,4 +1,4 @@
-```javascript
+
 /* ============================================================
    RIVER OPS — TRIAGEM — APP.JS
    ============================================================ */
@@ -587,4 +587,4 @@ var scT = document.getElementById('sc-t');
 if (scT) { scT.style.display = ''; scT.className = 'scr'; }
 
 window.addEventListener('load', function() { var ci = document.getElementById('ci'); if (ci) ci.focus(); });
-```
+
