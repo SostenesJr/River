@@ -113,36 +113,57 @@ const EMBS = {
     {"n":"BANZEIRO","d":"Quinta-feira","p":"ROADWAY","t":""},
     {"n":"LADY MARY","d":"Quinta-feira","p":"","t":""},
     {"n":"PP 2003","d":"Quinta-feira","p":"BALSA VERMELHA","t":""},
-    {"n":"COMANDANTE NUNES","d":"Quinta-feira","p":"","t":""}
+    {"n":"COMANDANTE NUNES","d":"Quinta-feira","p":"","t":""},
+    {"n":"FB BANZEIRO","d":"Quinta-feira","p":"ROADWAY","t":""},
+    {"n":"EMBAIXADOR","d":"Quinta-feira","p":"ROADWAY","t":""},
+    {"n":"SAMAUMA","d":"Segunda-feira","p":"ROADWAY","t":""},
+    {"n":"RIO NEGRO","d":"Quarta-feira","p":"","t":""},
+    {"n":"MARIA MONTEIRO","d":"Sexta-feira","p":"ROADWAY","t":""},
+    {"n":"COMANDANTE TAVARES","d":"Sabado","p":"","t":""}
   ]},
   "ATALAIA DO NORTE": {"estream": [
     {"n":"AMAZONIA","d":"Quinta-feira","p":"ROADWAY","t":""},
     {"n":"BANZEIRO","d":"Quinta-feira","p":"ROADWAY","t":""},
     {"n":"EMBAIXADOR","d":"Quinta-feira","p":"ROADWAY","t":""},
     {"n":"PPJ","d":"Quinta-feira","p":"BALSA BRANCA","t":""},
-    {"n":"CIDADE SANTAREM","d":"Quinta-feira","p":"","t":""}
+    {"n":"CIDADE SANTAREM","d":"Quinta-feira","p":"","t":""},
+    {"n":"FB BANZEIRO","d":"Quinta-feira","p":"ROADWAY","t":""},
+    {"n":"SAMAUMA","d":"Segunda-feira","p":"ROADWAY","t":""},
+    {"n":"MARIA MONTEIRO","d":"Sexta-feira","p":"ROADWAY","t":""}
   ]},
   "BENJAMIN CONSTANT": {"estream": [
     {"n":"AMAZONIA","d":"Quinta-feira","p":"ROADWAY","t":""},
     {"n":"BANZEIRO","d":"Quinta-feira","p":"ROADWAY","t":""},
     {"n":"EMBAIXADOR","d":"Quinta-feira","p":"ROADWAY","t":""},
     {"n":"CARLOS ALBERTO","d":"Quinta-feira","p":"BALSA VERMELHA","t":""},
-    {"n":"CIDADE SANTAREM","d":"Quinta-feira","p":"","t":""},
-    {"n":"RIO MADEIRA","d":"Quinta-feira","p":"DEMETRIO","t":""}
+    {"n":"RIO MADEIRA","d":"Quinta-feira","p":"DEMETRIO","t":""},
+    {"n":"FB BANZEIRO","d":"Quinta-feira","p":"ROADWAY","t":""},
+    {"n":"SAMAUMA","d":"Segunda-feira","p":"ROADWAY","t":""},
+    {"n":"RIO NEGRO","d":"Quarta-feira","p":"","t":""},
+    {"n":"MARIA MONTEIRO","d":"Sexta-feira","p":"ROADWAY","t":""},
+    {"n":"ESMERALDA","d":"Sabado","p":"","t":""}
   ]},
   "CAAPIRANGA": {"estream": [
     {"n":"CMT DEIVID","d":"Quinta-feira","p":"","t":""},
-    {"n":"COMANDANTE DAVID","d":"Quinta-feira","p":"BALSA VERDE","t":""}
+    {"n":"COMANDANTE DAVID","d":"Quinta-feira","p":"BALSA VERDE","t":""},
+    {"n":"PROTEGIDO POR CRISTO","d":"Segunda-feira","p":"","t":""}
   ]},
   "CAREIRO DA VARZEA": {"estream": [
     {"n":"AMADA MINHA 9","d":"Quinta-feira","p":"","t":""},
     {"n":"EXP BARBOSA II","d":"Quinta-feira","p":"","t":""},
     {"n":"YONE","d":"Quinta-feira","p":"CEASA","t":""},
-    {"n":"MONTE MORIA","d":"Quinta-feira","p":"","t":""}
+    {"n":"MONTE MORIA","d":"Quinta-feira","p":"","t":""},
+    {"n":"DE MELO V","d":"Segunda-feira","p":"","t":""},
+    {"n":"LANCHA ELOA","d":"Quarta-feira","p":"","t":""}
   ]},
   "FONTE BOA": {"estream": [
     {"n":"BANZEIRO","d":"Quinta-feira","p":"ROADWAY","t":""},
-    {"n":"EMBAIXADOR","d":"Quinta-feira","p":"ROADWAY","t":""}
+    {"n":"EMBAIXADOR","d":"Quinta-feira","p":"ROADWAY","t":""},
+    {"n":"FB BANZEIRO","d":"Quinta-feira","p":"ROADWAY","t":""},
+    {"n":"RAINHA ESTHER","d":"Segunda-feira","p":"ROADWAY","t":""},
+    {"n":"IRMAO MIRANDA","d":"Sabado","p":"","t":""},
+    {"n":"MARIA MONTEIRO","d":"Sexta-feira","p":"ROADWAY","t":""},
+    {"n":"COMANDANTE TAVARES","d":"Sabado","p":"","t":""}
   ]},
   "JAPURA": {"estream": [
     {"n":"AMERICA","d":"Terca-feira","p":"ROADWAY","t":""},
@@ -153,10 +174,14 @@ const EMBS = {
     {"n":"LADY ZANYS III","d":"Sabado","p":"ROADWAY","t":""},
     {"n":"MADAME GORETHE","d":"Terca-feira","p":"","t":""},
     {"n":"MANOEL MONTEIRO","d":"Sabado","p":"ROADWAY","t":""},
-    {"n":"PROFETA DANIEL","d":"Sexta-feira","p":"ROADWAY","t":""}
+    {"n":"PROFETA DANIEL","d":"Sexta-feira","p":"ROADWAY","t":""},
+    {"n":"LEAO DE JUDA V","d":"Quarta-feira","p":"ROADWAY","t":""},
+    {"n":"PRINCIPE JOSE","d":"Quinta-feira","p":"ROADWAY","t":""}
   ]},
   "JURUA": {"estream": [
-    {"n":"LADY LUIZA","d":"Sabado","p":"PORTO DE SAO RAIMUNDO","t":""}
+    {"n":"LADY LUIZA","d":"Sabado","p":"PORTO DE SAO RAIMUNDO","t":""},
+    {"n":"ALMIRANTE OLIVEIRA","d":"Quinta-feira","p":"","t":""},
+    {"n":"JESUS TE AMA","d":"Terca-feira","p":"","t":""}
   ]},
   "JUTAI": {"estream": [
     {"n":"BANZEIRO","d":"Quinta-feira","p":"ROADWAY","t":""},
@@ -167,7 +192,10 @@ const EMBS = {
     {"n":"FB SAFIRA","d":"Sexta-feira","p":"ROADWAY","t":""},
     {"n":"IZABEL L","d":"Sabado","p":"","t":""},
     {"n":"MARIA MONTEIRO","d":"Sabado","p":"ROADWAY","t":""},
-    {"n":"VITORIA REGIA","d":"Terca-feira","p":"ROADWAY","t":""}
+    {"n":"VITORIA REGIA","d":"Terca-feira","p":"ROADWAY","t":""},
+    {"n":"FB BANZEIRO","d":"Quinta-feira","p":"ROADWAY","t":""},
+    {"n":"SAMAUMA","d":"Segunda-feira","p":"ROADWAY","t":""},
+    {"n":"COMANDANTE TAVARES","d":"Sabado","p":"","t":""}
   ]},
   "MANAQUIRI": {"estream": [
     {"n":"BARBOSA V","d":"Quarta-feira","p":"BALSA AMARELA","t":""},
@@ -175,7 +203,8 @@ const EMBS = {
     {"n":"EXPRESSO BARBOSSA","d":"Sexta-feira","p":"","t":""},
     {"n":"J MIGUEIS BECIL","d":"Segunda-feira","p":"","t":""},
     {"n":"LANCHA ESPERANCA","d":"Quarta-feira","p":"","t":""},
-    {"n":"MENEZES","d":"Segunda-feira","p":"BALSA AMARELA","t":""}
+    {"n":"MENEZES","d":"Segunda-feira","p":"BALSA AMARELA","t":""},
+    {"n":"NR DA SILVA","d":"Quinta-feira","p":"","t":""}
   ]},
   "MANICORE": {"estream": [
     {"n":"ELIZABETH IV","d":"Sexta-feira","p":"DEMETRIO","t":""},
@@ -184,13 +213,17 @@ const EMBS = {
     {"n":"LUIZ GRACA","d":"Quarta-feira","p":"DEMETRIO","t":""},
     {"n":"PP MAUES","d":"Sexta-feira","p":"ROADWAY","t":""},
     {"n":"RAIMUNDO COIMBRA","d":"Segunda-feira","p":"DEMETRIO","t":""},
-    {"n":"RIO MADEIRA","d":"Quinta-feira","p":"DEMETRIO","t":""}
+    {"n":"RIO MADEIRA","d":"Quinta-feira","p":"DEMETRIO","t":""},
+    {"n":"MARLENE COIMBRA","d":"Segunda-feira","p":"DEMETRIO","t":""}
   ]},
   "MARAA": {"estream": [
     {"n":"ITAPURANGA","d":"Sexta-feira","p":"ROADWAY","t":""},
     {"n":"MANAUARA","d":"Sexta-feira","p":"ROADWAY","t":""},
     {"n":"LADY ZANIS","d":"Sabado","p":"","t":""},
-    {"n":"MANOEL MONTEIRO","d":"Sabado","p":"ROADWAY","t":""}
+    {"n":"MANOEL MONTEIRO","d":"Sabado","p":"ROADWAY","t":""},
+    {"n":"RAINHA ESTHER","d":"Segunda-feira","p":"ROADWAY","t":""},
+    {"n":"IRMAO MIRANDA","d":"Sabado","p":"","t":""},
+    {"n":"LEAO DE JUDA V","d":"Quarta-feira","p":"ROADWAY","t":""}
   ]},
   "MAUES": {"estream": [
     {"n":"ALMIRANTE DINELSIN","d":"Sexta-feira","p":"","t":""},
@@ -211,8 +244,10 @@ const EMBS = {
     {"n":"COMANDANTE PAIVA","d":"Quarta-feira","p":"PORTO DO GELAO","t":""},
     {"n":"JOAO FONSECA","d":"Segunda-feira","p":"PORTO DO GELAO","t":""},
     {"n":"LUIZ GRACA","d":"Quarta-feira","p":"DEMETRIO","t":""},
+    {"n":"MESTRE JOAO FONSECA","d":"Segunda-feira","p":"PORTO DO GELAO","t":""},
     {"n":"SEIS IRMAOS","d":"Sexta-feira","p":"PORTO DO GELAO","t":""},
-    {"n":"SAO FRANCISCO DE ASSIS 1","d":"Quinta-feira","p":"","t":""}
+    {"n":"SAO FRANCISCO DE ASSIS 1","d":"Quinta-feira","p":"","t":""},
+    {"n":"BARCO SAO FRANCISCO","d":"Quarta-feira","p":"","t":""}
   ]},
   "NOVO ARIPUANA": {"estream": [
     {"n":"CIDADE DE NOVO ARIPUANA","d":"Quarta-feira","p":"DEMETRIO","t":""},
@@ -222,14 +257,17 @@ const EMBS = {
     {"n":"PP MAUES","d":"Sexta-feira","p":"ROADWAY","t":""},
     {"n":"RAIMUNDO COIMBRA","d":"Segunda-feira","p":"DEMETRIO","t":""},
     {"n":"RIO MADEIRA","d":"Quinta-feira","p":"DEMETRIO","t":""},
-    {"n":"ZE HOLANDA","d":"Sabado","p":"BALSA AMARELA","t":""}
+    {"n":"ZE HOLANDA","d":"Sabado","p":"BALSA AMARELA","t":""},
+    {"n":"MARLENE COIMBRA","d":"Segunda-feira","p":"DEMETRIO","t":""}
   ]},
   "PARINTINS": {"estream": [
     {"n":"ANA REBECA III","d":"Sabado","p":"ROADWAY","t":""},
     {"n":"FB PARINTINS","d":"Quinta-feira","p":"","t":""},
     {"n":"LIZ PINHEIRO","d":"Quinta-feira","p":"BALSA VERMELHA","t":""},
     {"n":"NAVIO PARINTINS","d":"Quinta-feira","p":"","t":""},
-    {"n":"SERGIO BRELAS","d":"Terca-feira","p":"","t":""}
+    {"n":"SERGIO BRELAS","d":"Terca-feira","p":"","t":""},
+    {"n":"OLIVEIRA V","d":"Sexta-feira","p":"","t":""},
+    {"n":"PRINCIPE DO AMAZONAS","d":"Segunda-feira","p":"","t":""}
   ]},
   "SANTO ANTONIO DO ICA": {"estream": [
     {"n":"BANZEIRO","d":"Quinta-feira","p":"ROADWAY","t":""},
@@ -239,13 +277,20 @@ const EMBS = {
     {"n":"IZABEL L","d":"Sexta-feira","p":"","t":""},
     {"n":"MARIA MONTEIRO","d":"Sabado","p":"ROADWAY","t":""},
     {"n":"RIO NEGRO","d":"Quarta-feira","p":"","t":""},
-    {"n":"VITORIA REGIA","d":"Terca-feira","p":"ROADWAY","t":""}
+    {"n":"VITORIA REGIA","d":"Terca-feira","p":"ROADWAY","t":""},
+    {"n":"FB BANZEIRO","d":"Quinta-feira","p":"ROADWAY","t":""},
+    {"n":"SAMAUMA","d":"Segunda-feira","p":"ROADWAY","t":""},
+    {"n":"COMANDANTE TAVARES","d":"Sabado","p":"","t":""}
   ]},
   "SAO GABRIEL DA CACHOEIRA": {"estream": [
-    {"n":"LADY LUIZA","d":"Sexta-feira","p":"PORTO DE SAO RAIMUNDO","t":""}
+    {"n":"LADY LUIZA","d":"Sexta-feira","p":"PORTO DE SAO RAIMUNDO","t":""},
+    {"n":"LANCHA TURQUEZA","d":"Quinta-feira","p":"","t":""},
+    {"n":"CMT NATAL","d":"Quinta-feira","p":"","t":""}
   ]},
   "SAO GABRIEL CACHOEIRA": {"estream": [
-    {"n":"LADY LUIZA","d":"Sexta-feira","p":"PORTO DE SAO RAIMUNDO","t":""}
+    {"n":"LADY LUIZA","d":"Sexta-feira","p":"PORTO DE SAO RAIMUNDO","t":""},
+    {"n":"LANCHA TURQUEZA","d":"Quinta-feira","p":"","t":""},
+    {"n":"CMT NATAL","d":"Quinta-feira","p":"","t":""}
   ]},
   "SAO PAULO DE OLIVENCA": {"estream": [
     {"n":"BANZEIRO","d":"Quinta-feira","p":"ROADWAY","t":""},
@@ -254,7 +299,10 @@ const EMBS = {
     {"n":"IZABEL L","d":"Sexta-feira","p":"","t":""},
     {"n":"MARIA MONTEIRO","d":"Sabado","p":"ROADWAY","t":""},
     {"n":"RIO NEGRO","d":"Quarta-feira","p":"","t":""},
-    {"n":"VITORIA REGIA","d":"Terca-feira","p":"ROADWAY","t":""}
+    {"n":"VITORIA REGIA","d":"Terca-feira","p":"ROADWAY","t":""},
+    {"n":"FB BANZEIRO","d":"Quinta-feira","p":"ROADWAY","t":""},
+    {"n":"EMBAIXADOR","d":"Quinta-feira","p":"ROADWAY","t":""},
+    {"n":"COMANDANTE TAVARES","d":"Sabado","p":"","t":""}
   ]},
   "SAO PAULO OLIVENCA": {"estream": [
     {"n":"BANZEIRO","d":"Quinta-feira","p":"ROADWAY","t":""},
@@ -263,7 +311,10 @@ const EMBS = {
     {"n":"IZABEL L","d":"Sexta-feira","p":"","t":""},
     {"n":"MARIA MONTEIRO","d":"Sabado","p":"ROADWAY","t":""},
     {"n":"RIO NEGRO","d":"Quarta-feira","p":"","t":""},
-    {"n":"VITORIA REGIA","d":"Terca-feira","p":"ROADWAY","t":""}
+    {"n":"VITORIA REGIA","d":"Terca-feira","p":"ROADWAY","t":""},
+    {"n":"FB BANZEIRO","d":"Quinta-feira","p":"ROADWAY","t":""},
+    {"n":"EMBAIXADOR","d":"Quinta-feira","p":"ROADWAY","t":""},
+    {"n":"COMANDANTE TAVARES","d":"Sabado","p":"","t":""}
   ]},
   "SAO SEBASTIAO DO UATUMA": {"estream": [
     {"n":"ALMIRANTE GUIMARAES","d":"Quarta-feira","p":"","t":""},
@@ -272,7 +323,10 @@ const EMBS = {
     {"n":"COMANDANTE NATAL","d":"Sabado","p":"BALSA VERMELHA","t":""},
     {"n":"MS VITORIA","d":"Terca-feira","p":"BALSA BRANCA","t":""},
     {"n":"PP MAUES III","d":"Quinta-feira","p":"BALSA VERMELHA","t":""},
-    {"n":"PRINCIPE DE URUCARA","d":"Sexta-feira","p":"BALSA VERMELHA","t":""}
+    {"n":"PRINCIPE DE URUCARA","d":"Sexta-feira","p":"BALSA VERMELHA","t":""},
+    {"n":"DONA LIKA","d":"Segunda-feira","p":"BALSA BRANCA","t":""},
+    {"n":"O NOIVO","d":"Sabado","p":"","t":""},
+    {"n":"VITORIA REGIA","d":"Segunda-feira","p":"","t":""}
   ]},
   "TABATINGA": {"estream": [
     {"n":"BANZEIRO","d":"Quinta-feira","p":"ROADWAY","t":""},
@@ -281,7 +335,11 @@ const EMBS = {
     {"n":"GM OLIVEIRA","d":"Sabado","p":"ROADWAY","t":""},
     {"n":"RIO NEGRO","d":"Quarta-feira","p":"","t":""},
     {"n":"RIO SOLIMOES","d":"Terca-feira","p":"ROADWAY","t":""},
-    {"n":"VITORIA REGIA","d":"Terca-feira","p":"ROADWAY","t":""}
+    {"n":"VITORIA REGIA","d":"Terca-feira","p":"ROADWAY","t":""},
+    {"n":"FB BANZEIRO","d":"Quinta-feira","p":"ROADWAY","t":""},
+    {"n":"SAMAUMA","d":"Segunda-feira","p":"ROADWAY","t":""},
+    {"n":"MARIA MONTEIRO","d":"Sexta-feira","p":"ROADWAY","t":""},
+    {"n":"ESMERALDA","d":"Sabado","p":"","t":""}
   ]},
   "TAPAUA": {"estream": [
     {"n":"CMT WILLIAN","d":"Quarta-feira","p":"","t":""},
@@ -295,7 +353,10 @@ const EMBS = {
     {"n":"ESTRELA DO PURUS","d":"Quinta-feira","p":"ROADWAY","t":""},
     {"n":"IRMAO MIRANDA","d":"Sabado","p":"","t":""},
     {"n":"LEAO DE JUDA","d":"Quarta-feira","p":"BALSA VERDE","t":""},
-    {"n":"PROFETA DANIEL","d":"Sexta-feira","p":"ROADWAY","t":""}
+    {"n":"PROFETA DANIEL","d":"Sexta-feira","p":"ROADWAY","t":""},
+    {"n":"RAINHA ESTHER","d":"Segunda-feira","p":"ROADWAY","t":""},
+    {"n":"LEAO DE JUDA V","d":"Quarta-feira","p":"ROADWAY","t":""},
+    {"n":"PRINCIPE JOSE","d":"Quinta-feira","p":"ROADWAY","t":""}
   ]},
   "TONANTINS": {"estream": [
     {"n":"CMT TAVARES","d":"Sabado","p":"","t":""},
@@ -305,7 +366,9 @@ const EMBS = {
     {"n":"FB SAFIRA","d":"Sexta-feira","p":"ROADWAY","t":""},
     {"n":"IZABEL L","d":"Sexta-feira","p":"","t":""},
     {"n":"MARIA MONTEIRO","d":"Sabado","p":"ROADWAY","t":""},
-    {"n":"VITORIA REGIA","d":"Terca-feira","p":"ROADWAY","t":""}
+    {"n":"VITORIA REGIA","d":"Terca-feira","p":"ROADWAY","t":""},
+    {"n":"FB BANZEIRO","d":"Quinta-feira","p":"ROADWAY","t":""},
+    {"n":"COMANDANTE TAVARES","d":"Sabado","p":"","t":""}
   ]},
   "UARINI": {"estream": [
     {"n":"AMERICA","d":"Terca-feira","p":"ROADWAY","t":""},
@@ -313,7 +376,9 @@ const EMBS = {
     {"n":"IRMAO MIRANDA","d":"Sabado","p":"","t":""},
     {"n":"LEAO DE JUDA","d":"Quarta-feira","p":"BALSA VERDE","t":""},
     {"n":"PROFETA DANIEL","d":"Sexta-feira","p":"ROADWAY","t":""},
-    {"n":"RAINHA ESTHER","d":"Terca-feira","p":"ROADWAY","t":""}
+    {"n":"RAINHA ESTHER","d":"Segunda-feira","p":"ROADWAY","t":""},
+    {"n":"LEAO DE JUDA V","d":"Quarta-feira","p":"ROADWAY","t":""},
+    {"n":"PRINCIPE JOSE","d":"Quinta-feira","p":"ROADWAY","t":""}
   ]},
   "URUCARA": {"estream": [
     {"n":"ALMIRANTE GUIMARAES","d":"Quarta-feira","p":"","t":""},
@@ -323,20 +388,195 @@ const EMBS = {
     {"n":"MS VITORIA","d":"Terca-feira","p":"BALSA BRANCA","t":""},
     {"n":"O NOIVO","d":"Sabado","p":"","t":""},
     {"n":"PP MAUES","d":"Quarta-feira","p":"ROADWAY","t":""},
-    {"n":"PRINCIPE DE URUCARA","d":"Sexta-feira","p":"BALSA VERMELHA","t":""}
+    {"n":"PRINCIPE DE URUCARA","d":"Sexta-feira","p":"BALSA VERMELHA","t":""},
+    {"n":"DONA LIKA","d":"Segunda-feira","p":"BALSA BRANCA","t":""},
+    {"n":"PP MAUES II","d":"Quarta-feira","p":"ROADWAY","t":""}
   ]},
   "URUCURITUBA": {"estream": [
     {"n":"CIDADE DE URUCURITUBA","d":"Quinta-feira","p":"BALSA VERMELHA","t":""},
     {"n":"M GOMES","d":"Quarta-feira","p":"BALSA AMARELA","t":""},
     {"n":"TITO NOGUEIRA","d":"Segunda-feira","p":"BALSA VERMELHA","t":""},
-    {"n":"YASMIN","d":"Sexta-feira","p":"BALSA VERMELHA","t":""}
+    {"n":"YASMIN","d":"Sexta-feira","p":"BALSA VERMELHA","t":""},
+    {"n":"TITO NOGUEIRA II","d":"Segunda-feira","p":"BALSA VERMELHA","t":""}
   ]},
   "ALVARAES": {"estream": [
     {"n":"LEAO DE JUDA","d":"Quarta-feira","p":"BALSA VERDE","t":""},
-    {"n":"PROFETA DANIEL","d":"Sexta-feira","p":"ROADWAY","t":""}
+    {"n":"PROFETA DANIEL","d":"Sexta-feira","p":"ROADWAY","t":""},
+    {"n":"RAINHA ESTHER","d":"Segunda-feira","p":"ROADWAY","t":""},
+    {"n":"LEAO DE JUDA V","d":"Quarta-feira","p":"ROADWAY","t":""},
+    {"n":"ESTRELA DO PURUS","d":"Quinta-feira","p":"ROADWAY","t":""},
+    {"n":"IRMAO MIRANDA","d":"Sabado","p":"","t":""}
   ]},
   "ANAMA": {"estream": [
-    {"n":"ARTHUR OLIVEIRA","d":"Sexta-feira","p":"","t":""}
+    {"n":"ARTHUR OLIVEIRA","d":"Sexta-feira","p":"","t":""},
+    {"n":"INGRID BEATRIZ","d":"Quinta-feira","p":"","t":""},
+    {"n":"LIZ PINHEIRO","d":"Terca-feira","p":"","t":""},
+    {"n":"PODEROSO","d":"Segunda-feira","p":"","t":""},
+    {"n":"ZE HOLANDA","d":"Quarta-feira","p":"","t":""}
+  ]},
+  "ANORI": {"estream": [
+    {"n":"PODEROSO","d":"Segunda-feira","p":"","t":""},
+    {"n":"LIZ PINHEIRO","d":"Terca-feira","p":"","t":""},
+    {"n":"ZE HOLANDA","d":"Quarta-feira","p":"","t":""}
+  ]},
+  "AUTAZES": {"estream": [
+    {"n":"6 DE JULHO II","d":"Segunda-feira","p":"","t":""},
+    {"n":"DONA MARIA","d":"Terca-feira","p":"","t":""},
+    {"n":"PIMENTEL FILHO V","d":"Terca-feira","p":"","t":""},
+    {"n":"PPJ","d":"Quarta-feira","p":"","t":""}
+  ]},
+  "BARCELOS": {"estream": [
+    {"n":"CMT NATAL","d":"Quinta-feira","p":"","t":""}
+  ]},
+  "BARREIRINHA": {"estream": [
+    {"n":"ESTRELA PP II","d":"Sabado","p":"ROADWAY","t":""},
+    {"n":"CIDADE SANTAREM","d":"Quarta-feira","p":"","t":""},
+    {"n":"MARIA CARDOSO","d":"Segunda-feira","p":"","t":""}
+  ]},
+  "BERURI": {"estream": [
+    {"n":"ARTHUR OLIVEIRA","d":"Segunda-feira","p":"","t":""},
+    {"n":"CARLOS ALBERTO XV","d":"Terca-feira","p":"","t":""},
+    {"n":"INGRID BEATRIZ","d":"Quinta-feira","p":"","t":""}
+  ]},
+  "BOA VISTA DO RAMOS": {"estream": [
+    {"n":"MARIA CARDOSO","d":"Segunda-feira","p":"","t":""},
+    {"n":"ALMIR ARAUJO","d":"Terca-feira","p":"","t":""}
+  ]},
+  "BOA VISTA RAMOS": {"estream": [
+    {"n":"MARIA CARDOSO","d":"Segunda-feira","p":"","t":""},
+    {"n":"ALMIR ARAUJO","d":"Terca-feira","p":"","t":""}
+  ]},
+  "CARAUARI": {"estream": [
+    {"n":"ALMIRANTE OLIVEIRA","d":"Segunda-feira","p":"","t":""},
+    {"n":"JESUS TE AMA","d":"Terca-feira","p":"","t":""},
+    {"n":"ARAFER IX","d":"Quinta-feira","p":"","t":""}
+  ]},
+  "COARI": {"estream": [
+    {"n":"RAINHA ESTHER","d":"Segunda-feira","p":"ROADWAY","t":""},
+    {"n":"LEAO DE JUDA V","d":"Quarta-feira","p":"ROADWAY","t":""},
+    {"n":"PRINCIPE JOSE","d":"Quinta-feira","p":"ROADWAY","t":""},
+    {"n":"IRMAO MIRANDA","d":"Sabado","p":"","t":""},
+    {"n":"VENCEDOR VIII","d":"Segunda-feira","p":"","t":""},
+    {"n":"ESTRELA DO PURUS","d":"Quinta-feira","p":"ROADWAY","t":""}
+  ]},
+  "CODAJAS": {"estream": [
+    {"n":"RAINHA ESTHER","d":"Segunda-feira","p":"ROADWAY","t":""},
+    {"n":"CMT LORO","d":"Terca-feira","p":"","t":""},
+    {"n":"PROFETA DANIEL","d":"Sexta-feira","p":"ROADWAY","t":""},
+    {"n":"IRMAO MIRANDA","d":"Sabado","p":"","t":""},
+    {"n":"INGRID BEATRIZ","d":"Segunda-feira","p":"","t":""},
+    {"n":"MONTE MORIA","d":"Quarta-feira","p":"","t":""},
+    {"n":"ESTRELA DO PURUS","d":"Quinta-feira","p":"ROADWAY","t":""}
+  ]},
+  "ITACOATIARA": {"estream": [
+    {"n":"TRANSAMAZONICA","d":"Segunda-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Terca-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Quarta-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Quinta-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Sexta-feira","p":"RODOVIARIO","t":""}
+  ]},
+  "MANACAPURU": {"estream": [
+    {"n":"TRANSAMAZONICA","d":"Segunda-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Terca-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Quarta-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Quinta-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Sexta-feira","p":"RODOVIARIO","t":""}
+  ]},
+  "NOVO AIRAO": {"estream": [
+    {"n":"TRANSAMAZONICA","d":"Segunda-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Terca-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Quarta-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Quinta-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Sexta-feira","p":"RODOVIARIO","t":""}
+  ]},
+  "PRESIDENTE FIGUEIREDO": {"estream": [
+    {"n":"TRANSAMAZONICA","d":"Segunda-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Terca-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Quarta-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Quinta-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Sexta-feira","p":"RODOVIARIO","t":""}
+  ]},
+  "PRES. FIGUEIREDO": {"estream": [
+    {"n":"TRANSAMAZONICA","d":"Segunda-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Terca-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Quarta-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Quinta-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Sexta-feira","p":"RODOVIARIO","t":""}
+  ]},
+  "CAREIRO CASTANHO": {"estream": [
+    {"n":"TRANSAMAZONICA","d":"Segunda-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Terca-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Quarta-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Quinta-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Sexta-feira","p":"RODOVIARIO","t":""}
+  ]},
+  "ITAPIRANGA": {"estream": [
+    {"n":"TRANSAMAZONICA","d":"Segunda-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Terca-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Quarta-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Quinta-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Sexta-feira","p":"RODOVIARIO","t":""}
+  ]},
+  "NOVO REMANSO": {"estream": [
+    {"n":"TRANSAMAZONICA","d":"Segunda-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Terca-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Quarta-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Quinta-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Sexta-feira","p":"RODOVIARIO","t":""}
+  ]},
+  "RIO PRETO DA EVA": {"estream": [
+    {"n":"TRANSAMAZONICA","d":"Segunda-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Terca-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Quarta-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Quinta-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Sexta-feira","p":"RODOVIARIO","t":""}
+  ]},
+  "RIO PRETO EVA": {"estream": [
+    {"n":"TRANSAMAZONICA","d":"Segunda-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Terca-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Quarta-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Quinta-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Sexta-feira","p":"RODOVIARIO","t":""}
+  ]},
+  "SILVES": {"estream": [
+    {"n":"TRANSAMAZONICA","d":"Segunda-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Terca-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Quarta-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Quinta-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Sexta-feira","p":"RODOVIARIO","t":""}
+  ]},
+  "APUI": {"estream": [
+    {"n":"TRANSAMAZONICA","d":"Segunda-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Terca-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Quinta-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Sexta-feira","p":"RODOVIARIO","t":""}
+  ]},
+  "HUMAITA": {"estream": [
+    {"n":"TRANSAMAZONICA","d":"Segunda-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Terca-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Quinta-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Sexta-feira","p":"RODOVIARIO","t":""}
+  ]},
+  "LABREA": {"estream": [
+    {"n":"TRANSAMAZONICA","d":"Segunda-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Terca-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Quinta-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Sexta-feira","p":"RODOVIARIO","t":""}
+  ]},
+  "IRANDUBA": {"estream": [
+    {"n":"TRANSAMAZONICA","d":"Segunda-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Terca-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Quarta-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Quinta-feira","p":"RODOVIARIO","t":""},
+    {"n":"TRANSAMAZONICA","d":"Sexta-feira","p":"RODOVIARIO","t":""}
+  ]},
+  "ITAMARATI": {"estream": [
+    {"n":"DONA CANDIDA II","d":"Terca-feira","p":"","t":""}
+  ]},
+  "CARAUARI": {"estream": [
+    {"n":"ALMIRANTE OLIVEIRA","d":"Segunda-feira","p":"","t":""},
+    {"n":"JESUS TE AMA","d":"Terca-feira","p":"","t":""},
+    {"n":"ARAFER IX","d":"Quinta-feira","p":"","t":""}
   ]}
 };
 
