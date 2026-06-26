@@ -91,10 +91,15 @@ npx serve .
 ## 📂 Project Structure
 river/
 ├── index.html          # Main application shell
+
 ├── css/
+
 │   └── style.css       # Dark theme, responsive layout
+
 └── js/
+
 ├── data.js         # Routes, municipalities, vessels, coordinates
+
 └── app.js          # All application logic
 ---
 ## 🌊 Context
