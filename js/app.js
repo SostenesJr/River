@@ -1,4 +1,4 @@
-
+```javascript
 /* ============================================================
    RIVER OPS — TRIAGEM — APP.JS
    ============================================================ */
@@ -151,7 +151,6 @@ function renderRecentes() {
   }).join('');
 }
 
-/* ── ABA ROTAS ── */
 function bRO() {
   var body = document.getElementById('rbdy'); if (!body) return; body.innerHTML = '';
   ROTAS.forEach(function(r) {
@@ -199,7 +198,6 @@ function fR(q) {
   });
 }
 
-/* ── MODAL ROTAS ── */
 function abrirModalRota(nodeSeq) {
   var hit = NODEIDX[nodeSeq]; if (!hit) return;
   var r = hit.rota; var m = hit.mun; var prev = hit.prev; var next = hit.next;
@@ -254,7 +252,6 @@ function abrirModalRota(nodeSeq) {
   document.body.appendChild(overlay);
 }
 
-/* ── MAPA ── */
 var T = { s: 1, x: 0, y: 0 };
 var rotaFiltrada = null;
 
@@ -460,7 +457,6 @@ function zI() { T.s = Math.min(T.s * 1.3, 8); renderMap(); }
 function zO() { T.s = Math.max(T.s / 1.3, 0.5); renderMap(); }
 function zR() { T = { s: 1, x: 0, y: 0 }; rotaFiltrada = null; renderMap(); buildMapFilters(); }
 
-/* ── ABA PORTOS ── */
 var manifestoPortos = { esc: [], rod: [], 'v-rod': [] };
 
 var LISTA_PADRAO_PORTOS = {
@@ -496,7 +492,7 @@ function renderTabelaPortos() {
   var nomes = { esc: 'PORTO ESCADARIA', rod: 'PORTO ROADWAY', 'v-rod': 'RODOVIARIO' };
   ['esc', 'rod', 'v-rod'].forEach(function(p) {
 
-    // VIEW — tela com botão X
+    // VIEW — tela com botão X e toggle
     var viewContainer = document.querySelector('#view-col-' + p + ' .p-items-list');
     if (viewContainer) {
       viewContainer.innerHTML = '';
@@ -521,9 +517,22 @@ function renderTabelaPortos() {
       });
     }
 
-    // Títulos com contagem
+    // Título view com contagem e toggle
     var tituloView = document.querySelector('#view-col-' + p + ' .p-col-title');
-    if (tituloView) tituloView.textContent = nomes[p] + ' (' + manifestoPortos[p].length + ')';
+    if (tituloView) {
+      var aberto = viewContainer ? viewContainer.style.display !== 'none' : true;
+      tituloView.textContent = nomes[p] + ' (' + manifestoPortos[p].length + ') ' + (aberto ? '▼' : '▶');
+      tituloView.style.cursor = 'pointer';
+      tituloView.onclick = function() {
+        var lista = document.querySelector('#view-col-' + p + ' .p-items-list');
+        if (!lista) return;
+        var estaAberto = lista.style.display !== 'none';
+        lista.style.display = estaAberto ? 'none' : '';
+        tituloView.textContent = nomes[p] + ' (' + manifestoPortos[p].length + ') ' + (estaAberto ? '▶' : '▼');
+      };
+    }
+
+    // Título print sem toggle
     var tituloPrint = document.querySelector('#print-col-' + p + ' .p-col-title');
     if (tituloPrint) tituloPrint.textContent = nomes[p];
   });
@@ -560,7 +569,6 @@ function copiarTextoWhatsapp() {
   });
 }
 
-/* ── NAVEGAÇÃO ── */
 function SS(name, btn) {
   cur = name;
   ['t', 'r', 'm', 'l'].forEach(function(s) {
@@ -574,7 +582,6 @@ function SS(name, btn) {
   if (name === 't') { setTimeout(function() { var ci = document.getElementById('ci'); if (ci) ci.focus(); }, 100); }
 }
 
-/* ── INIT ── */
 bRO();
 resetarTabelaPortos();
 renderRecentes();
@@ -587,3 +594,4 @@ var scT = document.getElementById('sc-t');
 if (scT) { scT.style.display = ''; scT.className = 'scr'; }
 
 window.addEventListener('load', function() { var ci = document.getElementById('ci'); if (ci) ci.focus(); });
+```
