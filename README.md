@@ -49,7 +49,7 @@ Packages are sorted and dispatched via river vessels navigating the Amazon, Soli
 - Copy formatted text for WhatsApp
 ---
 ## 🗺️ Coverage
-10 river routes covering 54 municipalities:
+10 river routes covering 57 municipalities:
 | Route | Name | Direction |
 |-------|------|-----------|
 | A | Baixo Amazonas | Manaus → East |
