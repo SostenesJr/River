@@ -108,7 +108,7 @@ The Amazon river system is one of the most complex logistics environments on Ear
 ---
 
 ## 👤 Author
-Built by **[Your Name]** as part of real-world logistics operations at Fácil Express, Manaus, Amazonas, Brazil.
+Built by **Sostenes Jr** as part of real-world logistics operations at Fácil Express, Manaus, Amazonas, Brazil.
 - GitHub: [https://github.com/SostenesJr]
 - LinkedIn: [https://www.linkedin.com/in/srcjr/]
 ---
