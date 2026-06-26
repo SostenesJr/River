@@ -521,37 +521,6 @@ function renderTabelaPortos() {
       });
     }
 
-    // Títulos com contagem + toggle ao clicar
-    var tituloView = document.querySelector('#view-col-' + p + ' .p-col-title');
-    if (tituloView) {
-      tituloView.textContent = nomes[p] + ' (' + manifestoPortos[p].length + ') ▼';
-      tituloView.style.cursor = 'pointer';
-      tituloView.onclick = function() {
-        var lista = document.querySelector('#view-col-' + p + ' .p-items-list');
-        if (!lista) return;
-        var aberto = lista.style.display !== 'none';
-        lista.style.display = aberto ? 'none' : '';
-        tituloView.textContent = nomes[p] + ' (' + manifestoPortos[p].length + ') ' + (aberto ? '▶' : '▼');
-      };
-    }
-
-    var tituloPrint = document.querySelector('#print-col-' + p + ' .p-col-title');
-    if (tituloPrint) tituloPrint.textContent = nomes[p];
-  });
-}
-
-    // PRINT — área de captura sem botão X
-    var printContainer = document.querySelector('#print-col-' + p + ' .p-items-list');
-    if (printContainer) {
-      printContainer.innerHTML = '';
-      manifestoPortos[p].forEach(function(hit) {
-        if (!hit) return;
-        var item = document.createElement('div'); item.className = 'p-item';
-        item.innerHTML = '<span><b style="font-family:monospace">' + hit.mun.seq + '</b> - ' + hit.mun.nome + '</span>';
-        printContainer.appendChild(item);
-      });
-    }
-
     // Títulos com contagem
     var tituloView = document.querySelector('#view-col-' + p + ' .p-col-title');
     if (tituloView) tituloView.textContent = nomes[p] + ' (' + manifestoPortos[p].length + ')';
@@ -618,4 +587,3 @@ var scT = document.getElementById('sc-t');
 if (scT) { scT.style.display = ''; scT.className = 'scr'; }
 
 window.addEventListener('load', function() { var ci = document.getElementById('ci'); if (ci) ci.focus(); });
-
