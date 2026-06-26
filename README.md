@@ -11,7 +11,7 @@
 
 ## 📌 About
 
-**River** is a web-based operations tool built for managing river freight dispatches across **54 municipalities in Amazonas state, Brazil** — one of the most challenging logistics environments in the world.
+**River** is a web-based operations tool built for managing river freight dispatches across **57 municipalities in Amazonas state, Brazil** — one of the most challenging logistics environments in the world.
 
 Packages are sorted and dispatched via river vessels navigating the Amazon, Solimões, Negro, Madeira, Purus, and Juruá rivers. This dashboard was built to support the daily triage workflow of **Fácil Express**, a logistics company based in Manaus.
 
