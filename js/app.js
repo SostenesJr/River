@@ -1,4 +1,3 @@
-
 /* ============================================================
    RIVER OPS — TRIAGEM — APP.JS
    ============================================================ */
@@ -252,12 +251,67 @@ function abrirModalRota(nodeSeq) {
   document.body.appendChild(overlay);
 }
 
+/* ── MAPA ── */
 var T = { s: 1, x: 0, y: 0 };
 var rotaFiltrada = null;
 
 function mapLabel(rotaNum, idx) { return rotaNum + idx; }
 
-ROTAS.forEach(function(r) {
+function renderMap() {
+  var svg = document.getElementById('msvg'); if (!svg) return;
+  svg.innerHTML = '';
+  var NS = 'http://www.w3.org/2000/svg';
+  var W = 900, H = 600;
+  var LNG0 = -74.5, LNG1 = -53.5, LAT0 = -10.6, LAT1 = 2.7;
+  function merc(lat) { return Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360)); }
+  var m0 = merc(LAT0), m1 = merc(LAT1);
+  function proj(lat, lng) { return { x: (lng - LNG0) / (LNG1 - LNG0) * W, y: (m1 - merc(lat)) / (m1 - m0) * H }; }
+
+  var defs = document.createElementNS(NS, 'defs');
+  defs.innerHTML = '<pattern id="gr" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M30 0L0 0 0 30" fill="none" stroke="#0f172a" stroke-width=".4"/></pattern><filter id="gw"><feGaussianBlur stdDeviation="1.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>';
+  svg.appendChild(defs);
+
+  var g = document.createElementNS(NS, 'g'); g.id = 'mg';
+  g.setAttribute('transform', 'translate(' + T.x + ',' + T.y + ') scale(' + T.s + ')');
+
+  var bg = document.createElementNS(NS, 'rect'); bg.setAttribute('width', W); bg.setAttribute('height', H); bg.setAttribute('fill', '#070c14'); g.appendChild(bg);
+  var gr = document.createElementNS(NS, 'rect'); gr.setAttribute('width', W); gr.setAttribute('height', H); gr.setAttribute('fill', 'url(#gr)'); g.appendChild(gr);
+
+  var bPts = AM_BORDER.map(function(c) { var p = proj(c[0], c[1]); return p.x + ',' + p.y; }).join(' ');
+  var border = document.createElementNS(NS, 'polygon');
+  border.setAttribute('points', bPts); border.setAttribute('fill', '#0f1b2d'); border.setAttribute('stroke', '#1e3552'); border.setAttribute('stroke-width', '2'); g.appendChild(border);
+
+  RIOS.forEach(function(rv) {
+    var pts = rv.coords.map(function(c) { var p = proj(c[0], c[1]); return p.x + ' ' + p.y; });
+    var path = document.createElementNS(NS, 'polyline');
+    path.setAttribute('points', pts.join(', ')); path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', '#0284c7'); path.setAttribute('stroke-width', rv.w);
+    path.setAttribute('opacity', '0.75'); path.setAttribute('stroke-linecap', 'round'); g.appendChild(path);
+  });
+
+  var hub = proj(-3.119, -60.021);
+  var hc = document.createElementNS(NS, 'circle');
+  hc.setAttribute('cx', hub.x); hc.setAttribute('cy', hub.y); hc.setAttribute('r', '7'); hc.setAttribute('fill', '#14b8a6'); hc.setAttribute('filter', 'url(#gw)'); g.appendChild(hc);
+  var hl = document.createElementNS(NS, 'text');
+  hl.setAttribute('x', hub.x + 10); hl.setAttribute('y', hub.y + 4); hl.setAttribute('font-size', '8');
+  hl.setAttribute('fill', '#14b8a6'); hl.setAttribute('font-weight', '900'); hl.setAttribute('font-family', 'monospace'); hl.textContent = 'SPO9'; g.appendChild(hl);
+
+  /* Linhas das calhas */
+  ROTAS.forEach(function(r) {
+    var ativo = rotaFiltrada === null || rotaFiltrada === r.num;
+    var pts = r.municipios.map(function(m) { return LATLNG[m.cep] ? proj(LATLNG[m.cep].lat, LATLNG[m.cep].lng) : null; }).filter(Boolean);
+    if (pts.length) {
+      var lineCoords = [[hub.x, hub.y]].concat(pts.map(function(p) { return [p.x, p.y]; }));
+      var polyPts = lineCoords.map(function(p) { return p[0] + ' ' + p[1]; }).join(', ');
+      var line = document.createElementNS(NS, 'polyline');
+      line.setAttribute('points', polyPts); line.setAttribute('fill', 'none');
+      line.setAttribute('stroke', r.cor); line.setAttribute('stroke-width', ativo ? '2' : '1');
+      line.setAttribute('opacity', ativo ? '0.55' : '0.07'); line.setAttribute('stroke-linecap', 'round'); g.appendChild(line);
+    }
+  });
+
+  /* Nodes — menores com hitArea e hover */
+  ROTAS.forEach(function(r) {
     var ativo = rotaFiltrada === null || rotaFiltrada === r.num;
     r.municipios.forEach(function(m, idx) {
       var ll = LATLNG[m.cep]; if (!ll) return;
@@ -267,7 +321,6 @@ ROTAS.forEach(function(r) {
       grp.style.cursor = ativo ? 'pointer' : 'default';
       grp.style.opacity = ativo ? '1' : '0.07';
 
-      // Caixa menor: altura 12, fonte 7, largura reduzida
       var labelW = label.length <= 2 ? 18 : label.length === 3 ? 22 : 26;
       var bb = document.createElementNS(NS, 'rect');
       bb.setAttribute('x', p.x - labelW / 2); bb.setAttribute('y', p.y - 6);
@@ -279,7 +332,7 @@ ROTAS.forEach(function(r) {
       if (ativo) bb.setAttribute('filter', 'url(#gw)');
       grp.appendChild(bb);
 
-      // Área invisível maior para facilitar o clique no mobile
+      /* Área invisível maior para clique fácil no mobile */
       var hitArea = document.createElementNS(NS, 'rect');
       hitArea.setAttribute('x', p.x - 12); hitArea.setAttribute('y', p.y - 10);
       hitArea.setAttribute('width', '24'); hitArea.setAttribute('height', '20');
@@ -294,7 +347,6 @@ ROTAS.forEach(function(r) {
       nt.setAttribute('pointer-events', 'none');
       nt.textContent = label; grp.appendChild(nt);
 
-      // Hover: aumenta ao passar o mouse
       if (ativo) {
         grp.addEventListener('mouseenter', function() {
           bb.setAttribute('opacity', '1');
@@ -320,6 +372,10 @@ ROTAS.forEach(function(r) {
       g.appendChild(grp);
     });
   });
+
+  svg.appendChild(g);
+}
+
 function showMapPopup(hit, svgPt, transform, label) {
   var popup = document.getElementById('map-popup');
   if (!popup) {
@@ -467,8 +523,6 @@ function removeMunPorto(porto, seq) {
 function renderTabelaPortos() {
   var nomes = { esc: 'PORTO ESCADARIA', rod: 'PORTO ROADWAY', 'v-rod': 'RODOVIARIO' };
   ['esc', 'rod', 'v-rod'].forEach(function(p) {
-
-    // VIEW — tela com botão X e toggle
     var viewContainer = document.querySelector('#view-col-' + p + ' .p-items-list');
     if (viewContainer) {
       viewContainer.innerHTML = '';
@@ -480,8 +534,6 @@ function renderTabelaPortos() {
         viewContainer.appendChild(item);
       });
     }
-
-    // PRINT — área de captura sem botão X
     var printContainer = document.querySelector('#print-col-' + p + ' .p-items-list');
     if (printContainer) {
       printContainer.innerHTML = '';
@@ -492,8 +544,6 @@ function renderTabelaPortos() {
         printContainer.appendChild(item);
       });
     }
-
-    // Título view com contagem e toggle
     var tituloView = document.querySelector('#view-col-' + p + ' .p-col-title');
     if (tituloView) {
       var aberto = viewContainer ? viewContainer.style.display !== 'none' : true;
@@ -507,8 +557,6 @@ function renderTabelaPortos() {
         tituloView.textContent = nomes[p] + ' (' + manifestoPortos[p].length + ') ' + (estaAberto ? '▶' : '▼');
       };
     }
-
-    // Título print sem toggle
     var tituloPrint = document.querySelector('#print-col-' + p + ' .p-col-title');
     if (tituloPrint) tituloPrint.textContent = nomes[p];
   });
@@ -570,4 +618,3 @@ var scT = document.getElementById('sc-t');
 if (scT) { scT.style.display = ''; scT.className = 'scr'; }
 
 window.addEventListener('load', function() { var ci = document.getElementById('ci'); if (ci) ci.focus(); });
-
