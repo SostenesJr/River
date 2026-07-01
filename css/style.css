@@ -296,3 +296,49 @@ html, body {
   font-weight: 600;
   color: var(--tx);
 }
+
+/* ============================================================
+   CONTAGEM DE SACAS (toggle opcional na aba Portos)
+   ============================================================ */
+
+/* Toggle "Contar sacas por município". */
+.p-toggle-sacas {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--mu);
+  cursor: pointer;
+  user-select: none;
+}
+.p-toggle-sacas input { width: 16px; height: 16px; accent-color: var(--ac); cursor: pointer; }
+
+/* Campo de numero de sacas dentro de cada municipio. */
+.p-sacas-input {
+  width: 52px;
+  background: #0b0d11;
+  border: 1px solid var(--bd);
+  color: var(--tx);
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 12px;
+  text-align: center;
+  outline: none;
+  flex-shrink: 0;
+}
+.p-sacas-input:focus { border-color: var(--ac); }
+
+/* Rodape com o total geral de sacas. */
+.p-total-sacas {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: #12151b;
+  border: 1px solid var(--ac);
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: var(--ac);
+}
