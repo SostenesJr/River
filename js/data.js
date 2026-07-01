@@ -1,36 +1,49 @@
 /* ============================================================
-   DADOS DO RIVER OPS — TRIAGEM (PADRÃO AMAZON)
+   COORDENADAS POR NODE (lat, lng) — usadas no mapa.
+   Chave = codigo do node (mesmo valor de `seq`). Sem CEP.
    ============================================================ */
+const LATLNG = {
+  // Calha A · Baixo Amazonas
+  RAU9:{lat:-3.580,lng:-59.129}, RUC9:{lat:-2.838,lng:-57.747}, RAO9:{lat:-2.655,lng:-57.698},
+  RUR9:{lat:-2.532,lng:-57.755}, RME9:{lat:-3.388,lng:-57.720}, RRA9:{lat:-2.974,lng:-57.575},
+  RBA9:{lat:-2.793,lng:-57.049}, RPA9:{lat:-2.629,lng:-56.735}, RNH9:{lat:-2.195,lng:-56.709},
 
-// Coordenadas aproximadas (lat,lng) de cada município, usadas no mapa.
-const LATLNG={
-  '69200':{lat:-3.580,lng:-59.129},'69110':{lat:-2.838,lng:-57.747},'69120':{lat:-2.655,lng:-57.698},
-  '69130':{lat:-2.532,lng:-57.755},'69150':{lat:-2.974,lng:-57.575},'69180':{lat:-3.388,lng:-57.720},
-  '69151':{lat:-2.629,lng:-56.735},'69155':{lat:-2.793,lng:-57.049},'69160':{lat:-2.195,lng:-56.709},
-  '69410':{lat:-3.360,lng:-59.870},'69430':{lat:-3.486,lng:-60.458},'69455':{lat:-3.940,lng:-61.350},
-  '69490':{lat:-3.583,lng:-61.392},'69480':{lat:-3.769,lng:-61.656},
-  '69260':{lat:-3.894,lng:-59.094},'69230':{lat:-4.392,lng:-59.594},
-  '69290':{lat:-5.121,lng:-60.381},'69280':{lat:-5.808,lng:-61.297},
-  '69470':{lat:-3.836,lng:-62.059},'69460':{lat:-4.085,lng:-63.141},
-  '69553':{lat:-3.354,lng:-64.711},
-  '69655':{lat:-3.189,lng:-65.341},'69650':{lat:-3.215,lng:-64.867},
-  '59553':{lat:-3.367,lng:-64.709},'69665':{lat:-1.835,lng:-65.356},
-  '69660':{lat:-1.879,lng:-66.160},'69670':{lat:-2.513,lng:-66.095},
-  '69800':{lat:-4.872,lng:-66.896},'69820':{lat:-3.493,lng:-66.045},'69814':{lat:-4.280,lng:-68.049},
-  '69700':{lat:-0.980,lng:-62.921},'69735':{lat:0.414,lng:-65.016},'69750':{lat:0.130,lng:-67.089},
-  '69493':{lat:-3.900,lng:-61.359},'69510':{lat:-5.626,lng:-63.195},'69530':{lat:-6.532,lng:-64.393},
-  '69675':{lat:-2.744,lng:-66.778},'69693':{lat:-2.872,lng:-67.797},
-  '69690':{lat:-3.094,lng:-67.944},'69680':{lat:-3.355,lng:-68.216},
-  '69685':{lat:-3.462,lng:-68.984},'69695':{lat:-4.381,lng:-70.031},
-  '69697':{lat:-4.375,lng:-70.193},'69640':{lat:-4.253,lng:-69.937},
-  '69400':{lat:-3.281,lng:-60.185},'69440':{lat:-3.297,lng:-60.621},
-  '69103':{lat:-2.698,lng:-59.695},'69415':{lat:-3.743,lng:-59.287},
-  '69730':{lat:-2.630,lng:-60.932},'69773':{lat:-2.019,lng:-60.030},
-  '69107':{lat:-3.143,lng:-58.700},'69755':{lat:-1.920,lng:-59.473},
-  '69100':{lat:-3.143,lng:-58.444},'69105':{lat:-2.840,lng:-58.210},
-  '69115':{lat:-2.746,lng:-58.027},
-  '69265':{lat:-7.198,lng:-59.889},'69805':{lat:-7.503,lng:-63.019},
-  '69540':{lat:-7.259,lng:-64.793}
+  // Calha B · Metro Fluvial
+  RRE9:{lat:-3.360,lng:-59.870}, RQI9:{lat:-3.486,lng:-60.458}, RPI9:{lat:-3.940,lng:-61.350},
+  RAN9:{lat:-3.583,lng:-61.392}, RNA9:{lat:-3.769,lng:-61.656},
+
+  // Calha C · Rio Madeira
+  RNO9:{lat:-3.894,lng:-59.094}, RBO9:{lat:-4.392,lng:-59.594},
+  RPU9:{lat:-5.121,lng:-60.381}, RNI9:{lat:-5.808,lng:-61.297},
+
+  // Calha D · Medio Solimoes  (coordenadas corrigidas: Tefe/Alvaraes/Uarini)
+  RDA9:{lat:-3.836,lng:-62.059}, RCO9:{lat:-4.085,lng:-63.141},
+  RTE9:{lat:-3.354,lng:-64.711}, RAL9:{lat:-3.215,lng:-64.867}, RUA9:{lat:-3.189,lng:-65.341},
+  RAA9:{lat:-1.835,lng:-65.356}, RJA9:{lat:-1.879,lng:-66.160}, RFO9:{lat:-2.513,lng:-66.095},
+
+  // Calha E · Alto Solimoes
+  RJT9:{lat:-2.744,lng:-66.778}, RIN9:{lat:-2.872,lng:-67.797},
+  RTO9:{lat:-3.094,lng:-67.944}, RAM9:{lat:-3.355,lng:-68.216},
+  RUI9:{lat:-3.462,lng:-68.984}, RBE9:{lat:-4.381,lng:-70.031},
+  RAT9:{lat:-4.375,lng:-70.193}, RUT9:{lat:-4.253,lng:-69.937},
+
+  // Calha F · Rio Negro
+  RRC9:{lat:-0.980,lng:-62.921}, RIP9:{lat:0.414,lng:-65.016}, RGA9:{lat:0.130,lng:-67.089},
+
+  // Calha G · Rio Purus
+  RRU9:{lat:-3.900,lng:-61.359}, RRR9:{lat:-5.626,lng:-63.195}, RBL9:{lat:-6.532,lng:-64.393},
+
+  // Calha H · Rodoviario
+  RIR9:{lat:-3.281,lng:-60.185}, RMA9:{lat:-3.297,lng:-60.621}, RFB9:{lat:-2.630,lng:-60.932},
+  RPR9:{lat:-2.019,lng:-60.030}, RBB9:{lat:-1.920,lng:-59.473}, RAC9:{lat:-2.698,lng:-59.695},
+  RIT9:{lat:-3.143,lng:-58.444}, RNR9:{lat:-3.143,lng:-58.700}, RSI9:{lat:-2.840,lng:-58.210},
+  RNG9:{lat:-2.746,lng:-58.027}, RAR9:{lat:-3.743,lng:-59.287},
+
+  // Calha I · Sul do Amazonas
+  RAP9:{lat:-7.198,lng:-59.889}, RHU9:{lat:-7.503,lng:-63.019}, RLA9:{lat:-7.259,lng:-64.793},
+
+  // Calha J · Rio Jurua
+  RRI9:{lat:-4.872,lng:-66.896}, RJU9:{lat:-3.493,lng:-66.045}, RRT9:{lat:-4.280,lng:-68.049}
 };
 
 const AM_BORDER=[[-8.95,-64.14],[-9.04,-64.92],[-9.23,-64.92],[-9.45,-65.14],[-9.26,-65.25],[-9.32,-65.45],[-9.47,-65.43],[-9.41,-65.6],[-9.59,-65.79],[-9.41,-65.97],[-9.41,-66.41],[-9.63,-66.5],[-9.82,-66.81],[-9.05,-68.65],[-7.85,-70.05],[-7.55,-72.58],[-7.11,-73.8],[-6.76,-73.64],[-6.5,-73.14],[-6.03,-73.24],[-5.65,-72.96],[-5.11,-72.81],[-4.52,-71.88],[-4.39,-70.94],[-4.13,-70.65],[-4.15,-70.33],[-4.37,-70.2],[-4.3,-69.96],[-1.13,-69.4],[-0.75,-69.63],[-0.51,-69.61],[-0.19,-70.06],[0.56,-70.04],[0.74,-69.48],[0.61,-69.36],[0.65,-69.11],[1.06,-69.26],[1.09,-69.84],[1.72,-69.84],[1.73,-68.16],[1.83,-68.27],[1.98,-68.18],[1.83,-67.94],[2.24,-67.39],[1.89,-67.29],[1.73,-67.1],[1.17,-67.09],[1.23,-66.86],[0.74,-66.32],[1.01,-65.58],[0.65,-65.54],[0.93,-65.33],[0.92,-65.18],[1.16,-65.1],[1.31,-64.81],[1.23,-64.75],[1.53,-64.4],[1.36,-64.34],[1.62,-64.09],[1.98,-63.99],[2.18,-63.16],[2.03,-63.05],[1.94,-62.7],[1.59,-62.8],[0.97,-62.44],[0.51,-62.53],[-0.33,-62.19],[-0.65,-62.3],[-0.76,-62.51],[-1.14,-62.02],[-1.4,-61.9],[-1.58,-61.47],[-1.39,-61.62],[-0.94,-61.58],[-0.66,-61.46],[-0.5,-61.22],[-0.56,-60.92],[-0.89,-60.67],[-0.72,-60.31],[-0.51,-60.4],[0.26,-60.04],[0.26,-58.9],[-0.34,-58.87],[-1.14,-58.32],[-1.23,-58.16],[-1.11,-58.02],[-1.4,-57.96],[-1.72,-57.39],[-1.72,-57.16],[-1.91,-57.04],[-2.02,-56.73],[-2.21,-56.68],[-2.03,-56.1],[-2.42,-56.47],[-6.45,-58.25],[-6.7,-58.48],[-7.36,-58.14],[-7.84,-58.38],[-8.09,-58.29],[-8.77,-58.39],[-8.8,-61.58],[-8.69,-61.71],[-8.88,-61.98],[-7.99,-62.84],[-7.97,-63.62],[-8.33,-63.78],[-8.33,-63.94],[-8.57,-63.92],[-8.74,-64.14],[-8.95,-64.14]];
@@ -40,72 +53,72 @@ const RIOS=[{name:'Amazonas/Solimoes',w:4,op:0.4,coords:[[-2.05,-54.0],[-2.33,-5
 // Calhas organizadas por Letras e Nomenclatura Amazon
 const ROTAS=[
 {num:'A',nome:'Baixo Amazonas',cor:'#0ea5e9',dir:'Manaus -> leste',municipios:[
-{seq:'RAU9', nome:'Autazes',                    cep:'69200',km:100, tt:'2d', slam:'RAU9'},
-{seq:'RUC9', nome:'Urucurituba',                cep:'69110',km:210, tt:'2d', slam:'RUC9'},
-{seq:'RAO9', nome:'Sao Sebastiao do Uatuma',    cep:'69120',km:305, tt:'1d', slam:'RAO9'},
-{seq:'RUR9', nome:'Urucara',                    cep:'69130',km:320, tt:'1d', slam:'RUR9'},
-{seq:'RME9', nome:'Maues',                      cep:'69180',km:360, tt:'2d', slam:'RME9'},
-{seq:'RRA9', nome:'Boa Vista Ramos',            cep:'69150',km:348, tt:'1d', slam:'RRA9'},
-{seq:'RBA9', nome:'Barreirinha',                cep:'69155',km:440, tt:'1d', slam:'RBA9'},
-{seq:'RPA9', nome:'Parintins',                  cep:'69151',km:420, tt:'2d', slam:'RPA9'},
-{seq:'RNH9', nome:'Nhamunda',                   cep:'69160',km:480, tt:'2d', slam:'RNH9'}]},
+{seq:'RAU9', nome:'Autazes',km:100, tt:'2d'},
+{seq:'RUC9', nome:'Urucurituba',km:210, tt:'2d'},
+{seq:'RAO9', nome:'Sao Sebastiao do Uatuma',km:305, tt:'1d'},
+{seq:'RUR9', nome:'Urucara',km:320, tt:'1d'},
+{seq:'RME9', nome:'Maues',km:360, tt:'2d'},
+{seq:'RRA9', nome:'Boa Vista Ramos',km:348, tt:'1d'},
+{seq:'RBA9', nome:'Barreirinha',km:440, tt:'1d'},
+{seq:'RPA9', nome:'Parintins',km:420, tt:'2d'},
+{seq:'RNH9', nome:'Nhamunda',km:480, tt:'2d'}]},
 {num:'B',nome:'Metro Fluvial',cor:'#22d3ee',dir:'Manaus -> proximidades',municipios:[
-{seq:'RRE9',nome:'Careiro da Varzea',  cep:'69410',km:40,  tt:'6h', slam:'RRE9'},
-{seq:'RQI9',nome:'Manaquiri',          cep:'69430',km:80,  tt:'6h', slam:'RQI9'},
-{seq:'RPI9',nome:'Caapiranga',         cep:'69455',km:120, tt:'1d', slam:'RPI9'},
-{seq:'RAN9',nome:'Anama',              cep:'69490',km:170, tt:'1d', slam:'RAN9'},
-{seq:'RNA9',nome:'Anori',              cep:'69480',km:180, tt:'1d', slam:'RNA9'}]},
+{seq:'RRE9',nome:'Careiro da Varzea',km:40,  tt:'6h'},
+{seq:'RQI9',nome:'Manaquiri',km:80,  tt:'6h'},
+{seq:'RPI9',nome:'Caapiranga',km:120, tt:'1d'},
+{seq:'RAN9',nome:'Anama',km:170, tt:'1d'},
+{seq:'RNA9',nome:'Anori',km:180, tt:'1d'}]},
 {num:'C',nome:'Rio Madeira',cor:'#a855f7',dir:'Manaus -> sul',municipios:[
-{seq:'RNO9',nome:'Nova Olinda Norte',cep:'69260',km:135, tt:'1d', slam:'RNO9'},
-{seq:'RBO9',nome:'Borba',            cep:'69230',km:200, tt:'2d', slam:'RBO9'},
-{seq:'RPU9',nome:'Novo Aripuana',    cep:'69290',km:310, tt:'3d', slam:'RPU9'},
-{seq:'RNI9',nome:'Manicore',         cep:'69280',km:380, tt:'3d', slam:'RNI'}]},
+{seq:'RNO9',nome:'Nova Olinda Norte',km:135, tt:'1d'},
+{seq:'RBO9',nome:'Borba',km:200, tt:'2d'},
+{seq:'RPU9',nome:'Novo Aripuana',km:310, tt:'3d'},
+{seq:'RNI9',nome:'Manicore',km:380, tt:'3d'}]},
 {num:'D',nome:'Medio Solimoes',cor:'#f97316',dir:'Manaus -> oeste',municipios:[
-{seq:'RDA9',nome:'Codajas',          cep:'69470',km:240, tt:'2d', slam:'RDA9'},
-{seq:'RCO9',nome:'Coari',            cep:'69460',km:363, tt:'2d', slam:'RCO9'},
-{seq:'RTE9',nome:'Tefe',             cep:'69553',km:523, tt:'3d', slam:'RTE9'},
-{seq:'RAL9',nome:'Alvaraes',         cep:'69650',km:495, tt:'3d', slam:'RAL9'},
-{seq:'RUA9',nome:'Uarini',           cep:'69655',km:475, tt:'4d', slam:'RUA9'},
-{seq:'RAA9',nome:'Maraa',            cep:'69665',km:600, tt:'5d', slam:'RAA9'},
-{seq:'RJA9',nome:'Japura',           cep:'69660',km:640, tt:'5d', slam:'RJA9'},
-{seq:'RFO9',nome:'Fonte Boa',        cep:'69670',km:680, tt:'4d', slam:'RFO9'}]},
+{seq:'RDA9',nome:'Codajas',km:240, tt:'2d'},
+{seq:'RCO9',nome:'Coari',km:363, tt:'2d'},
+{seq:'RTE9',nome:'Tefe',km:523, tt:'3d'},
+{seq:'RAL9',nome:'Alvaraes',km:495, tt:'3d'},
+{seq:'RUA9',nome:'Uarini',km:475, tt:'4d'},
+{seq:'RAA9',nome:'Maraa',km:600, tt:'5d'},
+{seq:'RJA9',nome:'Japura',km:640, tt:'5d'},
+{seq:'RFO9',nome:'Fonte Boa',km:680, tt:'4d'}]},
 {num:'E',nome:'Alto Solimoes',cor:'#f59e0b',dir:'Fronteira oeste',municipios:[
-{seq:'RJT9',nome:'Jutai',                    cep:'69675',km:780, tt:'6d', slam:'RJT9'},
-{seq:'RIN9',nome:'Tonantins',                cep:'69693',km:900, tt:'6d', slam:'RIN9'},
-{seq:'RTO9',nome:'Santo Antonio do Ica',     cep:'69690',km:960, tt:'7d', slam:'RTO9'},
-{seq:'RAM9',nome:'Amatura',                  cep:'69680',km:1020,tt:'7d', slam:'RAM9'},
-{seq:'RUI9',nome:'Sao Paulo Olivenca',       cep:'69685',km:1080,tt:'7d',slam:'RUI9'},
-{seq:'RBE9',nome:'Benjamin Constant',        cep:'69695',km:1120,tt:'8d', slam:'RBE9'},
-{seq:'RAT9',nome:'Atalaia do Norte',         cep:'69697',km:1150,tt:'8d', slam:'RAT9'},
-{seq:'RUT9',nome:'Tabatinga',                cep:'69640',km:1160,tt:'8d', slam:'RUT9'}]},
+{seq:'RJT9',nome:'Jutai',km:780, tt:'6d'},
+{seq:'RIN9',nome:'Tonantins',km:900, tt:'6d'},
+{seq:'RTO9',nome:'Santo Antonio do Ica',km:960, tt:'7d'},
+{seq:'RAM9',nome:'Amatura',km:1020,tt:'7d'},
+{seq:'RUI9',nome:'Sao Paulo Olivenca',km:1080,tt:'7d'},
+{seq:'RBE9',nome:'Benjamin Constant',km:1120,tt:'8d'},
+{seq:'RAT9',nome:'Atalaia do Norte',km:1150,tt:'8d'},
+{seq:'RUT9',nome:'Tabatinga',km:1160,tt:'8d'}]},
 {num:'F',nome:'Rio Negro',cor:'#3b82f6',dir:'Manaus -> noroeste',municipios:[
-{seq:'RRC9',nome:'Barcelos',              cep:'69700',km:400, tt:'3d', slam:'RRC9'},
-{seq:'RIP9',nome:'Sta. Isabel Rio Negro', cep:'69735',km:620, tt:'5d', slam:'RIP9'},
-{seq:'RGA9',nome:'Sao Gabriel Cachoeira', cep:'69750',km:850, tt:'4d', slam:'RGA9'}]},
+{seq:'RRC9',nome:'Barcelos',km:400, tt:'3d'},
+{seq:'RIP9',nome:'Sta. Isabel Rio Negro',km:620, tt:'5d'},
+{seq:'RGA9',nome:'Sao Gabriel Cachoeira',km:850, tt:'4d'}]},
 {num:'G',nome:'Rio Purus',cor:'#22c55e',dir:'Manaus -> sudoeste',municipios:[
-{seq:'RRU9',nome:'Beruri',           cep:'69493',km:270, tt:'1d', slam:'RRU9'},
-{seq:'RRR9',nome:'Tapaua',           cep:'69510',km:460, tt:'4d', slam:'RRR9'},
-{seq:'RBL9',nome:'Canutama',         cep:'69530',km:620, tt:'5d', slam:'RBL9'}]},
+{seq:'RRU9',nome:'Beruri',km:270, tt:'1d'},
+{seq:'RRR9',nome:'Tapaua',km:460, tt:'4d'},
+{seq:'RBL9',nome:'Canutama',km:620, tt:'5d'}]},
 {num:'H',nome:'Rodoviario',cor:'#ff6644',dir:'Malha Rodoviaria estadual',municipios:[
-{seq:'RIR9',nome:'Iranduba',         cep:'69400',km:27,  tt:'6h', slam:'RIR9'},
-{seq:'RMA9',nome:'Manacapuru',       cep:'69440',km:68,  tt:'1d', slam:'RMA9'},
-{seq:'RFB9',nome:'Novo Airao',       cep:'69730',km:115, tt:'1d', slam:'RFB9'},
-{seq:'RPR9',nome:'Pres. Figueiredo', cep:'69773',km:107, tt:'1d', slam:'RPR9'},
-{seq:'RBB9',nome:'Balbina',          cep:'69755',km:140, tt:'1d', slam:'RBB9'},
-{seq:'RAC9',nome:'Rio Preto Eva',    cep:'69103',km:88,  tt:'1d', slam:'RAC9'},
-{seq:'RIT9',nome:'Itacoatiara',      cep:'69100',km:176, tt:'1d', slam:'RIT9'},
-{seq:'RNR9',nome:'Novo Remanso',     cep:'69107',km:100, tt:'1d', slam:'RNR9'},
-{seq:'RSI9',nome:'Silves',           cep:'69105',km:200, tt:'2d', slam:'RSI9'},
-{seq:'RNG9',nome:'Itapiranga',       cep:'69115',km:255, tt:'2d', slam:'RNG9'},
-{seq:'RAR9',nome:'Careiro Castanho', cep:'69415',km:90,  tt:'1d', slam:'RAR9'}]},
+{seq:'RIR9',nome:'Iranduba',km:27,  tt:'6h'},
+{seq:'RMA9',nome:'Manacapuru',km:68,  tt:'1d'},
+{seq:'RFB9',nome:'Novo Airao',km:115, tt:'1d'},
+{seq:'RPR9',nome:'Pres. Figueiredo',km:107, tt:'1d'},
+{seq:'RBB9',nome:'Balbina',km:140, tt:'1d'},
+{seq:'RAC9',nome:'Rio Preto Eva',km:88,  tt:'1d'},
+{seq:'RIT9',nome:'Itacoatiara',km:176, tt:'1d'},
+{seq:'RNR9',nome:'Novo Remanso',km:100, tt:'1d'},
+{seq:'RSI9',nome:'Silves',km:200, tt:'2d'},
+{seq:'RNG9',nome:'Itapiranga',km:255, tt:'2d'},
+{seq:'RAR9',nome:'Careiro Castanho',km:90,  tt:'1d'}]},
 {num:'I',nome:'Sul do Amazonas',cor:'#84cc16',dir:'Rodoviario sul - BR-319 / BR-230',municipios:[
-{seq:'RAP9',nome:'Apui',             cep:'69265',km:454, tt:'4d', slam:'RAP9'},
-{seq:'RHU9',nome:'Humaita',          cep:'69805',km:590, tt:'5d', slam:'RHU9'},
-{seq:'RLA9',nome:'Labrea',           cep:'69540',km:874, tt:'6d', slam:'RLA9'}]},
+{seq:'RAP9',nome:'Apui',km:454, tt:'4d'},
+{seq:'RHU9',nome:'Humaita',km:590, tt:'5d'},
+{seq:'RLA9',nome:'Labrea',km:874, tt:'6d'}]},
 {num:'J',nome:'Rio Jurua',cor:'#ec4899',dir:'Alto Jurua',municipios:[
-{seq:'RRI9',nome:'Carauari',         cep:'69800',km:800, tt:'15d',slam:'RRI9'},
-{seq:'RJU9',nome:'Jurua',            cep:'69820',km:820, tt:'15d',slam:'RJU9'},
-{seq:'RRT9',nome:'Itamarati',        cep:'69814',km:985, tt:'13d',slam:'RRT9'}]}
+{seq:'RRI9',nome:'Carauari',km:800, tt:'15d'},
+{seq:'RJU9',nome:'Jurua',km:820, tt:'15d'},
+{seq:'RRT9',nome:'Itamarati',km:985, tt:'13d'}]}
 ];
 
 const EMBS = {
