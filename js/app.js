@@ -2,19 +2,19 @@
    RIVER OPS — TRIAGEM — APP.JS
    ============================================================ */
 
-const IDX = {}; const SLAMIDX = {}; const NODEIDX = {};
-ROTAS.forEach(function(r) {
-  r.municipios.forEach(function(m, i) {
-    var rec = {
-      rota: r, mun: m,
+/* Indice unico: codigo do node (seq) -> registro completo.
+   Cada registro guarda a rota, o municipio e os vizinhos da calha. */
+const NODEIDX = {};
+ROTAS.forEach(function (rota) {
+  rota.municipios.forEach(function (mun, i) {
+    NODEIDX[mun.seq] = {
+      rota: rota,
+      mun: mun,
       pos: i + 1,
-      total: r.municipios.length,
-      prev: r.municipios[i - 1] || null,
-      next: r.municipios[i + 1] || null
+      total: rota.municipios.length,
+      prev: rota.municipios[i - 1] || null,
+      next: rota.municipios[i + 1] || null
     };
-    IDX[m.cep] = rec;
-    NODEIDX[String(m.seq)] = rec;
-    if (m.slam) { if (!SLAMIDX[m.slam]) SLAMIDX[m.slam] = []; SLAMIDX[m.slam].push(rec); }
   });
 });
 
@@ -299,7 +299,7 @@ function renderMap() {
   /* Linhas das calhas */
   ROTAS.forEach(function(r) {
     var ativo = rotaFiltrada === null || rotaFiltrada === r.num;
-    var pts = r.municipios.map(function(m) { return LATLNG[m.cep] ? proj(LATLNG[m.cep].lat, LATLNG[m.cep].lng) : null; }).filter(Boolean);
+    var pts = r.municipios.map(function(m) { return LATLNG[m.seq] ? proj(LATLNG[m.seq].lat, LATLNG[m.seq].lng) : null; }).filter(Boolean);
     if (pts.length) {
       var lineCoords = [[hub.x, hub.y]].concat(pts.map(function(p) { return [p.x, p.y]; }));
       var polyPts = lineCoords.map(function(p) { return p[0] + ' ' + p[1]; }).join(', ');
@@ -314,7 +314,7 @@ function renderMap() {
   ROTAS.forEach(function(r) {
     var ativo = rotaFiltrada === null || rotaFiltrada === r.num;
     r.municipios.forEach(function(m, idx) {
-      var ll = LATLNG[m.cep]; if (!ll) return;
+      var ll = LATLNG[m.seq]; if (!ll) return;
       var p = proj(ll.lat, ll.lng);
       var label = mapLabel(r.num, idx + 1);
       var grp = document.createElementNS(NS, 'g');
