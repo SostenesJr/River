@@ -626,17 +626,37 @@ function zR() { T = { s: 1, x: 0, y: 0 }; rotaFiltrada = null; renderMap(); buil
 
 var manifestoPortos = { esc: [], rod: [], 'v-rod': [] };
 
-var LISTA_PADRAO_PORTOS = {
-  esc:     ['RAU9','RUC9','RAO9','RUR9','RRE9','RQI9','RPI9','RAN9','RNA9','RNO9','RDA9','RRU9','RRR9','RRI9','RJU9'].map(function(k) { return NODEIDX[k]; }).filter(Boolean),
-  rod:     ['RME9','RRA9','RBA9','RPA9','RCO9','RTE9','RAL9','RUA9','RAA9','RJA9','RFO9','RJT9','RIN9','RTO9','RAM9','RUI9','RBE9','RAT9','RUT9','RRC9','RGA9'].map(function(k) { return NODEIDX[k]; }).filter(Boolean),
-  'v-rod': ['RNH9','RBO9','RPU9','RNI9','RIR9','RMA9','RPR9','RBB9','RAC9','RIT9','RNR9','RSI9','RNG9','RAR9','RAP9','RHU9','RLA9'].map(function(k) { return NODEIDX[k]; }).filter(Boolean)
+/* Porto preferido de cada municipio (usado so como sugestao no seletor).
+   As colunas comecam VAZIAS; o operador preenche o despacho do dia manualmente. */
+var PREF_PORTO = {
+  esc:     ['RAU9','RUC9','RAO9','RUR9','RRE9','RQI9','RPI9','RAN9','RNA9','RNO9','RDA9','RRU9','RRR9','RRI9','RJU9'],
+  rod:     ['RME9','RRA9','RBA9','RPA9','RCO9','RTE9','RAL9','RUA9','RAA9','RJA9','RFO9','RJT9','RIN9','RTO9','RAM9','RUI9','RBE9','RAT9','RUT9','RRC9','RGA9'],
+  'v-rod': ['RNH9','RBO9','RPU9','RNI9','RIR9','RMA9','RPR9','RBB9','RAC9','RIT9','RNR9','RSI9','RNG9','RAR9','RAP9','RHU9','RLA9']
 };
+
+/* Indice reverso: node -> chave do porto preferido (ex: 'RAU9' -> 'esc'). */
+var PORTO_DE = {};
+Object.keys(PREF_PORTO).forEach(function (chavePorto) {
+  PREF_PORTO[chavePorto].forEach(function (seq) { PORTO_DE[seq] = chavePorto; });
+});
 
 function popularSeletorPortos() {
   var select = document.getElementById('p-select-mun'); if (!select) return; select.innerHTML = '';
   ROTAS.forEach(function(r) { r.municipios.forEach(function(m) {
     var opt = document.createElement('option'); opt.value = m.seq; opt.textContent = '[' + m.seq + '] ' + m.nome; select.appendChild(opt);
   }); });
+  // Ao trocar o municipio, sugere automaticamente o porto preferido dele.
+  select.onchange = sugerirPortoPreferido;
+  sugerirPortoPreferido();
+}
+
+/* Move o dropdown de porto para o porto preferido do municipio selecionado. */
+function sugerirPortoPreferido() {
+  var selMun = document.getElementById('p-select-mun');
+  var selPorto = document.getElementById('p-select-target');
+  if (!selMun || !selPorto) return;
+  var pref = PORTO_DE[selMun.value];
+  if (pref) selPorto.value = pref;
 }
 
 function addMunToPorto() {
@@ -697,10 +717,11 @@ function renderTabelaPortos() {
   });
 }
 
+/* Esvazia as tres colunas (despacho do dia recomeca do zero). */
 function resetarTabelaPortos() {
-  manifestoPortos.esc = LISTA_PADRAO_PORTOS.esc.slice();
-  manifestoPortos.rod = LISTA_PADRAO_PORTOS.rod.slice();
-  manifestoPortos['v-rod'] = LISTA_PADRAO_PORTOS['v-rod'].slice();
+  manifestoPortos.esc = [];
+  manifestoPortos.rod = [];
+  manifestoPortos['v-rod'] = [];
   renderTabelaPortos();
 }
 
