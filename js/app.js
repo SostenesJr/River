@@ -169,13 +169,64 @@ function flashError() {
   setTimeout(function() { ci.style.borderColor = ''; }, 600);
 }
 
+/* ============================================================
+   HELPERS DE MONTAGEM DE HTML
+   Blocos visuais reutilizados por card / modal / popup.
+   Mantem o mesmo visual — as diferencas de tamanho entre as
+   telas sao passadas por parametro (objeto `tam`).
+   ============================================================ */
+
+/* Cor da "proxima saida" conforme proximidade (hoje/amanha/depois). */
+function hCorProxSaida(nx) {
+  if (nx.c === 'nt') return '#22c55e';   // hoje  -> verde
+  if (nx.c === 'nw') return '#f59e0b';   // amanha -> laranja
+  return '#9ba3b4';                       // depois -> cinza
+}
+
+/* Uma caixa de indicador (KPI): titulo pequeno em cima, valor grande embaixo.
+   `tam` controla as pequenas diferencas entre as telas. */
+function hKpi(titulo, valor, corValor, tam) {
+  return '<div style="background:#0b0d11;border-radius:6px;padding:' + tam.pad + ';text-align:center;">'
+    + '<div style="font-size:' + tam.tit + ';color:#737a8c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:' + tam.gap + ';">' + titulo + '</div>'
+    + '<div style="font-size:' + tam.val + ';font-weight:900;color:' + corValor + ';">' + valor + '</div>'
+    + '</div>';
+}
+
+/* Trio de KPIs (Transit Time · Distancia · Prox. Saida) usado no card e no modal. */
+function hKpiTrio(m, r, nx, corNx, tam) {
+  return '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">'
+    + hKpi('Transit Time', m.tt, r.cor, tam)
+    + hKpi('Distância', m.km + ' km', '#e8eaf0', tam)
+    + hKpi('Prox. Saída', nx.l, corNx, tam)
+    + '</div>';
+}
+
+/* Linha da embarcacao mais proxima. `emoji` fica vazio no card e com barco no modal. */
+function hEmbLine(nb, nx, r, emoji) {
+  if (!nb) return '';
+  return '<div style="margin-top:10px;padding:8px 12px;background:#0b0d11;border-radius:6px;border-left:3px solid ' + r.cor + ';font-size:12px;color:#9ba3b4;">'
+    + '<span style="color:#fff;font-weight:700;">' + emoji + nb.embarcacao + '</span>'
+    + (nb.porto ? '<span style="color:#737a8c;"> · ' + nb.porto + '</span>' : '')
+    + '<span style="color:' + r.cor + ';font-weight:700;"> · ' + nx.l + '</span>'
+    + '</div>';
+}
+
+/* Badge colorido "CALHA X". */
+function hBadgeCalha(r, tam) {
+  // Ordem das props de fonte preservada por tela (nao afeta render, mantem diff limpo).
+  var fonte = tam.fsFirst
+    ? 'font-size:' + tam.fs + ';font-weight:900;color:#fff;'
+    : 'font-weight:900;color:#fff;font-size:' + tam.fs + ';';
+  return '<div style="background:' + r.cor + ';padding:' + tam.pad + ';border-radius:' + tam.rad + ';' + fonte + 'letter-spacing:1px;' + (tam.inline ? 'display:inline-block;' : '') + '">CALHA ' + r.nome.toUpperCase() + '</div>';
+}
+
 function renderCard(hit) {
   var rc = document.getElementById('rcard');
   var r = hit.rota; var m = hit.mun; var prev = hit.prev; var next = hit.next;
   var pos = hit.pos; var total = hit.total;
   var nb = bB(m.nome);
   var nx = nb ? labelDays(nb.days) : { l: '---', c: 'ns' };
-  var corNx = nx.c === 'nt' ? '#22c55e' : nx.c === 'nw' ? '#f59e0b' : '#9ba3b4';
+  var corNx = hCorProxSaida(nx);
   ultimaRotaAtiva = r.num;
 
   if (timerAutoLimpeza) clearTimeout(timerAutoLimpeza);
@@ -185,13 +236,10 @@ function renderCard(hit) {
     rc.innerHTML = ''; rc.className = ''; ultimaRotaAtiva = null;
   }, 15000);
 
-  var embInfo = nb
-    ? '<div style="margin-top:10px;padding:8px 12px;background:#0b0d11;border-radius:6px;border-left:3px solid ' + r.cor + ';font-size:12px;color:#9ba3b4;">'
-      + '<span style="color:#fff;font-weight:700;">' + nb.embarcacao + '</span>'
-      + (nb.porto ? '<span style="color:#737a8c;"> · ' + nb.porto + '</span>' : '')
-      + '<span style="color:' + r.cor + ';font-weight:700;"> · ' + nx.l + '</span>'
-      + '</div>'
-    : '';
+  // Tamanhos das KPIs no card.
+  var tamKpi = { pad: '8px', tit: '10px', gap: '3px', val: '18px' };
+
+  var embInfo = hEmbLine(nb, nx, r, '');   // card: sem emoji
 
   var prevInfo = prev
     ? '<div style="font-size:11px;color:#737a8c;margin-top:4px;">⬅ Anterior: <b style="color:#9ba3b4">' + prev.seq + ' — ' + prev.nome + '</b></div>'
@@ -206,15 +254,11 @@ function renderCard(hit) {
     + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'
     + '<div style="font-size:44px;font-weight:900;color:' + r.cor + ';letter-spacing:2px;font-family:monospace;">' + m.seq + '</div>'
     + '<div style="text-align:right;">'
-    + '<div style="background:' + r.cor + ';padding:4px 12px;border-radius:6px;font-weight:900;color:#fff;font-size:12px;letter-spacing:1px;">CALHA ' + r.nome.toUpperCase() + '</div>'
+    + hBadgeCalha(r, { pad: '4px 12px', rad: '6px', fs: '12px', inline: false, fsFirst: false })
     + '<div style="font-size:10px;color:#737a8c;margin-top:4px;">Pos. ' + pos + ' de ' + total + '</div>'
     + '</div></div>'
     + '<div style="font-size:26px;font-weight:800;color:#e8eaf0;margin-bottom:12px;">' + m.nome + '</div>'
-    + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">'
-    + '<div style="background:#0b0d11;border-radius:6px;padding:8px;text-align:center;"><div style="font-size:10px;color:#737a8c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Transit Time</div><div style="font-size:18px;font-weight:900;color:' + r.cor + ';">' + m.tt + '</div></div>'
-    + '<div style="background:#0b0d11;border-radius:6px;padding:8px;text-align:center;"><div style="font-size:10px;color:#737a8c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Distância</div><div style="font-size:18px;font-weight:900;color:#e8eaf0;">' + m.km + ' km</div></div>'
-    + '<div style="background:#0b0d11;border-radius:6px;padding:8px;text-align:center;"><div style="font-size:10px;color:#737a8c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Prox. Saída</div><div style="font-size:18px;font-weight:900;color:' + corNx + ';">' + nx.l + '</div></div>'
-    + '</div>'
+    + hKpiTrio(m, r, nx, corNx, tamKpi)
     + embInfo
     + '<div style="margin-top:12px;padding:10px;background:#0b0d11;border-radius:6px;border:1px solid #1a1e26;">'
     + '<div style="font-size:10px;color:#737a8c;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Calha ' + r.nome + '</div>'
@@ -297,16 +341,14 @@ function abrirModalRota(nodeSeq) {
   var pos = hit.pos; var total = hit.total;
   var nb = bB(m.nome);
   var nx = nb ? labelDays(nb.days) : { l: '---', c: 'ns' };
-  var corNx = nx.c === 'nt' ? '#22c55e' : nx.c === 'nw' ? '#f59e0b' : '#9ba3b4';
+  var corNx = hCorProxSaida(nx);
 
   var old = document.getElementById('modal-rota'); if (old) old.remove();
 
-  var embInfo = nb
-    ? '<div style="margin-top:10px;padding:8px 12px;background:#0b0d11;border-radius:6px;border-left:3px solid ' + r.cor + ';font-size:12px;color:#9ba3b4;">'
-      + '<span style="color:#fff;font-weight:700;">🚢 ' + nb.embarcacao + '</span>'
-      + (nb.porto ? '<span style="color:#737a8c;"> · ' + nb.porto + '</span>' : '')
-      + '<span style="color:' + r.cor + ';font-weight:700;"> · ' + nx.l + '</span></div>'
-    : '';
+  // Tamanhos das KPIs no modal (titulo 9px, o resto igual ao card).
+  var tamKpi = { pad: '8px', tit: '9px', gap: '3px', val: '18px' };
+
+  var embInfo = hEmbLine(nb, nx, r, '🚢 ');   // modal: com emoji de barco
 
   var prevHTML = prev
     ? '<div style="font-size:12px;color:#9ba3b4;margin-bottom:6px;cursor:pointer;padding:4px;border-radius:4px;" onclick="abrirModalRota(\'' + prev.seq + '\')">⬅ <b style="color:#e8eaf0;font-family:monospace;">' + prev.seq + '</b> — ' + prev.nome + '</div>'
@@ -325,14 +367,10 @@ function abrirModalRota(nodeSeq) {
     + '<button onclick="document.getElementById(\'modal-rota\').remove()" style="position:absolute;top:12px;right:12px;background:#1a1e26;border:none;color:#737a8c;width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;font-weight:900;">✕</button>'
     + '<div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">'
     + '<div style="font-size:38px;font-weight:900;color:' + r.cor + ';font-family:monospace;letter-spacing:2px;">' + m.seq + '</div>'
-    + '<div><div style="background:' + r.cor + ';padding:3px 10px;border-radius:5px;font-size:11px;font-weight:900;color:#fff;letter-spacing:1px;display:inline-block;">CALHA ' + r.nome.toUpperCase() + '</div>'
+    + '<div>' + hBadgeCalha(r, { pad: '3px 10px', rad: '5px', fs: '11px', inline: true, fsFirst: true })
     + '<div style="font-size:10px;color:#737a8c;margin-top:3px;">Pos. ' + pos + ' de ' + total + '</div></div></div>'
     + '<div style="font-size:22px;font-weight:800;color:#e8eaf0;margin-bottom:14px;">' + m.nome + '</div>'
-    + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">'
-    + '<div style="background:#0b0d11;border-radius:6px;padding:8px;text-align:center;"><div style="font-size:9px;color:#737a8c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Transit Time</div><div style="font-size:18px;font-weight:900;color:' + r.cor + ';">' + m.tt + '</div></div>'
-    + '<div style="background:#0b0d11;border-radius:6px;padding:8px;text-align:center;"><div style="font-size:9px;color:#737a8c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Distância</div><div style="font-size:18px;font-weight:900;color:#e8eaf0;">' + m.km + ' km</div></div>'
-    + '<div style="background:#0b0d11;border-radius:6px;padding:8px;text-align:center;"><div style="font-size:9px;color:#737a8c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Prox. Saída</div><div style="font-size:18px;font-weight:900;color:' + corNx + ';">' + nx.l + '</div></div>'
-    + '</div>'
+    + hKpiTrio(m, r, nx, corNx, tamKpi)
     + embInfo
     + '<div style="margin-top:10px;padding:10px;background:#0b0d11;border-radius:6px;border:1px solid #1a1e26;">'
     + '<div style="font-size:9px;color:#737a8c;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Navegação da Calha</div>'
@@ -479,6 +517,8 @@ function showMapPopup(hit, svgPt, transform, label) {
   }
   var r = hit.rota; var m = hit.mun; var prev = hit.prev; var next = hit.next;
   var nb = bB(m.nome); var nx = nb ? labelDays(nb.days) : { l: '---' };
+  // Tamanhos das KPIs no popup (menores que no card/modal).
+  var tamKpi = { pad: '7px', tit: '9px', gap: '2px', val: '16px' };
   var svgEl = document.getElementById('msvg');
   var rect = svgEl.getBoundingClientRect();
   var sc = document.getElementById('sc-m').getBoundingClientRect();
@@ -496,8 +536,9 @@ function showMapPopup(hit, svgPt, transform, label) {
     + '<span style="font-size:10px;background:' + r.cor + '22;color:' + r.cor + ';padding:2px 8px;border-radius:4px;font-weight:700;">' + r.nome.toUpperCase() + '</span></div>'
     + '<div style="font-size:16px;font-weight:800;color:#e8eaf0;margin-bottom:10px;">' + m.nome + '</div>'
     + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;">'
-    + '<div style="background:#0b0d11;border-radius:6px;padding:7px;text-align:center;"><div style="font-size:9px;color:#737a8c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Transit Time</div><div style="font-size:16px;font-weight:900;color:' + r.cor + ';">' + m.tt + '</div></div>'
-    + '<div style="background:#0b0d11;border-radius:6px;padding:7px;text-align:center;"><div style="font-size:9px;color:#737a8c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Distância</div><div style="font-size:16px;font-weight:900;color:#e8eaf0;">' + m.km + ' km</div></div></div>'
+    + hKpi('Transit Time', m.tt, r.cor, tamKpi)
+    + hKpi('Distância', m.km + ' km', '#e8eaf0', tamKpi)
+    + '</div>'
     + '<div style="background:#0b0d11;border-radius:6px;padding:8px;display:flex;flex-direction:column;gap:5px;">'
     + '<div style="font-size:10px;color:#737a8c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Calha</div>'
     + (prev ? '<div style="font-size:11px;color:#9ba3b4;">⬅ <b style="color:#e8eaf0;font-family:monospace;">' + prev.seq + '</b> ' + prev.nome + '</div>' : '<div style="font-size:11px;color:#334155;">⬅ Início da calha</div>')
