@@ -442,7 +442,11 @@ function renderMap() {
     }
   });
 
-  /* Nodes — menores com hitArea e hover */
+  /* Nodes — encolhem conforme o zoom (escala inversa) para nao sobrepor.
+     iz = 1/zoom: como o grupo #mg ja recebe scale(T.s), dividir as dimensoes
+     por T.s mantem o marcador com tamanho ~constante na tela, separando
+     municipios geograficamente proximos e mantendo cada um clicavel. */
+  var iz = 1 / T.s;
   ROTAS.forEach(function(r) {
     var ativo = rotaFiltrada === null || rotaFiltrada === r.num;
     r.municipios.forEach(function(m, idx) {
@@ -453,27 +457,30 @@ function renderMap() {
       grp.style.cursor = ativo ? 'pointer' : 'default';
       grp.style.opacity = ativo ? '1' : '0.07';
 
-      var labelW = label.length <= 2 ? 18 : label.length === 3 ? 22 : 26;
+      var baseW = label.length <= 2 ? 18 : label.length === 3 ? 22 : 26;
+      var labelW = baseW * iz;
+      var labelH = 12 * iz;
       var bb = document.createElementNS(NS, 'rect');
-      bb.setAttribute('x', p.x - labelW / 2); bb.setAttribute('y', p.y - 6);
-      bb.setAttribute('width', String(labelW)); bb.setAttribute('height', '12');
-      bb.setAttribute('rx', '2');
+      bb.setAttribute('x', p.x - labelW / 2); bb.setAttribute('y', p.y - labelH / 2);
+      bb.setAttribute('width', String(labelW)); bb.setAttribute('height', String(labelH));
+      bb.setAttribute('rx', String(2 * iz));
       bb.setAttribute('fill', ativo ? r.cor : '#1a1e26');
-      bb.setAttribute('stroke', r.cor); bb.setAttribute('stroke-width', ativo ? '0' : '0.6');
+      bb.setAttribute('stroke', r.cor); bb.setAttribute('stroke-width', (ativo ? 0 : 0.6) * iz);
       bb.setAttribute('opacity', '0.85');
       if (ativo) bb.setAttribute('filter', 'url(#gw)');
       grp.appendChild(bb);
 
-      /* Área invisível maior para clique fácil no mobile */
+      /* Area invisivel um pouco maior para clique facil no mobile (tambem encolhe). */
+      var hitW = 24 * iz, hitH = 20 * iz;
       var hitArea = document.createElementNS(NS, 'rect');
-      hitArea.setAttribute('x', p.x - 12); hitArea.setAttribute('y', p.y - 10);
-      hitArea.setAttribute('width', '24'); hitArea.setAttribute('height', '20');
+      hitArea.setAttribute('x', p.x - hitW / 2); hitArea.setAttribute('y', p.y - hitH / 2);
+      hitArea.setAttribute('width', String(hitW)); hitArea.setAttribute('height', String(hitH));
       hitArea.setAttribute('fill', 'transparent');
       grp.appendChild(hitArea);
 
       var nt = document.createElementNS(NS, 'text');
-      nt.setAttribute('x', p.x); nt.setAttribute('y', p.y + 2.5);
-      nt.setAttribute('text-anchor', 'middle'); nt.setAttribute('font-size', '7');
+      nt.setAttribute('x', p.x); nt.setAttribute('y', p.y + 2.5 * iz);
+      nt.setAttribute('text-anchor', 'middle'); nt.setAttribute('font-size', String(7 * iz));
       nt.setAttribute('font-weight', '900'); nt.setAttribute('fill', ativo ? '#fff' : r.cor);
       nt.setAttribute('font-family', 'monospace');
       nt.setAttribute('pointer-events', 'none');
@@ -481,20 +488,21 @@ function renderMap() {
 
       if (ativo) {
         grp.addEventListener('mouseenter', function() {
+          var w = labelW + 6 * iz, h = 14 * iz;
           bb.setAttribute('opacity', '1');
-          bb.setAttribute('width', String(labelW + 6));
-          bb.setAttribute('x', p.x - (labelW + 6) / 2);
-          bb.setAttribute('height', '14');
-          bb.setAttribute('y', p.y - 7);
-          nt.setAttribute('font-size', '8');
+          bb.setAttribute('width', String(w));
+          bb.setAttribute('x', p.x - w / 2);
+          bb.setAttribute('height', String(h));
+          bb.setAttribute('y', p.y - h / 2);
+          nt.setAttribute('font-size', String(8 * iz));
         });
         grp.addEventListener('mouseleave', function() {
           bb.setAttribute('opacity', '0.85');
           bb.setAttribute('width', String(labelW));
           bb.setAttribute('x', p.x - labelW / 2);
-          bb.setAttribute('height', '12');
-          bb.setAttribute('y', p.y - 6);
-          nt.setAttribute('font-size', '7');
+          bb.setAttribute('height', String(labelH));
+          bb.setAttribute('y', p.y - labelH / 2);
+          nt.setAttribute('font-size', String(7 * iz));
         });
         grp.addEventListener('click', function(e) {
           e.stopPropagation();
@@ -512,22 +520,19 @@ function showMapPopup(hit, svgPt, transform, label) {
   var popup = document.getElementById('map-popup');
   if (!popup) {
     popup = document.createElement('div'); popup.id = 'map-popup';
-    popup.style.cssText = 'position:absolute;z-index:200;background:#12151b;border-radius:10px;padding:14px 16px;min-width:210px;max-width:270px;box-shadow:0 4px 24px rgba(0,0,0,0.85);border:1px solid #232838;font-family:inherit;';
     document.getElementById('sc-m').appendChild(popup);
   }
   var r = hit.rota; var m = hit.mun; var prev = hit.prev; var next = hit.next;
   var nb = bB(m.nome); var nx = nb ? labelDays(nb.days) : { l: '---' };
   // Tamanhos das KPIs no popup (menores que no card/modal).
   var tamKpi = { pad: '7px', tit: '9px', gap: '2px', val: '16px' };
-  var svgEl = document.getElementById('msvg');
-  var rect = svgEl.getBoundingClientRect();
-  var sc = document.getElementById('sc-m').getBoundingClientRect();
-  var ratioX = rect.width / 900, ratioY = rect.height / 600;
-  var px = svgPt.x * transform.s * ratioX + transform.x * ratioX + (rect.left - sc.left) + 22;
-  var py = svgPt.y * transform.s * ratioY + transform.y * ratioY + (rect.top - sc.top) - 75;
+
+  // Ancoragem fixa: centralizado na parte de baixo do mapa.
+  // Independe do zoom/pan, entao aparece sempre inteiro e no mesmo lugar.
+  popup.style.cssText = 'position:absolute;z-index:200;left:50%;bottom:12px;transform:translateX(-50%);'
+    + 'background:#12151b;border-radius:10px;padding:14px 16px;width:calc(100% - 24px);max-width:300px;'
+    + 'box-sizing:border-box;box-shadow:0 4px 24px rgba(0,0,0,0.85);border:1px solid ' + r.cor + ';font-family:inherit;';
   popup.style.display = 'block';
-  popup.style.left = Math.min(Math.max(px, 8), sc.width - 280) + 'px';
-  popup.style.top = Math.max(py, 8) + 'px';
   popup.style.pointerEvents = 'none';
 
   popup.innerHTML =
@@ -604,7 +609,12 @@ function initMapInteractions() {
     T.x = e.touches[0].clientX - ds.x; T.y = e.touches[0].clientY - ds.y;
     var mg = document.getElementById('mg'); if (mg) mg.setAttribute('transform', 'translate(' + T.x + ',' + T.y + ') scale(' + T.s + ')');
   }, { passive: true });
-  msvg.addEventListener('touchend', function() { drag = false; });
+  msvg.addEventListener('touchend', function() {
+    drag = false;
+    // Se acabou de dar pinch-zoom, redesenha para os marcadores reajustarem
+    // ao novo nivel de zoom (encolher/crescer conforme iz).
+    if (lastDist !== null) { lastDist = null; renderMap(); }
+  });
   var lastDist = null;
   msvg.addEventListener('touchstart', function(e) { if (e.touches.length === 2) lastDist = null; }, { passive: true });
   msvg.addEventListener('touchmove', function(e) {
