@@ -636,6 +636,41 @@ function zR() { T = { s: 1, x: 0, y: 0 }; rotaFiltrada = null; renderMap(); buil
 
 var manifestoPortos = { esc: [], rod: [], 'v-rod': [] };
 
+/* ── CONTAGEM DE SACAS (opcional, ativavel por toggle) ──
+   contarSacas: liga/desliga a exibicao das sacas na tela, imagem e texto.
+   sacasPorNode: quantidade por municipio, guardada pelo codigo do node
+   (sobrevive a mover o municipio entre portos). */
+var contarSacas = false;
+var sacasPorNode = {};
+
+/* Texto "N saca(s)" com plural automatico. */
+function plSaca(n) { return n + (n === 1 ? ' saca' : ' sacas'); }
+
+/* Soma de sacas de um porto (ignora municipios sem quantidade definida). */
+function totalSacas(porto) {
+  return manifestoPortos[porto].reduce(function (acc, hit) {
+    return acc + (hit ? (sacasPorNode[hit.mun.seq] || 0) : 0);
+  }, 0);
+}
+
+/* Soma geral de sacas das tres colunas. */
+function totalGeralSacas() {
+  return totalSacas('esc') + totalSacas('rod') + totalSacas('v-rod');
+}
+
+/* Liga/desliga a contagem de sacas e redesenha. */
+function alternarSacas() {
+  contarSacas = document.getElementById('chk-sacas').checked;
+  renderTabelaPortos();
+}
+
+/* Atualiza a quantidade de sacas de um municipio (campo de numero). */
+function setSacas(seq, valor) {
+  var n = parseInt(valor, 10);
+  sacasPorNode[seq] = (isNaN(n) || n < 0) ? 0 : n;
+  atualizarTotaisSacas();
+}
+
 /* Porto preferido de cada municipio (usado so como sugestao no seletor).
    As colunas comecam VAZIAS; o operador preenche o despacho do dia manualmente. */
 var PREF_PORTO = {
@@ -685,53 +720,109 @@ function removeMunPorto(porto, seq) {
   renderTabelaPortos();
 }
 
+var NOMES_PORTO = { esc: 'PORTO ESCADARIA', rod: 'PORTO ROADWAY', 'v-rod': 'RODOVIARIO' };
+
+/* Texto do titulo de uma coluna: nome, qtd de municipios e (se ativo) total de sacas. */
+function tituloColuna(p) {
+  var base = NOMES_PORTO[p] + ' (' + manifestoPortos[p].length + ')';
+  if (contarSacas) base += ' · ' + plSaca(totalSacas(p));
+  return base;
+}
+
 function renderTabelaPortos() {
-  var nomes = { esc: 'PORTO ESCADARIA', rod: 'PORTO ROADWAY', 'v-rod': 'RODOVIARIO' };
   ['esc', 'rod', 'v-rod'].forEach(function(p) {
+    // ── Coluna visivel (com botao remover e, se ativo, campo de sacas) ──
     var viewContainer = document.querySelector('#view-col-' + p + ' .p-items-list');
     if (viewContainer) {
       viewContainer.innerHTML = '';
       manifestoPortos[p].forEach(function(hit) {
         if (!hit) return;
+        var seq = hit.mun.seq;
+        var campoSacas = contarSacas
+          ? '<input type="number" min="0" class="p-sacas-input" value="' + (sacasPorNode[seq] || 0) + '" '
+            + 'oninput="setSacas(\'' + seq + '\',this.value)" onclick="event.stopPropagation()"> sacas'
+          : '';
         var item = document.createElement('div'); item.className = 'p-item';
-        item.innerHTML = '<span><b style="font-family:monospace">' + hit.mun.seq + '</b> - ' + hit.mun.nome + '</span>'
-          + '<button onclick="removeMunPorto(\'' + p + '\',\'' + hit.mun.seq + '\')">X</button>';
+        item.innerHTML = '<span><b style="font-family:monospace">' + seq + '</b> - ' + hit.mun.nome + '</span>'
+          + campoSacas
+          + '<button onclick="removeMunPorto(\'' + p + '\',\'' + seq + '\')">X</button>';
         viewContainer.appendChild(item);
       });
     }
+
+    // ── Coluna do print/imagem (sem botoes; sacas viram texto "— N sacas") ──
     var printContainer = document.querySelector('#print-col-' + p + ' .p-items-list');
     if (printContainer) {
       printContainer.innerHTML = '';
       manifestoPortos[p].forEach(function(hit) {
         if (!hit) return;
+        var seq = hit.mun.seq;
+        var txtSacas = contarSacas ? ' — ' + plSaca(sacasPorNode[seq] || 0) : '';
         var item = document.createElement('div'); item.className = 'p-item';
-        item.innerHTML = '<span><b style="font-family:monospace">' + hit.mun.seq + '</b> - ' + hit.mun.nome + '</span>';
+        item.innerHTML = '<span><b style="font-family:monospace">' + seq + '</b> - ' + hit.mun.nome + txtSacas + '</span>';
         printContainer.appendChild(item);
       });
     }
+
+    // ── Titulo da coluna visivel (clicavel para recolher) ──
     var tituloView = document.querySelector('#view-col-' + p + ' .p-col-title');
     if (tituloView) {
       var aberto = viewContainer ? viewContainer.style.display !== 'none' : true;
-      tituloView.textContent = nomes[p] + ' (' + manifestoPortos[p].length + ') ' + (aberto ? '▼' : '▶');
+      tituloView.textContent = tituloColuna(p) + ' ' + (aberto ? '▼' : '▶');
       tituloView.style.cursor = 'pointer';
       tituloView.onclick = function() {
         var lista = document.querySelector('#view-col-' + p + ' .p-items-list');
         if (!lista) return;
         var estaAberto = lista.style.display !== 'none';
         lista.style.display = estaAberto ? 'none' : '';
-        tituloView.textContent = nomes[p] + ' (' + manifestoPortos[p].length + ') ' + (estaAberto ? '▶' : '▼');
+        tituloView.textContent = tituloColuna(p) + ' ' + (estaAberto ? '▶' : '▼');
       };
     }
+
+    // ── Titulo da coluna do print ──
     var tituloPrint = document.querySelector('#print-col-' + p + ' .p-col-title');
-    if (tituloPrint) tituloPrint.textContent = nomes[p];
+    if (tituloPrint) tituloPrint.textContent = tituloColuna(p);
+  });
+
+  // ── Rodape com total geral de sacas (so aparece quando ativo) ──
+  atualizarRodapeSacas();
+}
+
+/* Recalcula so os totais nos titulos e no rodape (sem redesenhar a lista,
+   para nao perder o foco do campo de numero durante a digitacao). */
+function atualizarTotaisSacas() {
+  ['esc', 'rod', 'v-rod'].forEach(function(p) {
+    var tv = document.querySelector('#view-col-' + p + ' .p-col-title');
+    if (tv) {
+      var aberto = tv.textContent.indexOf('▶') === -1;
+      tv.textContent = tituloColuna(p) + ' ' + (aberto ? '▼' : '▶');
+    }
+    var tp = document.querySelector('#print-col-' + p + ' .p-col-title');
+    if (tp) tp.textContent = tituloColuna(p);
+  });
+  atualizarRodapeSacas();
+}
+
+/* Mostra/atualiza o total geral de sacas nos rodapes (tela e print). */
+function atualizarRodapeSacas() {
+  ['view', 'print'].forEach(function (destino) {
+    var el = document.getElementById('total-sacas-' + destino);
+    if (!el) return;
+    if (contarSacas) {
+      el.style.display = '';
+      el.textContent = 'TOTAL GERAL: ' + plSaca(totalGeralSacas());
+    } else {
+      el.style.display = 'none';
+    }
   });
 }
 
-/* Esvazia as tres colunas (despacho do dia recomeca do zero). */
+/* Esvazia as tres colunas e zera as sacas (despacho do dia recomeca do zero). */
 function resetarTabelaPortos() {
   manifestoPortos.esc = [];
   manifestoPortos.rod = [];
   manifestoPortos['v-rod'] = [];
+  sacasPorNode = {};
   renderTabelaPortos();
 }
 
@@ -784,14 +875,21 @@ function gerarImagemWhatsapp() {
 }
 
 function copiarTextoWhatsapp() {
-  var nomes = { esc: 'PORTO ESCADARIA', rod: 'PORTO ROADWAY', 'v-rod': 'RODOVIARIO' };
   var texto = 'FACIL EXPRESS LTDA - DESPACHO DIARIO\n\n';
   ['esc', 'rod', 'v-rod'].forEach(function(p) {
     if (manifestoPortos[p].length === 0) return;
-    texto += '*' + nomes[p] + '*\n';
-    manifestoPortos[p].forEach(function(hit) { if (hit) texto += '• ' + hit.mun.seq + ' - ' + hit.mun.nome + '\n'; });
+    // Cabecalho do porto: inclui total de sacas da coluna quando ativo.
+    texto += '*' + NOMES_PORTO[p] + (contarSacas ? ' (' + plSaca(totalSacas(p)) + ')' : '') + '*\n';
+    manifestoPortos[p].forEach(function(hit) {
+      if (!hit) return;
+      var txtSacas = contarSacas ? ' — ' + plSaca(sacasPorNode[hit.mun.seq] || 0) : '';
+      texto += '• ' + hit.mun.seq + ' - ' + hit.mun.nome + txtSacas + '\n';
+    });
     texto += '\n';
   });
+  // Total geral no rodape do texto.
+  if (contarSacas) texto += 'TOTAL GERAL: ' + plSaca(totalGeralSacas()) + '\n';
+
   navigator.clipboard.writeText(texto).then(function() {
     alert('Texto copiado! Cole direto no WhatsApp.');
   }).catch(function() {
