@@ -57,17 +57,110 @@ function labelDays(d) {
   return { l: 'em ' + d + 'd', c: 'ns' };
 }
 
+/* ── AUTOCOMPLETE / SUGESTAO DE NODE ──
+   Lista pre-montada uma unica vez: cada entrada guarda o node (seq),
+   o nome do municipio e uma chave de busca sem acento em maiusculas.  */
+var LISTA_SUGESTOES = [];
+ROTAS.forEach(function (rota) {
+  rota.municipios.forEach(function (mun) {
+    LISTA_SUGESTOES.push({
+      seq: mun.seq,
+      nome: mun.nome,
+      cor: rota.cor,
+      busca: normKey(mun.seq + ' ' + mun.nome)
+    });
+  });
+});
+
+var sugestaoAtiva = -1;   // indice do item destacado na lista (-1 = nenhum)
+
+/* Chamada a cada tecla digitada no campo de codigo. */
 function onCI(v) {
-  var text = v.trim().toUpperCase();
-  if (!text) { document.getElementById('rcard').innerHTML = ''; return; }
-  if (NODEIDX[text]) lookupNode(text);
+  var texto = v.trim();
+  if (!texto) { document.getElementById('rcard').innerHTML = ''; fecharSugestoes(); return; }
+
+  var chave = normKey(texto);
+
+  // Se o texto ja e um node completo e valido, esconde a lista:
+  // deixa o operador confirmar direto (fluxo de bipagem do scanner).
+  if (NODEIDX[chave]) { fecharSugestoes(); return; }
+
+  // Caso contrario, monta sugestoes por codigo OU por nome.
+  var achados = LISTA_SUGESTOES.filter(function (s) {
+    return s.busca.indexOf(chave) !== -1;
+  }).slice(0, 6);
+
+  renderSugestoes(achados);
+}
+
+/* Desenha a lista de sugestoes abaixo do campo. */
+function renderSugestoes(lista) {
+  var box = document.getElementById('sugest');
+  if (!box) return;
+  if (!lista.length) { fecharSugestoes(); return; }
+
+  sugestaoAtiva = -1;
+  box.innerHTML = lista.map(function (s, i) {
+    return '<div class="sug-item" data-seq="' + s.seq + '" data-i="' + i + '" '
+      + 'onclick="escolherSugestao(\'' + s.seq + '\')">'
+      + '<span class="sug-cod" style="color:' + s.cor + '">' + s.seq + '</span>'
+      + '<span class="sug-nome">' + s.nome + '</span>'
+      + '</div>';
+  }).join('');
+  box.style.display = 'block';
+}
+
+/* Fecha e limpa a lista de sugestoes. */
+function fecharSugestoes() {
+  var box = document.getElementById('sugest');
+  if (box) { box.style.display = 'none'; box.innerHTML = ''; }
+  sugestaoAtiva = -1;
+}
+
+/* Clique/Enter numa sugestao: apenas PREENCHE o campo (nao abre o card).
+   O operador confirma depois com Enter. */
+function escolherSugestao(seq) {
+  var ci = document.getElementById('ci');
+  ci.value = seq;
+  fecharSugestoes();
+  ci.focus();
+}
+
+/* Move o destaque da lista para cima/baixo. */
+function moverSugestao(delta) {
+  var itens = document.querySelectorAll('#sugest .sug-item');
+  if (!itens.length) return;
+  sugestaoAtiva += delta;
+  if (sugestaoAtiva < 0) sugestaoAtiva = itens.length - 1;
+  if (sugestaoAtiva >= itens.length) sugestaoAtiva = 0;
+  itens.forEach(function (el, i) { el.classList.toggle('on', i === sugestaoAtiva); });
 }
 
 function lookupNode(nodeId) { var hit = NODEIDX[nodeId]; if (hit) renderCard(hit); }
 
+/* Teclado no campo de codigo. */
 function onK(e) {
-  var v = document.getElementById('ci').value.trim().toUpperCase();
-  if (e.key === 'Enter' && v) { if (NODEIDX[v]) lookupNode(v); else flashError(); }
+  var itens = document.querySelectorAll('#sugest .sug-item');
+
+  // Setas e Esc controlam a lista de sugestoes, quando ela esta aberta.
+  if (itens.length) {
+    if (e.key === 'ArrowDown') { e.preventDefault(); moverSugestao(1);  return; }
+    if (e.key === 'ArrowUp')   { e.preventDefault(); moverSugestao(-1); return; }
+    if (e.key === 'Escape')    { fecharSugestoes(); return; }
+    // Enter com um item destacado: preenche o campo (nao abre o card).
+    if (e.key === 'Enter' && sugestaoAtiva >= 0) {
+      e.preventDefault();
+      escolherSugestao(itens[sugestaoAtiva].dataset.seq);
+      return;
+    }
+  }
+
+  // Enter sem lista aberta (ou sem item destacado): confirma o codigo.
+  var v = normKey(document.getElementById('ci').value.trim());
+  if (e.key === 'Enter' && v) {
+    if (NODEIDX[v]) { fecharSugestoes(); lookupNode(v); }
+    else flashError();
+  }
 }
 
 function flashError() {
@@ -129,6 +222,7 @@ function renderCard(hit) {
     + '</div></div>';
 
   rc.className = 'show';
+  fecharSugestoes();
   adicionarRecente(hit);
 }
 
@@ -595,6 +689,7 @@ function copiarTextoWhatsapp() {
 
 function SS(name, btn) {
   cur = name;
+  fecharSugestoes();
   ['t', 'r', 'm', 'l'].forEach(function(s) {
     var el = document.getElementById('sc-' + s);
     if (el) { el.className = (s === name) ? 'scr' : 'scr h'; el.style.display = (s === name) ? '' : 'none'; }
@@ -618,3 +713,9 @@ var scT = document.getElementById('sc-t');
 if (scT) { scT.style.display = ''; scT.className = 'scr'; }
 
 window.addEventListener('load', function() { var ci = document.getElementById('ci'); if (ci) ci.focus(); });
+
+/* Clique fora do campo de codigo fecha a lista de sugestoes. */
+document.addEventListener('click', function (e) {
+  var wrap = e.target.closest ? e.target.closest('.ci-wrap') : null;
+  if (!wrap) fecharSugestoes();
+});
