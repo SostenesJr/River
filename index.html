@@ -39,9 +39,12 @@
   <div class="scr" id="sc-t">
     <div class="csec">
       <label class="clbl">DIGITE OU BIPE O CÓDIGO DO NODE (EX: RAL9, RTE9, RTO9)</label>
-      <input id="ci" type="text" placeholder="CÓDIGO DA ETIQUETA"
-        autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="characters"
-        oninput="onCI(this.value)" onkeydown="onK(event)">
+      <div class="ci-wrap">
+        <input id="ci" type="text" placeholder="CÓDIGO DA ETIQUETA"
+          autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="characters"
+          oninput="onCI(this.value)" onkeydown="onK(event)">
+        <div id="sugest" class="sugest-box"></div>
+      </div>
       <div class="chint">Responde diretamente ao código da etiqueta Amazon.</div>
     </div>
     <div id="rcard"></div>
