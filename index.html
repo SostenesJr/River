@@ -94,6 +94,10 @@
           </select>
           <button class="p-btn-add" onclick="addMunToPorto()">+ Vincular</button>
         </div>
+        <label class="p-toggle-sacas">
+          <input type="checkbox" id="chk-sacas" onchange="alternarSacas()">
+          <span>Contar sacas por município</span>
+        </label>
       </div>
 
       <!-- ÁREA DE OPERAÇÃO VISÍVEL: Organizada em lista confortável para telas de celulares -->
@@ -111,6 +115,7 @@
           <div class="p-items-list"></div>
         </div>
       </div>
+      <div id="total-sacas-view" class="p-total-sacas" style="display:none;"></div>
 
       <!-- ÁREA OCULTA DO PRINT: Força a disposição horizontal widescreen com 3 colunas e oculta botões "X" -->
       <div id="capture-area">
@@ -131,6 +136,7 @@
             <div class="p-items-list"></div>
           </div>
         </div>
+        <div id="total-sacas-print" class="p-total-sacas" style="display:none;"></div>
       </div>
 
       <div class="p-action-row">
