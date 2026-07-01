@@ -704,12 +704,52 @@ function resetarTabelaPortos() {
   renderTabelaPortos();
 }
 
+/* Gera a imagem de despacho para o WhatsApp.
+   Problema resolvido: no celular, o CSS responsivo empilha as 3 colunas
+   (media query < 992px), entao a foto saia em retrato. Aqui forcamos
+   temporariamente o layout de 3 colunas lado a lado (paisagem, ajustado
+   ao conteudo), capturamos, e restauramos o estado original. */
 function gerarImagemWhatsapp() {
   var area = document.getElementById('capture-area');
+  if (!area) return;
   if (typeof html2canvas === 'undefined') { alert('html2canvas nao carregado.'); return; }
-  html2canvas(area, { backgroundColor: '#0b0d11', scale: 2 }).then(function(canvas) {
-    var link = document.createElement('a'); link.download = 'despacho-facil-express.png'; link.href = canvas.toDataURL(); link.click();
-  });
+
+  var grid = area.querySelector('.p-grid-3');
+
+  // Guarda os estilos inline atuais para restaurar depois da captura.
+  var estadoArea = area.getAttribute('style') || '';
+  var estadoGrid = grid ? (grid.getAttribute('style') || '') : '';
+
+  // Tira o elemento da tela (sem esconder) para o operador nao ver o "flash",
+  // mantendo-o renderizavel pelo html2canvas.
+  area.style.setProperty('position', 'fixed', 'important');
+  area.style.setProperty('left', '-10000px', 'important');
+  area.style.setProperty('top', '0', 'important');
+  area.style.setProperty('width', 'max-content', 'important');
+
+  // Forca as 3 colunas lado a lado, cada uma com largura minima (ajustada ao conteudo).
+  if (grid) {
+    grid.style.setProperty('display', 'grid', 'important');
+    grid.style.setProperty('grid-template-columns', 'repeat(3, minmax(230px, max-content))', 'important');
+  }
+
+  function restaurar() {
+    area.setAttribute('style', estadoArea);
+    if (grid) grid.setAttribute('style', estadoGrid);
+  }
+
+  html2canvas(area, { backgroundColor: '#0b0d11', scale: 2 })
+    .then(function (canvas) {
+      restaurar();
+      var link = document.createElement('a');
+      link.download = 'despacho-facil-express.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    })
+    .catch(function () {
+      restaurar();
+      alert('Nao foi possivel gerar a imagem. Tente novamente.');
+    });
 }
 
 function copiarTextoWhatsapp() {
