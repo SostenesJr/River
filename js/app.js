@@ -722,11 +722,10 @@ function removeMunPorto(porto, seq) {
 
 var NOMES_PORTO = { esc: 'PORTO ESCADARIA', rod: 'PORTO ROADWAY', 'v-rod': 'RODOVIARIO' };
 
-/* Texto do titulo de uma coluna: nome, qtd de municipios e (se ativo) total de sacas. */
+/* Texto do titulo de uma coluna: nome e quantidade de MUNICIPIOS.
+   O total de sacas nao entra aqui — aparece so no rodape geral. */
 function tituloColuna(p) {
-  var base = NOMES_PORTO[p] + ' (' + manifestoPortos[p].length + ')';
-  if (contarSacas) base += ' · ' + plSaca(totalSacas(p));
-  return base;
+  return NOMES_PORTO[p] + ' (' + manifestoPortos[p].length + ')';
 }
 
 function renderTabelaPortos() {
@@ -788,18 +787,10 @@ function renderTabelaPortos() {
   atualizarRodapeSacas();
 }
 
-/* Recalcula so os totais nos titulos e no rodape (sem redesenhar a lista,
-   para nao perder o foco do campo de numero durante a digitacao). */
+/* Recalcula so o total geral no rodape (os titulos das colunas nao
+   dependem das sacas, entao nao precisam ser redesenhados aqui —
+   isso tambem preserva o foco do campo de numero durante a digitacao). */
 function atualizarTotaisSacas() {
-  ['esc', 'rod', 'v-rod'].forEach(function(p) {
-    var tv = document.querySelector('#view-col-' + p + ' .p-col-title');
-    if (tv) {
-      var aberto = tv.textContent.indexOf('▶') === -1;
-      tv.textContent = tituloColuna(p) + ' ' + (aberto ? '▼' : '▶');
-    }
-    var tp = document.querySelector('#print-col-' + p + ' .p-col-title');
-    if (tp) tp.textContent = tituloColuna(p);
-  });
   atualizarRodapeSacas();
 }
 
@@ -878,8 +869,8 @@ function copiarTextoWhatsapp() {
   var texto = 'FACIL EXPRESS LTDA - DESPACHO DIARIO\n\n';
   ['esc', 'rod', 'v-rod'].forEach(function(p) {
     if (manifestoPortos[p].length === 0) return;
-    // Cabecalho do porto: inclui total de sacas da coluna quando ativo.
-    texto += '*' + NOMES_PORTO[p] + (contarSacas ? ' (' + plSaca(totalSacas(p)) + ')' : '') + '*\n';
+    // Cabecalho do porto: quantidade de MUNICIPIOS (nao de sacas).
+    texto += '*' + NOMES_PORTO[p] + ' (' + manifestoPortos[p].length + ')*\n';
     manifestoPortos[p].forEach(function(hit) {
       if (!hit) return;
       var txtSacas = contarSacas ? ' — ' + plSaca(sacasPorNode[hit.mun.seq] || 0) : '';
